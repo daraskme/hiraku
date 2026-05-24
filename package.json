@@ -19,6 +19,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "gray-matter": "^4.0.3",
     "pagefind": "^1.5.2",
-    "satori": "^0.26.0"
+    "satori": "^0.26.0",
+    "sharp": "^0.34.5"
   }
 }
