@@ -1,6 +1,7 @@
 ---
 import Base from './Base.astro';
 import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 
 interface Props {
   lesson:
@@ -15,6 +16,72 @@ interface Props {
 
 const { lesson } = Astro.props;
 const d = lesson.data;
+
+// ─── 関連教材の計算 ────────────────────────────────
+const COLLECTION_NAMES = [
+  'kokugo3',
+  'chugaku1',
+  'kotoko1',
+  'chugakurika1',
+  'kotokoeigo1',
+  'sansu5',
+  'chugakukomin3',
+] as const;
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語',
+  chugaku1: '中1 国語',
+  kotoko1: '高1 国語',
+  chugakurika1: '中1 理科',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+};
+
+const allLessons: any[] = [];
+for (const name of COLLECTION_NAMES) {
+  const items = await getCollection(name as any);
+  for (const l of items as any[]) allLessons.push({ collection: name, lesson: l });
+}
+
+interface RelatedScore {
+  collection: string;
+  lesson: any;
+  score: number;
+  reason: string;
+}
+const lessonKeywords = new Set<string>(d.keywords || []);
+const related: RelatedScore[] = [];
+for (const entry of allLessons) {
+  if (entry.collection === lesson.collection && entry.lesson.id === lesson.id) continue;
+  let score = 0;
+  let reason = '';
+  // Same author = strong
+  if (entry.lesson.data.author === d.author) {
+    score += 10;
+    reason = '同じ作者';
+  }
+  // Keyword overlap
+  const otherKeywords = new Set<string>(entry.lesson.data.keywords || []);
+  let overlap = 0;
+  for (const k of lessonKeywords) if (otherKeywords.has(k)) overlap++;
+  if (overlap > 0) {
+    score += overlap * 3;
+    if (!reason) reason = `共通テーマ：${[...lessonKeywords].filter((k) => otherKeywords.has(k)).slice(0, 2).join('・')}`;
+  }
+  // Same collection (school stage + subject)
+  if (entry.collection === lesson.collection) {
+    score += 2;
+    if (!reason) reason = COLLECTION_LABEL[entry.collection] + ' の別教材';
+  }
+  // Classical kinship
+  if (d.classical && entry.lesson.data.classical) {
+    score += 3;
+    if (!reason) reason = '同じ古典作品の系列';
+  }
+  if (score >= 3) related.push({ collection: entry.collection, lesson: entry.lesson, score, reason });
+}
+related.sort((a, b) => b.score - a.score);
+const relatedTop = related.slice(0, 4);
 
 const stageLabel: Record<string, string> = {
   shogaku: '小学校',
@@ -131,6 +198,27 @@ const guidelineDoc = d.school_stage === 'kotoko'
             正確な指導事項は<a href="https://www.mext.go.jp/a_menu/shotou/new-cs/" target="_blank" rel="noopener">文部科学省の公式資料</a>を参照してください。
           </small>
         </p>
+      </section>
+    )}
+
+    {relatedTop.length > 0 && (
+      <section aria-label="関連する教材" class="no-print">
+        <h2>関連する教材</h2>
+        <div class="lesson-grid">
+          {relatedTop.map((r) => (
+            <article class="lesson-card">
+              <a href={`/library/${r.collection}/${r.lesson.id}`} class="lesson-card__link">
+                <p class="lesson-card__meta">{COLLECTION_LABEL[r.collection]} ・ {r.reason}</p>
+                <h3 class="lesson-card__title">{r.lesson.data.title}</h3>
+                <p class="lesson-card__desc">{r.lesson.data.description}</p>
+                <p class="lesson-card__author">
+                  {r.lesson.data.author}
+                  {r.lesson.data.era ? `（${r.lesson.data.era}）` : r.lesson.data.original_year ? `（${r.lesson.data.original_year}）` : ''}
+                </p>
+              </a>
+            </article>
+          ))}
+        </div>
       </section>
     )}
 
