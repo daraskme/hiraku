@@ -1,0 +1,171 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語',
+  kokugo4: '小4 国語',
+  chugaku1: '中1 国語',
+  kotoko1: '高1 国語',
+  chugakurika1: '中1 理科',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+};
+
+// 年号判定。lesson の era 文字列から、または original_year から、標準的な時代名を一つ返す。
+function deriveEra(data: any): string {
+  const e = (data.era || '') as string;
+  // 古典の era 文字列の中に時代名があればそれを優先
+  const eras = ['平安時代', '鎌倉時代', '室町時代', '安土桃山時代', '江戸時代'];
+  for (const era of eras) {
+    if (e.includes(era)) return era;
+  }
+  if (e.includes('慶応') || e.includes('明治')) return '明治';
+  if (e.includes('大正')) return '大正';
+  if (e.includes('昭和') || e.includes('平成') || e.includes('令和')) {
+    return e.includes('昭和') ? '昭和' : e.includes('平成') ? '平成' : '令和';
+  }
+  const y = data.original_year as number | undefined;
+  if (!y) return 'その他';
+  if (y < 1603) return '江戸時代以前';
+  if (y < 1868) return '江戸時代';
+  if (y < 1912) return '明治';
+  if (y < 1926) return '大正';
+  if (y < 1989) return '昭和';
+  if (y < 2019) return '平成';
+  return '令和';
+}
+
+const ERA_ORDER = [
+  '平安時代',
+  '鎌倉時代',
+  '室町時代',
+  '安土桃山時代',
+  '江戸時代以前',
+  '江戸時代',
+  '明治',
+  '大正',
+  '昭和',
+  '平成',
+  '令和',
+  'その他',
+];
+
+const ERA_DESCRIPTION: Record<string, string> = {
+  '平安時代': '794〜1185 年頃。貴族文化が花開いた時代。「枕草子」「伊勢物語」など仮名文学の名作が生まれた。',
+  '鎌倉時代': '1185〜1333 年頃。武士の時代。「徒然草」「平家物語」など、無常観と力強い文体が結実した。',
+  '室町時代': '1336〜1573 年頃。',
+  '安土桃山時代': '1573〜1603 年頃。',
+  '江戸時代以前': '1603 年より前。',
+  '江戸時代': '1603〜1868 年。「塵劫記」など実学書のほか、町人文化が育った。',
+  '明治': '1868〜1912 年。文明開化と西洋思想の流入。新美南吉以前の先駆的作家たちが活躍。',
+  '大正': '1912〜1926 年。「赤い鳥」を中心とした児童文学運動と、漱石・芥川ら近代文学の黄金期。',
+  '昭和': '1926〜1989 年。前期は新美南吉・宮沢賢治ら童話の名手、戦後は教育・憲法など現代社会の基礎が形成された。',
+  '平成': '1989〜2019 年。',
+  '令和': '2019 年以降。',
+  'その他': '時代の特定が難しい作品群。',
+};
+
+export const getStaticPaths = (async () => {
+  // Astro evaluates getStaticPaths in an isolated context — keep helpers inline
+  function _deriveEra(data: any): string {
+    const e = (data.era || '') as string;
+    const eras = ['平安時代', '鎌倉時代', '室町時代', '安土桃山時代', '江戸時代'];
+    for (const era of eras) {
+      if (e.includes(era)) return era;
+    }
+    if (e.includes('慶応') || e.includes('明治')) return '明治';
+    if (e.includes('大正')) return '大正';
+    if (e.includes('昭和') || e.includes('平成') || e.includes('令和')) {
+      return e.includes('昭和') ? '昭和' : e.includes('平成') ? '平成' : '令和';
+    }
+    const y = data.original_year as number | undefined;
+    if (!y) return 'その他';
+    if (y < 1603) return '江戸時代以前';
+    if (y < 1868) return '江戸時代';
+    if (y < 1912) return '明治';
+    if (y < 1926) return '大正';
+    if (y < 1989) return '昭和';
+    if (y < 2019) return '平成';
+    return '令和';
+  }
+
+  const collectionNames = [
+    'kokugo3',
+    'kokugo4',
+    'chugaku1',
+    'kotoko1',
+    'chugakurika1',
+    'kotokoeigo1',
+    'sansu5',
+    'chugakukomin3',
+  ] as const;
+
+  const byEra: Record<string, any[]> = {};
+  for (const name of collectionNames) {
+    const lessons = await getCollection(name as any);
+    for (const lesson of lessons) {
+      const era = _deriveEra(lesson.data);
+      if (!byEra[era]) byEra[era] = [];
+      byEra[era].push({ ...lesson, collection: name });
+    }
+  }
+
+  return Object.entries(byEra).map(([era, lessons]) => ({
+    params: { era },
+    props: { era, lessons },
+  }));
+}) satisfies GetStaticPaths;
+
+const { era, lessons } = Astro.props;
+const sortedLessons = [...lessons].sort(
+  (a: any, b: any) => (a.data.original_year || 0) - (b.data.original_year || 0),
+);
+---
+
+<Base
+  title={`${era} の教材`}
+  description={`${era}に書かれた、または成立した教材${lessons.length}本を一覧。${ERA_DESCRIPTION[era] ?? ''}`}
+  wide
+>
+  <section class="section">
+    <p class="cross-page__breadcrumb no-print">
+      <a href="/eras">時代一覧</a> ／ {era}
+    </p>
+    <div class="section__heading">
+      <h1>{era}</h1>
+      <span class="section__subtitle">ERA</span>
+    </div>
+    {ERA_DESCRIPTION[era] && <p>{ERA_DESCRIPTION[era]}</p>}
+    <div class="cross-page__meta">
+      <span class="badge">{lessons.length} 本収載</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>作品一覧</h2>
+      <span class="section__subtitle">WORKS</span>
+    </div>
+    <div class="lesson-grid">
+      {sortedLessons.map((lesson: any) => (
+        <article class="lesson-card">
+          <a href={`/library/${lesson.collection}/${lesson.id}`} class="lesson-card__link">
+            <p class="lesson-card__meta">
+              {COLLECTION_LABEL[lesson.collection] || lesson.collection}
+              {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
+            </p>
+            <h3 class="lesson-card__title">{lesson.data.title}</h3>
+            <p class="lesson-card__desc">{lesson.data.description}</p>
+            <p class="lesson-card__author">
+              {lesson.data.author}
+              {lesson.data.era ? `・ ${lesson.data.era}` : lesson.data.original_year ? `・ ${lesson.data.original_year}年` : ''}
+            </p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>

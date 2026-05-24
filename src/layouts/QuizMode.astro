@@ -1,0 +1,471 @@
+---
+/**
+ * QuizMode レイアウト — 教材の questions を1問ずつインタラクティブに表示する。
+ *
+ * - 全画面・フローティング操作
+ * - 各問の自由記述回答は localStorage に自動保存
+ * - 自己評価（◯△✗）も localStorage に保存
+ * - 最終画面で全問の回答を一覧表示
+ */
+import type { CollectionEntry } from 'astro:content';
+import '../styles/global.css';
+
+type AnyLesson =
+  | CollectionEntry<'kokugo3'>
+  | CollectionEntry<'kokugo4'>
+  | CollectionEntry<'chugaku1'>
+  | CollectionEntry<'kotoko1'>
+  | CollectionEntry<'chugakurika1'>
+  | CollectionEntry<'kotokoeigo1'>
+  | CollectionEntry<'sansu5'>
+  | CollectionEntry<'chugakukomin3'>;
+
+interface Props {
+  lesson: AnyLesson;
+  collection: string;
+}
+
+const { lesson, collection } = Astro.props;
+const d = lesson.data;
+const lessonUrl = `/library/${collection}/${lesson.id}`;
+const quizStorageKey = `hiraku.quiz.v1.${collection}.${lesson.id}`;
+const questions = d.questions || [];
+---
+
+<!doctype html>
+<html lang="ja" data-quiz-mode>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{d.title} — クイズ | ひらく</title>
+    <meta name="description" content={`「${d.title}」の考えてみよう（クイズモード）`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap"
+    />
+    <style>
+      :root[data-quiz-mode] body { background: var(--bg); margin: 0; }
+      .quiz-shell { min-height: 100vh; display: flex; flex-direction: column; }
+      .quiz-topbar {
+        position: sticky; top: 0; z-index: 10;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.7rem 1rem;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+      .quiz-topbar a, .quiz-topbar button {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 36px; min-width: 36px; padding: 0 0.8rem;
+        border: 1px solid var(--border); border-radius: 999px;
+        color: var(--text-soft); background: transparent;
+        text-decoration: none; cursor: pointer; font-size: 0.85rem;
+        font-family: var(--font-sans);
+      }
+      .quiz-topbar a:hover, .quiz-topbar button:hover {
+        background: var(--bg-soft); color: var(--text);
+      }
+      .quiz-topbar__title {
+        font-family: var(--font-serif); font-weight: 700;
+        font-size: 0.95rem; color: var(--text);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        max-width: 50vw;
+      }
+      .quiz-progress {
+        height: 4px; width: 100%; background: var(--bg-soft);
+        position: relative;
+      }
+      .quiz-progress__bar {
+        position: absolute; top: 0; left: 0; height: 100%;
+        background: var(--accent);
+        transition: width 0.25s ease-out;
+      }
+      .quiz-main {
+        flex: 1; max-width: 760px; margin: 0 auto; padding: 2rem 1.2rem 6rem;
+        width: 100%;
+      }
+      .quiz-meta {
+        font-family: var(--font-mono); font-size: 0.78rem;
+        letter-spacing: 0.1em; color: var(--text-faint);
+        margin-bottom: 0.4rem;
+      }
+      .quiz-title {
+        font-family: var(--font-serif); font-weight: 700;
+        font-size: clamp(1.4rem, 3vw, 1.8rem);
+        margin: 0 0 0.4rem;
+        line-height: 1.4;
+      }
+      .quiz-byline {
+        color: var(--text-soft); font-size: 0.95rem;
+        margin: 0 0 2.5rem;
+      }
+      .quiz-question__counter {
+        font-family: var(--font-mono); font-size: 0.78rem;
+        letter-spacing: 0.1em; color: var(--accent);
+        margin-bottom: 0.4rem;
+      }
+      .quiz-question__text {
+        font-family: var(--font-serif);
+        font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+        line-height: 1.7;
+        margin: 0 0 1.5rem;
+        color: var(--text);
+      }
+      .quiz-answer {
+        width: 100%; min-height: 8rem; padding: 0.9rem 1rem;
+        border: 1px solid var(--border); border-radius: 8px;
+        background: var(--bg-elevated); color: var(--text);
+        font-family: var(--font-serif); font-size: 1rem; line-height: 1.7;
+        resize: vertical;
+      }
+      .quiz-answer:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+      .quiz-rate {
+        display: flex; flex-wrap: wrap; gap: 0.6rem;
+        margin: 1.4rem 0;
+      }
+      .quiz-rate__label {
+        width: 100%; font-family: var(--font-mono); font-size: 0.78rem;
+        letter-spacing: 0.1em; color: var(--text-soft);
+      }
+      .quiz-rate__btn {
+        flex: 1; min-width: 7rem; padding: 0.7rem 1rem;
+        border: 1px solid var(--border); border-radius: 8px;
+        background: var(--bg-elevated); color: var(--text);
+        font-family: var(--font-sans); font-size: 0.9rem;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 0.4em;
+      }
+      .quiz-rate__btn:hover { border-color: var(--text-soft); }
+      .quiz-rate__btn[aria-pressed="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--logo-fg);
+      }
+      .quiz-rate__btn--ok[aria-pressed="true"] { background: #5b8c5a; border-color: #5b8c5a; }
+      .quiz-rate__btn--meh[aria-pressed="true"] { background: #b89a4f; border-color: #b89a4f; }
+      .quiz-rate__btn--no[aria-pressed="true"] { background: #b85c4a; border-color: #b85c4a; }
+
+      .quiz-nav {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 1rem; padding: 0.8rem 1rem;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid var(--border);
+        z-index: 10;
+      }
+      .quiz-nav button, .quiz-nav a {
+        flex: 1; max-width: 200px; padding: 0.7rem 1.2rem;
+        border: 1px solid var(--border); border-radius: 8px;
+        background: var(--bg-elevated); color: var(--text);
+        font-family: var(--font-sans); font-size: 0.9rem; cursor: pointer;
+        text-decoration: none; text-align: center;
+      }
+      .quiz-nav button:hover, .quiz-nav a:hover { border-color: var(--text-soft); }
+      .quiz-nav button[disabled] { opacity: 0.4; cursor: not-allowed; }
+      .quiz-nav__next {
+        background: var(--accent) !important;
+        border-color: var(--accent) !important;
+        color: var(--logo-fg) !important;
+      }
+      .quiz-nav__counter {
+        font-family: var(--font-mono); font-size: 0.85rem;
+        color: var(--text-soft);
+        flex: 0 0 auto;
+      }
+
+      .quiz-final {
+        margin-top: 2rem;
+      }
+      .quiz-final__summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.7rem;
+        margin: 1.5rem 0;
+      }
+      .quiz-final__card {
+        text-align: center; padding: 1rem;
+        background: var(--bg-elevated); border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .quiz-final__card-num {
+        font-size: 1.8rem; font-weight: 700;
+        font-family: var(--font-serif);
+      }
+      .quiz-final__card-label {
+        font-family: var(--font-mono); font-size: 0.75rem;
+        letter-spacing: 0.1em; color: var(--text-soft);
+      }
+      .quiz-final__item {
+        margin: 1.4rem 0;
+        padding: 1rem 1.2rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .quiz-final__q {
+        font-family: var(--font-serif); font-weight: 700;
+        margin: 0 0 0.5rem;
+        display: flex; gap: 0.5em; align-items: baseline;
+      }
+      .quiz-final__q-num {
+        color: var(--accent); font-size: 0.85rem;
+        font-family: var(--font-mono); flex-shrink: 0;
+      }
+      .quiz-final__a {
+        white-space: pre-wrap; word-break: break-word;
+        margin: 0; font-size: 0.95rem; line-height: 1.7;
+        color: var(--text);
+      }
+      .quiz-final__a--empty { color: var(--text-faint); font-style: italic; }
+      .quiz-final__rate {
+        margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-soft);
+        font-family: var(--font-mono); letter-spacing: 0.08em;
+      }
+
+      .quiz-empty {
+        margin-top: 4rem; text-align: center;
+        padding: 3rem 1rem; color: var(--text-soft);
+      }
+
+      @media (max-width: 600px) {
+        .quiz-main { padding: 1.5rem 1rem 6rem; }
+        .quiz-topbar__title { max-width: 40vw; }
+        .quiz-nav button, .quiz-nav a { max-width: none; padding: 0.6rem 0.8rem; font-size: 0.85rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-shell">
+      <header class="quiz-topbar" role="banner">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <a href={lessonUrl} title="教材ページへ戻る" aria-label="教材ページへ戻る">× 戻る</a>
+          <span class="quiz-topbar__title">{d.title} — クイズ</span>
+        </div>
+        <button type="button" data-quiz-reset title="この教材のクイズ進捗をリセット">リセット</button>
+      </header>
+
+      <div class="quiz-progress">
+        <div class="quiz-progress__bar" data-quiz-progress style="width:0%"></div>
+      </div>
+
+      <main class="quiz-main">
+        {questions.length === 0 ? (
+          <div class="quiz-empty">
+            <h2>この教材には問いが設定されていません</h2>
+            <p><a href={lessonUrl}>教材ページへ戻る</a></p>
+          </div>
+        ) : (
+          <>
+            <p class="quiz-meta">
+              {d.subject} ・ 第{d.grade}学年 ・ 全 {questions.length} 問
+            </p>
+            <h1 class="quiz-title">{d.title}</h1>
+            <p class="quiz-byline">
+              {d.author}{d.author_dates ? `（${d.author_dates}）` : ''}
+            </p>
+
+            {questions.map((q, idx) => (
+              <article class="quiz-step" data-quiz-step={idx} hidden={idx > 0}>
+                <p class="quiz-question__counter">問 {idx + 1} / {questions.length}</p>
+                <p class="quiz-question__text">{q}</p>
+                <textarea
+                  class="quiz-answer"
+                  data-quiz-textarea={idx}
+                  placeholder="自分の考えをここに書いてみましょう…"
+                  aria-label={`問 ${idx + 1} の回答`}
+                ></textarea>
+
+                <div class="quiz-rate" data-quiz-rate={idx}>
+                  <span class="quiz-rate__label">自分の理解度を選ぼう（後で変えられます）</span>
+                  <button type="button" class="quiz-rate__btn quiz-rate__btn--ok" data-rate="ok">
+                    <span aria-hidden="true">○</span> わかった
+                  </button>
+                  <button type="button" class="quiz-rate__btn quiz-rate__btn--meh" data-rate="meh">
+                    <span aria-hidden="true">△</span> もうすこし
+                  </button>
+                  <button type="button" class="quiz-rate__btn quiz-rate__btn--no" data-rate="no">
+                    <span aria-hidden="true">✗</span> むずかしい
+                  </button>
+                </div>
+              </article>
+            ))}
+
+            <section class="quiz-final" data-quiz-final hidden>
+              <h2>回答のふりかえり</h2>
+              <p style="color: var(--text-soft);">
+                すべての問いに目を通しました。下のボタンから教材へ戻って、本文を読み直してみるのもよいでしょう。
+              </p>
+              <div class="quiz-final__summary" data-quiz-summary></div>
+              <div data-quiz-final-items></div>
+            </section>
+          </>
+        )}
+      </main>
+
+      {questions.length > 0 && (
+        <nav class="quiz-nav" aria-label="ナビゲーション">
+          <button type="button" data-quiz-prev disabled>← 前の問い</button>
+          <span class="quiz-nav__counter" data-quiz-counter>1 / {questions.length}</span>
+          <button type="button" class="quiz-nav__next" data-quiz-next>次の問い →</button>
+        </nav>
+      )}
+    </div>
+
+    <script is:inline define:vars={{ quizStorageKey, lessonUrl, questionCount: questions.length }}>
+      (function () {
+        if (questionCount === 0) return;
+        const steps = Array.from(document.querySelectorAll('[data-quiz-step]'));
+        const final = document.querySelector('[data-quiz-final]');
+        const prevBtn = document.querySelector('[data-quiz-prev]');
+        const nextBtn = document.querySelector('[data-quiz-next]');
+        const counter = document.querySelector('[data-quiz-counter]');
+        const resetBtn = document.querySelector('[data-quiz-reset]');
+        const progressBar = document.querySelector('[data-quiz-progress]');
+        let current = 0;
+
+        // Load saved state
+        function load() {
+          try {
+            return JSON.parse(localStorage.getItem(quizStorageKey) || '{}');
+          } catch (_) { return {}; }
+        }
+        let state = load(); // { 0: { a: "answer", r: "ok"|"meh"|"no" } }
+
+        function persist() {
+          try { localStorage.setItem(quizStorageKey, JSON.stringify(state)); } catch (_) {}
+        }
+
+        // Hydrate textareas + rates
+        steps.forEach((step, idx) => {
+          const ta = step.querySelector('[data-quiz-textarea]');
+          const rateBtns = step.querySelectorAll('[data-rate]');
+          if (state[idx]?.a) ta.value = state[idx].a;
+          ta.addEventListener('input', () => {
+            state[idx] = state[idx] || {};
+            state[idx].a = ta.value;
+            persist();
+          });
+          rateBtns.forEach((btn) => {
+            if (state[idx]?.r === btn.dataset.rate) btn.setAttribute('aria-pressed', 'true');
+            btn.addEventListener('click', () => {
+              state[idx] = state[idx] || {};
+              const wasSelected = state[idx].r === btn.dataset.rate;
+              state[idx].r = wasSelected ? null : btn.dataset.rate;
+              rateBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === btn && !wasSelected)));
+              persist();
+            });
+          });
+        });
+
+        function show(n) {
+          // n in [0, questionCount] — questionCount means final
+          steps.forEach((s, i) => { s.hidden = i !== n; });
+          const isFinal = n >= questionCount;
+          if (final) final.hidden = !isFinal;
+
+          if (isFinal) {
+            renderFinal();
+            nextBtn.disabled = true;
+            nextBtn.textContent = '完了';
+          } else {
+            nextBtn.disabled = false;
+            nextBtn.textContent = n === questionCount - 1 ? '回答を確認 →' : '次の問い →';
+          }
+          prevBtn.disabled = n === 0;
+
+          const ratio = isFinal ? 1 : Math.min(1, (n) / questionCount);
+          // visited up to current question
+          progressBar.style.width = `${Math.round(((n + (isFinal ? 0 : 1)) / questionCount) * 100)}%`;
+          counter.textContent = isFinal
+            ? `完了 / ${questionCount}`
+            : `${n + 1} / ${questionCount}`;
+          current = n;
+
+          // Focus textarea
+          if (!isFinal) {
+            const ta = steps[n].querySelector('[data-quiz-textarea]');
+            setTimeout(() => ta?.focus(), 50);
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderFinal() {
+          const summary = document.querySelector('[data-quiz-summary]');
+          const list = document.querySelector('[data-quiz-final-items]');
+          const counts = { ok: 0, meh: 0, no: 0, none: 0, answered: 0 };
+          for (let i = 0; i < questionCount; i++) {
+            const e = state[i] || {};
+            if (e.r === 'ok') counts.ok++;
+            else if (e.r === 'meh') counts.meh++;
+            else if (e.r === 'no') counts.no++;
+            else counts.none++;
+            if (e.a && e.a.trim()) counts.answered++;
+          }
+          summary.innerHTML = `
+            <div class="quiz-final__card"><div class="quiz-final__card-num">${counts.answered}</div><div class="quiz-final__card-label">回答した</div></div>
+            <div class="quiz-final__card"><div class="quiz-final__card-num" style="color:#5b8c5a">${counts.ok}</div><div class="quiz-final__card-label">わかった</div></div>
+            <div class="quiz-final__card"><div class="quiz-final__card-num" style="color:#b89a4f">${counts.meh}</div><div class="quiz-final__card-label">もうすこし</div></div>
+            <div class="quiz-final__card"><div class="quiz-final__card-num" style="color:#b85c4a">${counts.no}</div><div class="quiz-final__card-label">むずかしい</div></div>
+          `;
+
+          const items = [];
+          steps.forEach((step, idx) => {
+            const q = step.querySelector('.quiz-question__text').textContent;
+            const e = state[idx] || {};
+            const rateLabel = e.r === 'ok' ? '○ わかった' : e.r === 'meh' ? '△ もうすこし' : e.r === 'no' ? '✗ むずかしい' : '— 未評価';
+            const aClass = e.a && e.a.trim() ? '' : 'quiz-final__a--empty';
+            const aText = e.a && e.a.trim() ? e.a : '（未記入）';
+            items.push(`
+              <article class="quiz-final__item">
+                <p class="quiz-final__q"><span class="quiz-final__q-num">問 ${idx + 1}</span><span>${escapeHtml(q)}</span></p>
+                <p class="quiz-final__a ${aClass}">${escapeHtml(aText)}</p>
+                <p class="quiz-final__rate">${rateLabel}</p>
+              </article>
+            `);
+          });
+          items.push(`<p style="text-align:center; margin-top: 2rem;"><a href="${lessonUrl}" class="quiz-nav__next" style="display: inline-block; padding: 0.7rem 1.5rem; border-radius: 8px; text-decoration: none;">教材ページへ戻る</a></p>`);
+          list.innerHTML = items.join('');
+        }
+
+        function escapeHtml(s) {
+          return String(s).replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+          }[c]));
+        }
+
+        prevBtn.addEventListener('click', () => show(Math.max(0, current - 1)));
+        nextBtn.addEventListener('click', () => show(Math.min(questionCount, current + 1)));
+        document.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'TEXTAREA') return;
+          if (e.key === 'ArrowLeft' && !prevBtn.disabled) prevBtn.click();
+          if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
+        });
+        resetBtn?.addEventListener('click', () => {
+          if (confirm('この教材のクイズ回答をすべて消去します。よろしいですか？')) {
+            try { localStorage.removeItem(quizStorageKey); } catch (_) {}
+            state = {};
+            steps.forEach((step) => {
+              step.querySelector('[data-quiz-textarea]').value = '';
+              step.querySelectorAll('[data-rate]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+            });
+            show(0);
+          }
+        });
+
+        // Restore last visited question if any answer exists
+        let lastFilledIdx = -1;
+        for (let i = 0; i < questionCount; i++) {
+          if (state[i] && (state[i].a || state[i].r)) lastFilledIdx = i;
+        }
+        show(lastFilledIdx >= 0 ? Math.min(lastFilledIdx, questionCount - 1) : 0);
+      })();
+    </script>
+  </body>
+</html>

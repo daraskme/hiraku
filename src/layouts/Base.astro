@@ -41,6 +41,12 @@ const ogImageUrl = new URL(computedOgImage, Astro.site || 'https://hiraku-5cb.pa
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImageUrl} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#1d2a3d" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f3efe5" media="(prefers-color-scheme: light)" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ひらく" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -56,5 +62,15 @@ const ogImageUrl = new URL(computedOgImage, Astro.site || 'https://hiraku-5cb.pa
     <BottomNav />
     <Footer />
     <script src="/progress.js" is:inline></script>
+    <script is:inline>
+      // Service Worker 登録（PWA / オフライン対応）
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+            /* ignore registration failure */
+          });
+        });
+      }
+    </script>
   </body>
 </html>

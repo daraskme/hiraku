@@ -1,0 +1,76 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const collectionNames = [
+  'kokugo3',
+  'kokugo4',
+  'chugaku1',
+  'kotoko1',
+  'chugakurika1',
+  'kotokoeigo1',
+  'sansu5',
+  'chugakukomin3',
+] as const;
+
+interface AuthorEntry {
+  author: string;
+  dates?: string;
+  lessons: any[];
+  earliestYear?: number;
+}
+
+const byAuthor: Record<string, AuthorEntry> = {};
+for (const name of collectionNames) {
+  const lessons = await getCollection(name as any);
+  for (const lesson of lessons) {
+    const author = lesson.data.author;
+    if (!byAuthor[author]) {
+      byAuthor[author] = {
+        author,
+        dates: lesson.data.author_dates,
+        lessons: [],
+      };
+    }
+    byAuthor[author].lessons.push(lesson);
+    const y = lesson.data.original_year;
+    if (y && (!byAuthor[author].earliestYear || y < byAuthor[author].earliestYear)) {
+      byAuthor[author].earliestYear = y;
+    }
+  }
+}
+
+const authors = Object.values(byAuthor).sort((a, b) => {
+  const ay = a.earliestYear ?? Infinity;
+  const by = b.earliestYear ?? Infinity;
+  if (ay !== by) return ay - by;
+  return a.author.localeCompare(b.author, 'ja');
+});
+---
+
+<Base title="著者一覧" description="ひらく収載教材の著者一覧" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>著者一覧</h1>
+      <span class="section__subtitle">AUTHORS</span>
+    </div>
+    <p>
+      ひらくに収載されている全 {authors.length} 名の著者です。
+      古い順（最初の作品の発表年）に並んでいます。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="cross-grid">
+      {authors.map((a) => (
+        <article class="cross-card">
+          <a href={`/authors/${encodeURIComponent(a.author)}`} class="cross-card__link">
+            <h2 class="cross-card__title">{a.author}</h2>
+            {a.dates && <p class="cross-card__meta">{a.dates}</p>}
+            <p class="cross-card__count">{a.lessons.length} 本収載</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>

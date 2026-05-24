@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+function deriveEra(data: any): string {
+  const e = (data.era || '') as string;
+  const eras = ['平安時代', '鎌倉時代', '室町時代', '安土桃山時代', '江戸時代'];
+  for (const era of eras) {
+    if (e.includes(era)) return era;
+  }
+  if (e.includes('慶応') || e.includes('明治')) return '明治';
+  if (e.includes('大正')) return '大正';
+  if (e.includes('昭和') || e.includes('平成') || e.includes('令和')) {
+    return e.includes('昭和') ? '昭和' : e.includes('平成') ? '平成' : '令和';
+  }
+  const y = data.original_year as number | undefined;
+  if (!y) return 'その他';
+  if (y < 1603) return '江戸時代以前';
+  if (y < 1868) return '江戸時代';
+  if (y < 1912) return '明治';
+  if (y < 1926) return '大正';
+  if (y < 1989) return '昭和';
+  if (y < 2019) return '平成';
+  return '令和';
+}
+
+const ERA_ORDER = [
+  '平安時代',
+  '鎌倉時代',
+  '室町時代',
+  '安土桃山時代',
+  '江戸時代以前',
+  '江戸時代',
+  '明治',
+  '大正',
+  '昭和',
+  '平成',
+  '令和',
+  'その他',
+];
+
+const ERA_DESCRIPTION: Record<string, string> = {
+  '平安時代': '794〜1185 年頃。「枕草子」「伊勢物語」など仮名文学の名作。',
+  '鎌倉時代': '1185〜1333 年頃。「徒然草」「平家物語」など、無常観と力強い文体。',
+  '江戸時代': '1603〜1868 年。「塵劫記」など実学書のほか、町人文化。',
+  '明治': '1868〜1912 年。文明開化と西洋思想の流入。',
+  '大正': '1912〜1926 年。児童文学運動と近代文学の黄金期。',
+  '昭和': '1926〜1989 年。童話の名手、戦後の教育・憲法。',
+};
+
+const collectionNames = [
+  'kokugo3',
+  'kokugo4',
+  'chugaku1',
+  'kotoko1',
+  'chugakurika1',
+  'kotokoeigo1',
+  'sansu5',
+  'chugakukomin3',
+] as const;
+
+const byEra: Record<string, number> = {};
+for (const name of collectionNames) {
+  const lessons = await getCollection(name as any);
+  for (const lesson of lessons) {
+    const era = deriveEra(lesson.data);
+    byEra[era] = (byEra[era] || 0) + 1;
+  }
+}
+
+const sortedEras = ERA_ORDER.filter((e) => byEra[e]);
+---
+
+<Base title="時代一覧" description="ひらく収載教材を時代別に分類" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>時代別アーカイブ</h1>
+      <span class="section__subtitle">ERAS</span>
+    </div>
+    <p>
+      ひらく収載教材を、書かれた時代・成立した時代によって分類しています。
+      古典・近代・現代を行き来して読むと、日本語の流れと作家たちの呼吸が見えてきます。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="cross-grid">
+      {sortedEras.map((era) => (
+        <article class="cross-card">
+          <a href={`/eras/${encodeURIComponent(era)}`} class="cross-card__link">
+            <h2 class="cross-card__title">{era}</h2>
+            {ERA_DESCRIPTION[era] && <p class="cross-card__meta">{ERA_DESCRIPTION[era]}</p>}
+            <p class="cross-card__count">{byEra[era]} 本収載</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>

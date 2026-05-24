@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語',
+  kokugo4: '小4 国語',
+  chugaku1: '中1 国語',
+  kotoko1: '高1 国語',
+  chugakurika1: '中1 理科',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+};
+
+export const getStaticPaths = (async () => {
+  const collectionNames = [
+    'kokugo3',
+    'kokugo4',
+    'chugaku1',
+    'kotoko1',
+    'chugakurika1',
+    'kotokoeigo1',
+    'sansu5',
+    'chugakukomin3',
+  ] as const;
+
+  const byAuthor: Record<string, any[]> = {};
+  for (const name of collectionNames) {
+    const lessons = await getCollection(name as any);
+    for (const lesson of lessons) {
+      const author = lesson.data.author;
+      if (!byAuthor[author]) byAuthor[author] = [];
+      byAuthor[author].push({ ...lesson, collection: name });
+    }
+  }
+
+  return Object.entries(byAuthor).map(([author, lessons]) => ({
+    params: { author: encodeURIComponent(author) },
+    props: { author, lessons },
+  }));
+}) satisfies GetStaticPaths;
+
+const { author, lessons } = Astro.props;
+const sortedLessons = [...lessons].sort(
+  (a: any, b: any) => (a.data.original_year || 0) - (b.data.original_year || 0),
+);
+const dates = sortedLessons[0].data.author_dates;
+const totalMinutes = sortedLessons.reduce((acc: number, l: any) => acc + (l.data.estimated_minutes || 0), 0);
+
+// Era-spanning info
+const years = sortedLessons.map((l: any) => l.data.original_year).filter(Boolean);
+const earliest = Math.min(...years);
+const latest = Math.max(...years);
+---
+
+<Base title={`${author} の教材`} description={`${author}（${dates ?? ''}）が著した教材一覧。${lessons.length}本収載。`} wide>
+  <section class="section">
+    <p class="cross-page__breadcrumb no-print">
+      <a href="/authors">著者一覧</a> ／ {author}
+    </p>
+    <div class="section__heading">
+      <h1>{author}</h1>
+      <span class="section__subtitle">AUTHOR</span>
+    </div>
+    <div class="cross-page__meta">
+      {dates && <span class="badge">{dates}</span>}
+      <span class="badge">{lessons.length} 本収載</span>
+      {totalMinutes > 0 && <span class="badge">合計 {totalMinutes} 分</span>}
+      {years.length > 0 && (
+        <span class="badge">作品年代：{earliest === latest ? earliest : `${earliest}〜${latest}`}</span>
+      )}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>作品一覧</h2>
+      <span class="section__subtitle">WORKS</span>
+    </div>
+    <div class="lesson-grid">
+      {sortedLessons.map((lesson: any) => (
+        <article class="lesson-card">
+          <a href={`/library/${lesson.collection}/${lesson.id}`} class="lesson-card__link">
+            <p class="lesson-card__meta">
+              {COLLECTION_LABEL[lesson.collection] || lesson.collection}
+              {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
+            </p>
+            <h3 class="lesson-card__title">{lesson.data.title}</h3>
+            <p class="lesson-card__desc">{lesson.data.description}</p>
+            <p class="lesson-card__author">
+              {lesson.data.era ? lesson.data.era : lesson.data.original_year ? `${lesson.data.original_year}年` : ''}
+            </p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,58 @@
+{
+  "name": "ひらく — みんなの教科書を、ふたたびひらく。",
+  "short_name": "ひらく",
+  "description": "著作権切れの教科書素材を、現行学習指導要領に沿って再編集して公開するオープン教材プロジェクト",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3efe5",
+  "theme_color": "#1d2a3d",
+  "lang": "ja",
+  "categories": ["education", "books"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ライブラリ",
+      "short_name": "ライブラリ",
+      "url": "/library",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "進捗",
+      "short_name": "進捗",
+      "url": "/progress",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "検索",
+      "short_name": "検索",
+      "url": "/search",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}

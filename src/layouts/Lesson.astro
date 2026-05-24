@@ -107,9 +107,16 @@ const guidelineDoc = d.school_stage === 'kotoko'
     <header class="lesson-header">
       <div class="lesson-header__top no-print">
         <a href="/library" class="lesson-header__back">← ライブラリへ戻る</a>
-        <a href={`/reader/${lesson.collection}/${lesson.id}`} class="lesson-header__reader-link" title="フルスクリーンで読む">
-          ✦ リーダーモードで読む
-        </a>
+        <div class="lesson-header__actions">
+          <a href={`/reader/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link" title="フルスクリーンで読む">
+            ✦ リーダーモードで読む
+          </a>
+          {d.questions && d.questions.length > 0 && (
+            <a href={`/quiz/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link lesson-header__action-link--accent" title="問いを1問ずつ考える">
+              ? クイズで考える
+            </a>
+          )}
+        </div>
       </div>
       {d.cover_image && (
         <figure class="lesson-cover">
@@ -127,7 +134,9 @@ const guidelineDoc = d.school_stage === 'kotoko'
       <section class="meta-panel" aria-label="教材メタ情報">
         <dl>
           <dt>作者</dt>
-          <dd>{d.author}{d.author_dates ? `（${d.author_dates}）` : ''}</dd>
+          <dd>
+            <a href={`/authors/${encodeURIComponent(d.author)}`} style="color: inherit; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px;">{d.author}</a>{d.author_dates ? `（${d.author_dates}）` : ''}
+          </dd>
           {d.original_year && (
             <>
               <dt>原作発表</dt>

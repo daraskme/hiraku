@@ -772,6 +772,86 @@ blockquote {
   border: 1px dashed var(--border);
   border-radius: 10px;
 }
+
+/* ============================================================
+   著者・時代の横断ページ
+   ============================================================ */
+.cross-page__breadcrumb {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+}
+.cross-page__breadcrumb a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.cross-page__breadcrumb a:hover { text-decoration: underline; }
+.cross-page__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.8rem 0 1rem;
+}
+
+.cross-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+.cross-card {
+  margin: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+.cross-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+.cross-card__link {
+  display: block;
+  padding: 1rem 1.1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+.cross-card__title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+  color: var(--text);
+}
+.cross-card__meta {
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+}
+.cross-card__count {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin: 0;
+}
+
+.cross-links {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+.cross-links a {
+  color: var(--accent);
+  text-decoration: none;
+  margin: 0 0.2em;
+}
+.cross-links a:hover { text-decoration: underline; }
 .library-empty h3 {
   margin: 0 0 0.4rem;
   color: var(--text-soft);
@@ -816,20 +896,37 @@ blockquote {
   gap: 0.4rem;
 }
 .lesson-header__back:hover { color: var(--accent); }
+.lesson-header__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.lesson-header__action-link,
 .lesson-header__reader-link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--text-soft);
   border-radius: 999px;
   font-size: 0.85rem;
-  color: var(--accent);
+  color: var(--text-soft);
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
+.lesson-header__action-link:hover,
 .lesson-header__reader-link:hover {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+.lesson-header__action-link--accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.lesson-header__action-link--accent:hover {
   background: var(--accent);
+  border-color: var(--accent);
   color: var(--logo-fg);
 }
 .lesson-header__title {

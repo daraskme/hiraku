@@ -140,6 +140,13 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
       <h3>表示する教材が選ばれていません</h3>
       <p>上の「学校段階」「教科」「学年」のいずれかから、見たい組み合わせをクリックしてください。</p>
     </div>
+
+    <p class="cross-links no-print">
+      別の切り口で探す：
+      <a href="/authors">著者一覧</a> ・
+      <a href="/eras">時代別</a> ・
+      <a href="/search">本文検索</a>
+    </p>
   </section>
 
   {sections.map((s) => (

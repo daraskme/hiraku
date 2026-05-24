@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="オフラインです" description="現在ネットワークに接続できません">
+  <section class="section" style="text-align: center; padding: 3rem 1rem;">
+    <div class="section__heading" style="justify-content: center;">
+      <h1>オフラインです</h1>
+      <span class="section__subtitle">OFFLINE</span>
+    </div>
+    <p style="margin-top: 1.5rem;">
+      現在、インターネットに接続できないため、このページは表示できません。
+    </p>
+    <p style="color: var(--text-soft);">
+      ネットワークに繋がっているときに一度開いたページは、オフラインでも読めることがあります。
+    </p>
+    <div style="margin-top: 2rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+      <a href="/" class="lesson-header__action-link">トップへ</a>
+      <a href="/library" class="lesson-header__action-link">ライブラリ</a>
+      <button type="button" class="lesson-header__action-link" onclick="location.reload()" style="cursor: pointer;">再読み込み</button>
+    </div>
+  </section>
+</Base>

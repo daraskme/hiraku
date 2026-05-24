@@ -1,0 +1,36 @@
+---
+import QuizMode from '../../../layouts/QuizMode.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const collectionNames = [
+    'kokugo3',
+    'kokugo4',
+    'chugaku1',
+    'kotoko1',
+    'chugakurika1',
+    'kotokoeigo1',
+    'sansu5',
+    'chugakukomin3',
+  ] as const;
+
+  const paths = [];
+  for (const name of collectionNames) {
+    const lessons = await getCollection(name as any);
+    for (const lesson of lessons) {
+      // Only generate quiz pages for lessons that have questions
+      if (!lesson.data.questions || lesson.data.questions.length === 0) continue;
+      paths.push({
+        params: { collection: name, slug: lesson.id },
+        props: { lesson, collection: name },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+const { lesson, collection } = Astro.props;
+---
+
+<QuizMode lesson={lesson} collection={collection} />
