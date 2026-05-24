@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 interface Props {
   lesson:
     | CollectionEntry<'kokugo3'>
+    | CollectionEntry<'kokugo4'>
     | CollectionEntry<'chugaku1'>
     | CollectionEntry<'kotoko1'>
     | CollectionEntry<'chugakurika1'>
@@ -20,6 +21,7 @@ const d = lesson.data;
 // ─── 関連教材の計算 ────────────────────────────────
 const COLLECTION_NAMES = [
   'kokugo3',
+  'kokugo4',
   'chugaku1',
   'kotoko1',
   'chugakurika1',
@@ -29,6 +31,7 @@ const COLLECTION_NAMES = [
 ] as const;
 const COLLECTION_LABEL: Record<string, string> = {
   kokugo3: '小3 国語',
+  kokugo4: '小4 国語',
   chugaku1: '中1 国語',
   kotoko1: '高1 国語',
   chugakurika1: '中1 理科',

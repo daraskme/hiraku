@@ -58,6 +58,11 @@ const kokugo3 = defineCollection({
   schema: lessonSchema,
 });
 
+const kokugo4 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kokugo4' }),
+  schema: lessonSchema,
+});
+
 const chugaku1 = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/chugaku1' }),
   schema: lessonSchema,
@@ -88,4 +93,4 @@ const chugakukomin3 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo3, chugaku1, kotoko1, chugakurika1, kotokoeigo1, sansu5, chugakukomin3 };
+export const collections = { kokugo3, kokugo4, chugaku1, kotoko1, chugakurika1, kotokoeigo1, sansu5, chugakukomin3 };
