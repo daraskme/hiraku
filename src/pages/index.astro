@@ -4,7 +4,8 @@ import { getCollection } from 'astro:content';
 
 const kokugo3 = (await getCollection('kokugo3')).map((l) => ({ collection: 'kokugo3', ...l }));
 const chugaku1 = (await getCollection('chugaku1')).map((l) => ({ collection: 'chugaku1', ...l }));
-const featured = [...kokugo3, ...chugaku1]
+const kotoko1 = (await getCollection('kotoko1')).map((l) => ({ collection: 'kotoko1', ...l }));
+const featured = [...kokugo3, ...chugaku1, ...kotoko1]
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
 ---
@@ -41,7 +42,11 @@ const featured = [...kokugo3, ...chugaku1]
     ) : (
       <div class="lesson-grid">
         {featured.map((lesson) => {
-          const stagePrefix = lesson.data.school_stage === 'chugaku' ? '中学' : '小';
+          const stagePrefix = lesson.data.school_stage === 'kotoko'
+            ? '高'
+            : lesson.data.school_stage === 'chugaku'
+              ? '中'
+              : '小';
           return (
             <article class="lesson-card">
               <a href={`/library/${lesson.collection}/${lesson.id}`} class="lesson-card__link">
