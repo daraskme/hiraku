@@ -2,14 +2,76 @@
 import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
-const kokugo3 = (await getCollection('kokugo3')).sort((a, b) => a.data.order - b.data.order);
-const kokugo4 = (await getCollection('kokugo4')).sort((a, b) => a.data.order - b.data.order);
-const chugaku1 = (await getCollection('chugaku1')).sort((a, b) => a.data.order - b.data.order);
-const kotoko1 = (await getCollection('kotoko1')).sort((a, b) => a.data.order - b.data.order);
-const chugakurika1 = (await getCollection('chugakurika1')).sort((a, b) => a.data.order - b.data.order);
-const kotokoeigo1 = (await getCollection('kotokoeigo1')).sort((a, b) => a.data.order - b.data.order);
-const sansu5 = (await getCollection('sansu5')).sort((a, b) => a.data.order - b.data.order);
-const chugakukomin3 = (await getCollection('chugakukomin3')).sort((a, b) => a.data.order - b.data.order);
+// すべての collection を共通のシェイプに正規化
+interface Section {
+  name: string;            // collection 名（kokugo3 など）
+  stage: string;           // 学校段階（小学校/中学校/高等学校）
+  stageShort: string;      // チップ用の略称（小/中/高）
+  subject: string;         // 教科（国語/算数/理科/英語/公民）
+  grade: number;           // 学年
+  heading: string;         // セクション見出し
+  subtitle: string;        // セクション小見出し
+  defaultMeta: (lesson: any) => string;
+  lessons: any[];
+}
+
+const COLLECTIONS = [
+  { name: 'kokugo3',       stage: '小学校',   stageShort: '小', subject: '国語', grade: 3 },
+  { name: 'kokugo4',       stage: '小学校',   stageShort: '小', subject: '国語', grade: 4 },
+  { name: 'sansu5',        stage: '小学校',   stageShort: '小', subject: '算数', grade: 5 },
+  { name: 'chugakurika1',  stage: '中学校',   stageShort: '中', subject: '理科', grade: 1 },
+  { name: 'chugaku1',      stage: '中学校',   stageShort: '中', subject: '国語', grade: 1 },
+  { name: 'chugakukomin3', stage: '中学校',   stageShort: '中', subject: '公民', grade: 3 },
+  { name: 'kotokoeigo1',   stage: '高等学校', stageShort: '高', subject: '英語', grade: 1 },
+  { name: 'kotoko1',       stage: '高等学校', stageShort: '高', subject: '国語', grade: 1 },
+] as const;
+
+const sections: Section[] = [];
+for (const c of COLLECTIONS) {
+  const lessons = (await getCollection(c.name as any)).sort(
+    (a: any, b: any) => a.data.order - b.data.order,
+  );
+  let metaFn: Section['defaultMeta'];
+  switch (c.subject) {
+    case '算数':
+      metaFn = (l) => `和算${l.data.estimated_minutes ? ` ・ ${l.data.estimated_minutes} 分` : ''}`;
+      break;
+    case '理科':
+      metaFn = (l) => `科学随筆${l.data.estimated_minutes ? ` ・ ${l.data.estimated_minutes} 分` : ''}`;
+      break;
+    case '英語':
+      metaFn = (l) => `Reading${l.data.estimated_minutes ? ` ・ ${l.data.estimated_minutes} min` : ''}`;
+      break;
+    case '公民':
+      metaFn = (l) =>
+        `${l.data.classical ? '古典 ・ ' : '近代史料 ・ '}${l.data.estimated_minutes ? `${l.data.estimated_minutes} 分` : ''}`;
+      break;
+    default:
+      metaFn = (l) =>
+        `${l.data.classical ? '古典 ・ ' : ''}${l.data.domains[0] || `第${l.data.grade}学年`}${
+          l.data.estimated_minutes ? ` ・ ${l.data.estimated_minutes} 分` : ''
+        }`;
+  }
+  sections.push({
+    name: c.name,
+    stage: c.stage,
+    stageShort: c.stageShort,
+    subject: c.subject,
+    grade: c.grade,
+    heading: `${c.stage} ${c.subject} 第${c.grade}学年`,
+    subtitle: `${c.stageShort}${c.grade} ・ ${c.subject}`,
+    defaultMeta: metaFn,
+    lessons,
+  });
+}
+
+const allStages = Array.from(new Set(sections.map((s) => s.stage)));
+const allSubjects = Array.from(new Set(sections.map((s) => s.subject)));
+const allGrades = Array.from(
+  new Set(sections.map((s) => `${s.stageShort}${s.grade}`)),
+).sort();
+
+const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
 ---
 
 <Base title="ライブラリ" description="教材一覧" wide>
@@ -20,265 +82,213 @@ const chugakukomin3 = (await getCollection('chugakukomin3')).sort((a, b) => a.da
     </div>
     <p>
       現行学習指導要領（平成29年告示）に対応する教材を、教科・学年ごとに収載しています。
-      新しい教材は順次追加していきます。
+      現在 <strong>{totalLessonCount}</strong> 教材を公開中。
     </p>
-  </section>
 
-  <section class="section">
-    <div class="section__heading">
-      <h2>小学校 国語 第3学年</h2>
-      <span class="section__subtitle">小3 ・ 国語</span>
-    </div>
-
-    {kokugo3.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {kokugo3.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/kokugo3/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                {lesson.data.domains[0] || `第${lesson.data.grade}学年`}
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.original_year && `（${lesson.data.original_year}）`}
-              </p>
-            </a>
-          </article>
+    <div class="library-filters" data-library-filters>
+      <div class="library-filters__group" role="group" aria-label="学校段階で絞り込み">
+        <span class="library-filters__label">学校段階</span>
+        {allStages.map((stage) => (
+          <button
+            type="button"
+            class="filter-chip"
+            data-filter-key="stage"
+            data-filter-value={stage}
+            aria-pressed="true"
+          >
+            {stage}
+          </button>
         ))}
       </div>
-    )}
-  </section>
-
-  <section class="section">
-    <div class="section__heading">
-      <h2>小学校 国語 第4学年</h2>
-      <span class="section__subtitle">小4 ・ 国語</span>
-    </div>
-
-    {kokugo4.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {kokugo4.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/kokugo4/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                {lesson.data.domains[0] || `第${lesson.data.grade}学年`}
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.original_year && `（${lesson.data.original_year}）`}
-              </p>
-            </a>
-          </article>
+      <div class="library-filters__group" role="group" aria-label="教科で絞り込み">
+        <span class="library-filters__label">教科</span>
+        {allSubjects.map((subject) => (
+          <button
+            type="button"
+            class="filter-chip"
+            data-filter-key="subject"
+            data-filter-value={subject}
+            aria-pressed="true"
+          >
+            {subject}
+          </button>
         ))}
       </div>
-    )}
-  </section>
-
-  <section class="section">
-    <div class="section__heading">
-      <h2>小学校 算数 第5学年</h2>
-      <span class="section__subtitle">小5 ・ 算数</span>
-    </div>
-
-    {sansu5.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {sansu5.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/sansu5/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                和算
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.original_year && `（${lesson.data.original_year}）`}
-              </p>
-            </a>
-          </article>
+      <div class="library-filters__group" role="group" aria-label="学年で絞り込み">
+        <span class="library-filters__label">学年</span>
+        {allGrades.map((grade) => (
+          <button
+            type="button"
+            class="filter-chip"
+            data-filter-key="grade"
+            data-filter-value={grade}
+            aria-pressed="true"
+          >
+            {grade}
+          </button>
         ))}
       </div>
-    )}
-  </section>
-
-  <section class="section">
-    <div class="section__heading">
-      <h2>中学校 理科 第1学年</h2>
-      <span class="section__subtitle">中1 ・ 理科</span>
+      <div class="library-filters__actions">
+        <button type="button" class="filter-chip filter-chip--ghost" data-filter-reset>すべて表示</button>
+        <button type="button" class="filter-chip filter-chip--ghost" data-filter-none>すべて非表示</button>
+      </div>
     </div>
 
-    {chugakurika1.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {chugakurika1.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/chugakurika1/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                科学随筆
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.original_year && `（${lesson.data.original_year}）`}
-              </p>
-            </a>
-          </article>
-        ))}
-      </div>
-    )}
-  </section>
+    <p class="library-filters__hint no-print" aria-live="polite" data-library-status></p>
 
-  <section class="section">
-    <div class="section__heading">
-      <h2>中学校 国語 第1学年</h2>
-      <span class="section__subtitle">中1 ・ 国語</span>
+    <div class="library-empty no-print" data-library-empty hidden>
+      <h3>表示する教材が選ばれていません</h3>
+      <p>上の「学校段階」「教科」「学年」のいずれかから、見たい組み合わせをクリックしてください。</p>
     </div>
-
-    {chugaku1.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {chugaku1.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/chugaku1/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                {lesson.data.classical ? '古典 ・ ' : ''}
-                {lesson.data.domains[0] || `第${lesson.data.grade}学年`}
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.era ? `（${lesson.data.era}）` : lesson.data.original_year ? `（${lesson.data.original_year}）` : ''}
-              </p>
-            </a>
-          </article>
-        ))}
-      </div>
-    )}
   </section>
 
-  <section class="section">
-    <div class="section__heading">
-      <h2>中学校 公民 第3学年</h2>
-      <span class="section__subtitle">中3 ・ 公民</span>
-    </div>
+  {sections.map((s) => (
+    <section
+      class="section library-section"
+      data-library-section
+      data-stage={s.stage}
+      data-subject={s.subject}
+      data-grade={`${s.stageShort}${s.grade}`}
+    >
+      <div class="section__heading">
+        <h2>{s.heading}</h2>
+        <span class="section__subtitle">{s.subtitle}</span>
+      </div>
 
-    {chugakukomin3.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {chugakukomin3.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/chugakukomin3/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                {lesson.data.classical ? '古典 ・ ' : '近代史料 ・ '}
-                {lesson.data.estimated_minutes && `${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.era ? `（${lesson.data.era}）` : lesson.data.original_year ? `（${lesson.data.original_year}）` : ''}
-              </p>
-            </a>
-          </article>
-        ))}
-      </div>
-    )}
-  </section>
+      {s.lessons.length === 0 ? (
+        <div class="empty-state">
+          <h3>準備中です</h3>
+        </div>
+      ) : (
+        <div class="lesson-grid">
+          {s.lessons.map((lesson) => (
+            <article class="lesson-card">
+              <a href={`/library/${s.name}/${lesson.id}`} class="lesson-card__link">
+                <p class="lesson-card__meta">{s.defaultMeta(lesson)}</p>
+                <h3 class="lesson-card__title">{lesson.data.title}</h3>
+                <p class="lesson-card__desc">{lesson.data.description}</p>
+                <p class="lesson-card__author">
+                  {lesson.data.author}
+                  {lesson.data.era
+                    ? `（${lesson.data.era}）`
+                    : lesson.data.original_year
+                      ? `（${lesson.data.original_year}）`
+                      : ''}
+                </p>
+              </a>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  ))}
 
-  <section class="section">
-    <div class="section__heading">
-      <h2>高等学校 英語 第1学年</h2>
-      <span class="section__subtitle">高1 ・ 英語</span>
-    </div>
+  <script is:inline>
+    (function () {
+      const STORAGE_KEY = 'hiraku.libraryFilters.v1';
+      const root = document.querySelector('[data-library-filters]');
+      if (!root) return;
+      const sections = Array.from(document.querySelectorAll('[data-library-section]'));
+      const status = document.querySelector('[data-library-status]');
+      const empty = document.querySelector('[data-library-empty]');
 
-    {kotokoeigo1.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {kotokoeigo1.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/kotokoeigo1/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                Reading
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} min`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.original_year && `（${lesson.data.original_year}）`}
-              </p>
-            </a>
-          </article>
-        ))}
-      </div>
-    )}
-  </section>
+      // Initial state: all enabled
+      const allValues = (key) =>
+        Array.from(new Set(sections.map((s) => s.dataset[key])));
+      const defaults = {
+        stage: new Set(allValues('stage')),
+        subject: new Set(allValues('subject')),
+        grade: new Set(allValues('grade')),
+      };
 
-  <section class="section">
-    <div class="section__heading">
-      <h2>高等学校 国語 第1学年</h2>
-      <span class="section__subtitle">高1 ・ 国語</span>
-    </div>
+      // Load from localStorage
+      const state = { stage: new Set(defaults.stage), subject: new Set(defaults.subject), grade: new Set(defaults.grade) };
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          for (const k of ['stage', 'subject', 'grade']) {
+            if (Array.isArray(parsed[k])) {
+              state[k] = new Set(parsed[k]);
+            }
+          }
+        }
+      } catch (_) {}
 
-    {kotoko1.length === 0 ? (
-      <div class="empty-state">
-        <h3>準備中です</h3>
-      </div>
-    ) : (
-      <div class="lesson-grid">
-        {kotoko1.map((lesson) => (
-          <article class="lesson-card">
-            <a href={`/library/kotoko1/${lesson.id}`} class="lesson-card__link">
-              <p class="lesson-card__meta">
-                {lesson.data.classical ? '古典 ・ ' : ''}
-                {lesson.data.domains[0] || `第${lesson.data.grade}学年`}
-                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
-              </p>
-              <h3 class="lesson-card__title">{lesson.data.title}</h3>
-              <p class="lesson-card__desc">{lesson.data.description}</p>
-              <p class="lesson-card__author">
-                {lesson.data.author}
-                {lesson.data.era ? `（${lesson.data.era}）` : lesson.data.original_year ? `（${lesson.data.original_year}）` : ''}
-              </p>
-            </a>
-          </article>
-        ))}
-      </div>
-    )}
-  </section>
+      function persist() {
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              stage: [...state.stage],
+              subject: [...state.subject],
+              grade: [...state.grade],
+            }),
+          );
+        } catch (_) {}
+      }
+
+      function apply() {
+        let visible = 0;
+        sections.forEach((s) => {
+          const stage = s.dataset.stage;
+          const subject = s.dataset.subject;
+          const grade = s.dataset.grade;
+          const show =
+            state.stage.has(stage) && state.subject.has(subject) && state.grade.has(grade);
+          s.hidden = !show;
+          if (show) visible++;
+        });
+        // Update chip aria-pressed
+        root.querySelectorAll('[data-filter-key]').forEach((chip) => {
+          const k = chip.dataset.filterKey;
+          const v = chip.dataset.filterValue;
+          chip.setAttribute('aria-pressed', state[k].has(v) ? 'true' : 'false');
+        });
+        // Status / empty state
+        if (status) {
+          status.textContent =
+            visible === sections.length
+              ? `全 ${sections.length} セクションを表示中`
+              : `${visible} / ${sections.length} セクションを表示中`;
+        }
+        if (empty) {
+          empty.hidden = visible !== 0;
+        }
+      }
+
+      root.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        if (target.matches('[data-filter-reset]')) {
+          state.stage = new Set(defaults.stage);
+          state.subject = new Set(defaults.subject);
+          state.grade = new Set(defaults.grade);
+          persist();
+          apply();
+          return;
+        }
+        if (target.matches('[data-filter-none]')) {
+          state.stage = new Set();
+          state.subject = new Set();
+          state.grade = new Set();
+          persist();
+          apply();
+          return;
+        }
+
+        const chip = target.closest('[data-filter-key]');
+        if (!chip) return;
+        const k = chip.dataset.filterKey;
+        const v = chip.dataset.filterValue;
+        if (state[k].has(v)) state[k].delete(v);
+        else state[k].add(v);
+        persist();
+        apply();
+      });
+
+      apply();
+    })();
+  </script>
 </Base>

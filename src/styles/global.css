@@ -674,6 +674,125 @@ blockquote {
 }
 
 /* ============================================================
+   ライブラリ フィルタ
+   ============================================================ */
+.library-filters {
+  margin: 1.4rem 0 0.6rem;
+  padding: 1rem 1.1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.library-filters__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.library-filters__label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+  min-width: 5.6em;
+  text-transform: uppercase;
+}
+.library-filters__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border-soft);
+}
+.library-filters__hint {
+  margin: 0.3rem 0 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.32rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  background: var(--bg);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.06s;
+  user-select: none;
+}
+.filter-chip:hover {
+  border-color: var(--text-soft);
+  color: var(--text);
+}
+.filter-chip:active {
+  transform: scale(0.97);
+}
+.filter-chip[aria-pressed="true"] {
+  background: var(--logo-bg);
+  border-color: var(--logo-bg);
+  color: var(--logo-fg);
+}
+.filter-chip[aria-pressed="true"]::before {
+  content: "✓ ";
+  font-size: 0.85em;
+  margin-right: 0.1em;
+}
+.filter-chip[aria-pressed="false"] {
+  opacity: 0.75;
+}
+.filter-chip--ghost {
+  border-style: dashed;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+.filter-chip--ghost:hover {
+  border-style: solid;
+  color: var(--text);
+}
+.filter-chip--ghost[aria-pressed]::before {
+  content: none;
+}
+
+.library-empty {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+.library-empty h3 {
+  margin: 0 0 0.4rem;
+  color: var(--text-soft);
+}
+.library-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-faint);
+}
+
+@media (max-width: 600px) {
+  .library-filters__group {
+    flex-direction: row;
+  }
+  .library-filters__label {
+    min-width: 100%;
+    margin-bottom: 0.2rem;
+  }
+}
+
+/* ============================================================
    教材ページ
    ============================================================ */
 .lesson-header {
