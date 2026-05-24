@@ -5,7 +5,8 @@ import { getCollection } from 'astro:content';
 const kokugo3 = (await getCollection('kokugo3')).map((l) => ({ collection: 'kokugo3', ...l }));
 const chugaku1 = (await getCollection('chugaku1')).map((l) => ({ collection: 'chugaku1', ...l }));
 const kotoko1 = (await getCollection('kotoko1')).map((l) => ({ collection: 'kotoko1', ...l }));
-const featured = [...kokugo3, ...chugaku1, ...kotoko1]
+const chugakurika1 = (await getCollection('chugakurika1')).map((l) => ({ collection: 'chugakurika1', ...l }));
+const featured = [...kokugo3, ...chugaku1, ...kotoko1, ...chugakurika1]
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
 ---
