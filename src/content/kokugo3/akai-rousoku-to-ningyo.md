@@ -58,6 +58,17 @@ questions:
   - はじめのうち、老夫婦はなぜ娘を大切に育てたのでしょう。あとに、娘を売ろうとしたのは、なぜですか。
   - 娘が最後に描いた「赤いろうそく」には、どんな気持ちがこめられていたと思いますか。
   - お話の終わりで、町はほろびてしまいます。作者は、このお話を通じてどんなことを伝えたかったのでしょう。あなたの考えを書きましょう。
+cover_image: /illustrations/kokugo3/akai-rousoku-to-ningyo/scene1.webp
+illustrations:
+  - src: /illustrations/kokugo3/akai-rousoku-to-ningyo/scene1.webp
+    caption: 嵐の海辺。人魚の母は、岩の上に赤ん坊をそっと置く。
+    alt: 雨の海辺で、人魚の母が岩の上に赤ん坊を寝かせ、遠くに灯台の灯が見える挿絵。
+  - src: /illustrations/kokugo3/akai-rousoku-to-ningyo/scene2.webp
+    caption: 娘は、赤いろうそくに静かに絵を描いていく。
+    alt: 夜の小さなろうそく店で、人魚の娘が机に向かって赤いろうそくに絵を描く挿絵。
+  - src: /illustrations/kokugo3/akai-rousoku-to-ningyo/scene3.webp
+    caption: 香具師の鉄格子の車に閉じこめられて、娘は連れて行かれる。
+    alt: 雷雨の海辺で、鉄格子の車に閉じこめられた人魚の娘と、それを引く香具師の挿絵。
 ---
 
 <h3>一</h3>

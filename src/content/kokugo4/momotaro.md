@@ -65,6 +65,17 @@ questions:
   - "桃太郎は鬼が島でどんなふうに戦いましたか。順を追って書きましょう。"
   - "鬼が桃太郎にあやまり「もう悪いことはしません」と言って、宝物をさし出します。あなたが桃太郎だったら、鬼の命を助けますか、助けませんか。理由もそえて書きましょう。"
   - "「むかしばなしには『小さな主人公が、大きなものに打ち勝つ』というおきまりの形がたくさんある」と、3年生のときに「一寸法師」で学びました。桃太郎にも同じ形がありますか。両方を比べて、にているところとちがうところを書きましょう。"
+cover_image: /illustrations/kokugo4/momotaro/scene1.webp
+illustrations:
+  - src: /illustrations/kokugo4/momotaro/scene1.webp
+    caption: ドンブラコッコ、スッコッコ。川上から大きな桃が流れてくる。
+    alt: 春の小川で洗濯をするおばあさんと、川上から流れてくる大きな桃の挿絵。
+  - src: /illustrations/kokugo4/momotaro/scene2.webp
+    caption: 「日本一」の旗をさして、犬・猿・きじと旅へ。
+    alt: 山道を、桃太郎と犬・猿・きじが連れだって進む挿絵。遠くに鬼が島が見える。
+  - src: /illustrations/kokugo4/momotaro/scene3.webp
+    caption: 鬼が島で、鬼たちが頭を下げて宝物を差し出す。
+    alt: 鬼が島の城門前で、桃太郎一行に降参する鬼たちと積まれた宝物の挿絵。
 ---
 
 <h3>一</h3>

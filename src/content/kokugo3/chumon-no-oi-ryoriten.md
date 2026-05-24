@@ -64,6 +64,17 @@ questions:
   - "「注文の多い料理店」とは、はじめ二人にはどういう意味だと思われていましたか。じつは、だれがだれに「注文」していたのですか。"
   - 二人の紳士が、扉の文字を都合よく読みかえながら奥へ進んでいく場面を、あなたはどう感じましたか。
   - 物語の最後で、二人の顔がもとどおりにならなかったのはなぜでしょう。作者が伝えたかったことを、あなたの言葉で書きましょう。
+cover_image: /illustrations/kokugo3/chumon-no-oi-ryoriten/scene1.webp
+illustrations:
+  - src: /illustrations/kokugo3/chumon-no-oi-ryoriten/scene1.webp
+    caption: 冬の山中、犬まで失って骨しぐる二人の紳士。
+    alt: 雪と柏の冬山で、銘を抱えた二人のイギリス風紳士コスチュームの後ろ姿。
+  - src: /illustrations/kokugo3/chumon-no-oi-ryoriten/scene2.webp
+    caption: 雪の森に、白いタイル張りの妙な料理店があらわれる。
+    alt: 雪の柏の森のなかに、白いタイル張りの洋風料理店の玄関と二人の紳士の挿絵。
+  - src: /illustrations/kokugo3/chumon-no-oi-ryoriten/scene3.webp
+    caption: 助かったあとも、紙くずのようにくしゃくしゃの顔のまま。
+    alt: 雪の森で、顔が紙くずのようにくしゃくしゃになってしまった二人の紳士の挿絵。
 ---
 
 <p>　二人の若い<ruby>紳士<rt>しんし</rt></ruby>が、すっかりイギリスの兵隊のかたちをして、ぴかぴかする<ruby>鉄砲<rt>てっぽう</rt></ruby>をかついで、<ruby>白熊<rt>しろくま</rt></ruby>のような犬を二<ruby>疋<rt>ひき</rt></ruby>つれて、だいぶ<ruby>山奥<rt>やまおく</rt></ruby>の、木の葉のかさかさしたとこを、こんなことを<ruby>云<rt>い</rt></ruby>いながら、あるいておりました。</p>

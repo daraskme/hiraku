@@ -67,6 +67,17 @@ questions:
   - "ごんがいわしや栗をこっそり置いていくようになったのは、なぜですか。本文の言葉を使って書きましょう。"
   - "最後の場面で兵十は「ごん、お前だったのか。いつも栗をくれたのは」と言います。このとき兵十とごんは、それぞれどんな気持ちだったと思いますか。"
   - "物語の題名「ごんぎつね」を読み終えたあと、あなたはこの題名をどんな気持ちで読み直しますか。"
+cover_image: /illustrations/kokugo3/gongitsune/scene1.webp
+illustrations:
+  - src: /illustrations/kokugo3/gongitsune/scene1.webp
+    caption: 兵十のはりきり網。ごんはそっと近づき、いたずらを始める。
+    alt: 秋の小川で漁をする兵十と、草に隠れて近づく子狐ごん。和風水彩の挿絵。
+  - src: /illustrations/kokugo3/gongitsune/scene2.webp
+    caption: 夜明け前。ごんは栗を、兵十の家の戸口にそっと置く。
+    alt: 暗い色合いの夜明け、農家の戸口に栗を積む子狐ごんの後ろ姿。
+  - src: /illustrations/kokugo3/gongitsune/scene3.webp
+    caption: 朝の光のなかで、兵十は銘を抱えてうずくまる。
+    alt: 朝の土間で、銘を抱えて肩を落とす兵十と、足元のごん。
 ---
 
 <h3>一</h3>
