@@ -8,6 +8,7 @@ const kotoko1 = (await getCollection('kotoko1')).sort((a, b) => a.data.order - b
 const chugakurika1 = (await getCollection('chugakurika1')).sort((a, b) => a.data.order - b.data.order);
 const kotokoeigo1 = (await getCollection('kotokoeigo1')).sort((a, b) => a.data.order - b.data.order);
 const sansu5 = (await getCollection('sansu5')).sort((a, b) => a.data.order - b.data.order);
+const chugakukomin3 = (await getCollection('chugakukomin3')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Base title="ライブラリ" description="教材一覧" wide>
@@ -137,6 +138,38 @@ const sansu5 = (await getCollection('sansu5')).sort((a, b) => a.data.order - b.d
                 {lesson.data.classical ? '古典 ・ ' : ''}
                 {lesson.data.domains[0] || `第${lesson.data.grade}学年`}
                 {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} 分`}
+              </p>
+              <h3 class="lesson-card__title">{lesson.data.title}</h3>
+              <p class="lesson-card__desc">{lesson.data.description}</p>
+              <p class="lesson-card__author">
+                {lesson.data.author}
+                {lesson.data.era ? `（${lesson.data.era}）` : lesson.data.original_year ? `（${lesson.data.original_year}）` : ''}
+              </p>
+            </a>
+          </article>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>中学校 公民 第3学年</h2>
+      <span class="section__subtitle">中3 ・ 公民</span>
+    </div>
+
+    {chugakukomin3.length === 0 ? (
+      <div class="empty-state">
+        <h3>準備中です</h3>
+      </div>
+    ) : (
+      <div class="lesson-grid">
+        {chugakukomin3.map((lesson) => (
+          <article class="lesson-card">
+            <a href={`/library/chugakukomin3/${lesson.id}`} class="lesson-card__link">
+              <p class="lesson-card__meta">
+                {lesson.data.classical ? '古典 ・ ' : '近代史料 ・ '}
+                {lesson.data.estimated_minutes && `${lesson.data.estimated_minutes} 分`}
               </p>
               <h3 class="lesson-card__title">{lesson.data.title}</h3>
               <p class="lesson-card__desc">{lesson.data.description}</p>
