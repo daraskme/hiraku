@@ -1,0 +1,219 @@
+---
+import Logo from './Logo.astro';
+
+const path = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(href + '/');
+}
+
+const navItems = [
+  { href: '/', label: 'ホーム', icon: '⌂' },
+  { href: '/library', label: 'ライブラリ', icon: '📖' },
+  { href: '/reader', label: 'リーダー', icon: '✦' },
+  { href: '/progress', label: '進捗', icon: '◐' },
+  { href: '/community', label: '対話', icon: '◌' },
+];
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <Logo />
+
+    <nav class="nav" aria-label="主要ナビゲーション">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class="nav__link"
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          <span class="nav__icon" aria-hidden="true">{item.icon}</span>
+          <span class="nav__label">{item.label}</span>
+        </a>
+      ))}
+    </nav>
+
+    <div class="header-actions">
+      <div class="a11y-toggle">
+        <button
+          type="button"
+          class="icon-btn"
+          aria-label="表示設定"
+          aria-expanded="false"
+          data-a11y-toggle
+        >
+          <span aria-hidden="true">Aa</span>
+        </button>
+        <div class="a11y-panel" data-a11y-panel role="dialog" aria-label="表示設定">
+          <h3>表示設定</h3>
+
+          <div class="a11y-row">
+            <span class="a11y-row__label">テーマ</span>
+            <div class="a11y-row__controls" role="group" aria-label="カラーテーマ">
+              <button type="button" class="a11y-btn" data-theme-set="light" aria-label="ライトモード">☀</button>
+              <button type="button" class="a11y-btn" data-theme-set="dark" aria-label="ダークモード">☾</button>
+              <button type="button" class="a11y-btn" data-theme-set="auto" aria-label="システムに合わせる">auto</button>
+            </div>
+          </div>
+
+          <div class="a11y-row">
+            <span class="a11y-row__label">文字サイズ</span>
+            <div class="a11y-row__controls" role="group" aria-label="文字サイズ">
+              <button type="button" class="a11y-btn" data-fs-set="0.9" aria-label="小">A-</button>
+              <button type="button" class="a11y-btn" data-fs-set="1" aria-label="標準">A</button>
+              <button type="button" class="a11y-btn" data-fs-set="1.15" aria-label="大">A+</button>
+              <button type="button" class="a11y-btn" data-fs-set="1.3" aria-label="特大">A++</button>
+            </div>
+          </div>
+
+          <div class="a11y-row">
+            <span class="a11y-row__label">ふりがな</span>
+            <div class="a11y-row__controls" role="group" aria-label="ふりがな">
+              <button type="button" class="a11y-btn" data-ruby-set="on" aria-label="表示">表示</button>
+              <button type="button" class="a11y-btn" data-ruby-set="off" aria-label="非表示">非表示</button>
+            </div>
+          </div>
+
+          <div class="a11y-row">
+            <span class="a11y-row__label">高コントラスト</span>
+            <div class="a11y-row__controls" role="group" aria-label="高コントラスト">
+              <button type="button" class="a11y-btn" data-contrast-set="normal" aria-label="標準">標準</button>
+              <button type="button" class="a11y-btn" data-contrast-set="high" aria-label="高">高</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="icon-btn hamburger"
+        aria-label="メニュー"
+        aria-expanded="false"
+        data-mobile-toggle
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" data-mobile-menu aria-label="モバイルメニュー">
+    <ul class="mobile-menu__list">
+      {navItems.map((item) => (
+        <li class="mobile-menu__item">
+          <a
+            href={item.href}
+            class="mobile-menu__link"
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            <span class="mobile-menu__icon" aria-hidden="true">{item.icon}</span>
+            <span>{item.label}</span>
+          </a>
+        </li>
+      ))}
+      <li class="mobile-menu__item">
+        <a href="/about" class="mobile-menu__link">
+          <span class="mobile-menu__icon" aria-hidden="true">ⓘ</span>
+          <span>このサイトについて</span>
+        </a>
+      </li>
+      <li class="mobile-menu__item">
+        <a href="/license" class="mobile-menu__link">
+          <span class="mobile-menu__icon" aria-hidden="true">©</span>
+          <span>ライセンス</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<script>
+  // A11y パネル
+  const a11yToggle = document.querySelector<HTMLButtonElement>('[data-a11y-toggle]');
+  const a11yPanel = document.querySelector<HTMLElement>('[data-a11y-panel]');
+  a11yToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = a11yPanel?.classList.toggle('is-open');
+    a11yToggle.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e) => {
+    if (a11yPanel && !a11yPanel.contains(e.target as Node) && e.target !== a11yToggle) {
+      a11yPanel.classList.remove('is-open');
+      a11yToggle?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // モバイルメニュー
+  const mobileToggle = document.querySelector<HTMLButtonElement>('[data-mobile-toggle]');
+  const mobileMenu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+  mobileToggle?.addEventListener('click', () => {
+    const open = mobileMenu?.classList.toggle('is-open');
+    mobileToggle.setAttribute('aria-expanded', String(open));
+  });
+
+  // ----- 設定の保存と復元 -----
+  const root = document.documentElement;
+  const ls = window.localStorage;
+
+  function applyTheme(v: string) {
+    if (v === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', v);
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-set]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.themeSet === v));
+    });
+  }
+  function applyFontSize(v: string) {
+    root.style.setProperty('--font-size-scale', v);
+    document.querySelectorAll<HTMLButtonElement>('[data-fs-set]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.fsSet === v));
+    });
+  }
+  function applyRuby(v: string) {
+    if (v === 'on') root.removeAttribute('data-ruby');
+    else root.setAttribute('data-ruby', v);
+    document.querySelectorAll<HTMLButtonElement>('[data-ruby-set]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.rubySet === v));
+    });
+  }
+  function applyContrast(v: string) {
+    if (v === 'normal') root.removeAttribute('data-contrast');
+    else root.setAttribute('data-contrast', v);
+    document.querySelectorAll<HTMLButtonElement>('[data-contrast-set]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.contrastSet === v));
+    });
+  }
+
+  // 初期値復元（明示的に切り替えない限り常にライト）
+  applyTheme(ls.getItem('theme') || 'light');
+  applyFontSize(ls.getItem('fontSize') || '1');
+  applyRuby(ls.getItem('ruby') || 'on');
+  applyContrast(ls.getItem('contrast') || 'normal');
+
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-set]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.themeSet!;
+      ls.setItem('theme', v);
+      applyTheme(v);
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-fs-set]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.fsSet!;
+      ls.setItem('fontSize', v);
+      applyFontSize(v);
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-ruby-set]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.rubySet!;
+      ls.setItem('ruby', v);
+      applyRuby(v);
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-contrast-set]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.contrastSet!;
+      ls.setItem('contrast', v);
+      applyContrast(v);
+    });
+  });
+</script>

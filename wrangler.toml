@@ -1,0 +1,9 @@
+# Cloudflare Pages 設定（オプション）
+#
+# Pages の GitHub 連携でビルドする場合、本ファイルは必須ではなく、
+# ダッシュボード上で同等の設定を行えばデプロイされます。
+# wrangler CLI から直接デプロイしたい場合に利用してください。
+
+name = "project-procopios"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"

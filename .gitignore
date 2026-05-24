@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+.output/
+.wrangler/
+.env
+.env.local
+.env.*.local
+.DS_Store
+.tmp/
+*.log
+npm-debug.log*
+.vscode/
+.idea/

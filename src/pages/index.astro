@@ -1,0 +1,87 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const kokugo3 = (await getCollection('kokugo3')).map((l) => ({ collection: 'kokugo3', ...l }));
+const chugaku1 = (await getCollection('chugaku1')).map((l) => ({ collection: 'chugaku1', ...l }));
+const featured = [...kokugo3, ...chugaku1]
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 6);
+---
+
+<Base
+  title="ひらく"
+  description="著作権が切れた日本語教科書素材を、現行学習指導要領（平成29年告示）に沿って再編集して公開するオープン教材プロジェクト"
+  wide
+>
+  <section class="hero">
+    <p class="hero__eyebrow">無料 ・ オープンソース ・ CC BY-SA</p>
+    <h1 class="hero__title">みんなの教科書を、<br />ふたたび<span class="accent">ひらく</span>。</h1>
+    <p class="hero__lead">
+      明治から平成までの日本語教科書を、現代の<strong>学習指導要領</strong>に
+      合わせて編集。すべての人に、自由でひらかれた学びの道具を。
+    </p>
+    <div class="hero__ctas">
+      <a href="/library" class="btn btn--primary">教材を探す →</a>
+      <a href="/about" class="btn btn--ghost">サイトについて</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>新しい教材</h2>
+      <span class="section__subtitle">FEATURED</span>
+    </div>
+
+    {featured.length === 0 ? (
+      <div class="empty-state">
+        <h3>準備中です</h3>
+        <p>最初の教材を編集中。<br />しばらくお待ちください。</p>
+      </div>
+    ) : (
+      <div class="lesson-grid">
+        {featured.map((lesson) => {
+          const stagePrefix = lesson.data.school_stage === 'chugaku' ? '中学' : '小';
+          return (
+            <article class="lesson-card">
+              <a href={`/library/${lesson.collection}/${lesson.id}`} class="lesson-card__link">
+                <p class="lesson-card__meta">
+                  {stagePrefix}{lesson.data.grade} ・ {lesson.data.subject}
+                  {lesson.data.classical && ' ・ 古典'}
+                </p>
+                <h3 class="lesson-card__title">{lesson.data.title}</h3>
+                <p class="lesson-card__desc">{lesson.data.description}</p>
+                <p class="lesson-card__author">
+                  {lesson.data.author}
+                  {lesson.data.era ? `（${lesson.data.era}）` : lesson.data.original_year ? `（${lesson.data.original_year}）` : ''}
+                </p>
+              </a>
+            </article>
+          );
+        })}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>このプロジェクトについて</h2>
+      <span class="section__subtitle">ABOUT</span>
+    </div>
+    <p>
+      <strong>ひらく</strong>（project_procopios）は、著作権が満了したパブリックドメインの
+      近代日本の読み物を、現代の学習指導要領に沿って編集し、無償・オープンライセンスで
+      公開するプロジェクトです。
+    </p>
+    <p>
+      明治・大正・昭和初期の日本語表記をそのまま現代の児童が読むのは難しいことがあります。
+      現代仮名遣いへの修正、ふりがな（ルビ）の付与、語注、発問、
+      そして現行指導要領との対応関係を明示することで、教室・家庭・自学のいずれでも
+      すぐに使える教材を整えていきます。
+    </p>
+    <div class="callout">
+      <strong>ご注意：</strong> 本サイトは文部科学省検定済教科書ではありません。
+      <strong>自主教材（副教材）</strong>としてご活用ください。
+    </div>
+  </section>
+</Base>

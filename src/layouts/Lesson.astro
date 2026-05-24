@@ -1,0 +1,142 @@
+---
+import Base from './Base.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lesson: CollectionEntry<'kokugo3'> | CollectionEntry<'chugaku1'>;
+}
+
+const { lesson } = Astro.props;
+const d = lesson.data;
+
+const stageLabel: Record<string, string> = {
+  shogaku: '小学校',
+  chugaku: '中学校',
+  kotoko: '高等学校',
+};
+const stage = stageLabel[d.school_stage] ?? '小学校';
+const guidelineDoc = d.school_stage === 'kotoko'
+  ? '高等学校学習指導要領（平成30年告示）'
+  : d.school_stage === 'chugaku'
+    ? '中学校学習指導要領（平成29年告示）'
+    : '小学校学習指導要領（平成29年告示）';
+---
+
+<Base title={d.title} description={d.description}>
+  <article>
+    <header class="lesson-header">
+      <a href="/library" class="lesson-header__back no-print">← ライブラリへ戻る</a>
+      <h1 class="lesson-header__title">{d.title}</h1>
+      <p class="lesson-header__badges">
+        <span class="badge">{stage} {d.subject} 第{d.grade}学年</span>
+        {d.classical && <span class="badge badge--accent">古典</span>}
+        {d.domains.map((dom) => <span class="badge">{dom}</span>)}
+        {d.estimated_minutes && <span class="badge">目安 {d.estimated_minutes} 分</span>}
+      </p>
+
+      <section class="meta-panel" aria-label="教材メタ情報">
+        <dl>
+          <dt>作者</dt>
+          <dd>{d.author}{d.author_dates ? `（${d.author_dates}）` : ''}</dd>
+          {d.original_year && (
+            <>
+              <dt>原作発表</dt>
+              <dd>{d.original_year} 年{d.era ? `（${d.era}）` : ''}</dd>
+            </>
+          )}
+          {!d.original_year && d.era && (
+            <>
+              <dt>成立</dt>
+              <dd>{d.era}</dd>
+            </>
+          )}
+          <dt>出典</dt>
+          <dd>
+            {d.source.url
+              ? <a href={d.source.url} target="_blank" rel="noopener">{d.source.text}</a>
+              : d.source.text}
+            {d.source.base && <><br /><small>底本：{d.source.base}</small></>}
+          </dd>
+        </dl>
+      </section>
+    </header>
+
+    {d.goals.length > 0 && (
+      <section class="goals-box" aria-label="学習のめあて">
+        <h2>学習のめあて</h2>
+        <ul>
+          {d.goals.map((g) => <li>{g}</li>)}
+        </ul>
+      </section>
+    )}
+
+    <section aria-label="本文">
+      <h2>本文</h2>
+      <slot />
+    </section>
+
+    {d.glossary.length > 0 && (
+      <section aria-label="語句の意味">
+        <h2>語句の意味</h2>
+        <ul class="glossary-list">
+          {d.glossary.map((g) => (
+            <li>
+              <span class="term">{g.term}</span>
+              <span>{g.meaning}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {d.questions.length > 0 && (
+      <section aria-label="考えてみよう">
+        <h2>考えてみよう</h2>
+        <ol class="questions-list">
+          {d.questions.map((q) => <li>{q}</li>)}
+        </ol>
+      </section>
+    )}
+
+    {d.curriculum_items.length > 0 && (
+      <section aria-label="指導要領との対応" class="no-print">
+        <h2>指導要領との対応</h2>
+        <p>
+          このページは、文部科学省「{guidelineDoc}」{d.subject} 第{d.grade}学年の
+          以下の指導事項を意識して編集しています。
+        </p>
+        <ul>
+          {d.curriculum_items.map((c) => (
+            <li><strong>{c.code}</strong> — {c.label}</li>
+          ))}
+        </ul>
+        <p>
+          <small>
+            ※ 文部科学省告示の本文ではなく、編集者による要旨の言い換えです。
+            正確な指導事項は<a href="https://www.mext.go.jp/a_menu/shotou/new-cs/" target="_blank" rel="noopener">文部科学省の公式資料</a>を参照してください。
+          </small>
+        </p>
+      </section>
+    )}
+
+    <section aria-label="出典・ライセンス" class="no-print">
+      <h2>出典・ライセンス</h2>
+      <ul>
+        <li><strong>原文</strong>: {d.author}「{d.title}」{d.original_year && `（${d.original_year}年）`}</li>
+        <li>
+          <strong>入力テキスト</strong>:
+          {d.source.url
+            ? <a href={d.source.url} target="_blank" rel="noopener">{d.source.text}</a>
+            : d.source.text}
+          {d.source.base && <>（底本：{d.source.base}）</>}
+        </li>
+        <li><strong>原文の権利</strong>: パブリックドメイン</li>
+        <li>
+          <strong>編集・語注・発問・解説</strong>:
+          <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="license noopener">CC BY 4.0</a>
+          &copy; project_procopios contributors
+        </li>
+      </ul>
+    </section>
+  </article>
+</Base>

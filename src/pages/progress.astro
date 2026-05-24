@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="進捗" description="学習進捗ダッシュボード">
+  <section class="section">
+    <div class="section__heading">
+      <h1>進捗</h1>
+      <span class="section__subtitle">PROGRESS</span>
+    </div>
+    <p>
+      読んだ教材・学習中の単元・週ごとの学習時間などをまとめて確認できます。
+      （現在はデモ表示のみ。今後ローカル保存ベースで実装予定。）
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-card__label">読了教材</div>
+        <div class="kpi-card__value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">学習中</div>
+        <div class="kpi-card__value">0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">今週の時間</div>
+        <div class="kpi-card__value">0分</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">連続日数</div>
+        <div class="kpi-card__value">0日</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>教科別の進捗</h2>
+      <span class="section__subtitle">BY SUBJECT</span>
+    </div>
+    <div class="empty-state">
+      <h3>準備中</h3>
+      <p>教材を開くと、進捗がここに表示されます。</p>
+    </div>
+  </section>
+</Base>

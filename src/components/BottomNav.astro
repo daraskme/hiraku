@@ -1,0 +1,28 @@
+---
+const path = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(href + '/');
+}
+
+const items = [
+  { href: '/', label: 'ホーム', icon: '⌂' },
+  { href: '/library', label: 'ライブラリ', icon: '📖' },
+  { href: '/reader', label: 'リーダー', icon: '✦' },
+  { href: '/progress', label: '進捗', icon: '◐' },
+  { href: '/community', label: '対話', icon: '◌' },
+];
+---
+
+<nav class="bottom-nav" aria-label="下部ナビゲーション">
+  {items.map((item) => (
+    <a
+      href={item.href}
+      class="bottom-nav__link"
+      aria-current={isActive(item.href) ? 'page' : undefined}
+    >
+      <span class="bottom-nav__icon" aria-hidden="true">{item.icon}</span>
+      <span>{item.label}</span>
+    </a>
+  ))}
+</nav>

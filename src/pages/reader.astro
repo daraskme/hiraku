@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const kokugo3 = await getCollection('kokugo3');
+const latest = kokugo3.sort((a, b) => a.data.order - b.data.order)[0];
+---
+
+<Base title="リーダー" description="教材リーダー">
+  <section class="section">
+    <div class="section__heading">
+      <h1>リーダー</h1>
+      <span class="section__subtitle">READER</span>
+    </div>
+    <p>
+      教材を全画面で読むためのモードです。文字サイズやふりがな表示の切替は
+      右上の <code>Aa</code> ボタンから。
+    </p>
+
+    {latest ? (
+      <div class="lesson-grid" style="grid-template-columns: 1fr; max-width: 520px;">
+        <article class="lesson-card">
+          <a href={`/library/kokugo3/${latest.id}`} class="lesson-card__link">
+            <p class="lesson-card__meta">最近の教材</p>
+            <h3 class="lesson-card__title">{latest.data.title}</h3>
+            <p class="lesson-card__desc">{latest.data.description}</p>
+            <p class="lesson-card__author">{latest.data.author}</p>
+          </a>
+        </article>
+      </div>
+    ) : (
+      <div class="empty-state">
+        <h3>読むものがまだありません</h3>
+        <p><a href="/library">ライブラリ</a>から教材を選んでください。</p>
+      </div>
+    )}
+  </section>
+</Base>

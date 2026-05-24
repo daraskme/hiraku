@@ -1,0 +1,15 @@
+---
+interface Props {
+  hideCaption?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+}
+const { hideCaption = false, size = 'md' } = Astro.props;
+---
+
+<a href="/" class={`logo logo--${size}`} aria-label="ひらく ホームへ">
+  <span class="logo__mark" aria-hidden="true">啓</span>
+  <span class="logo__text">
+    <span class="logo__name">ひらく</span>
+    {!hideCaption && <span class="logo__caption">OPEN TEXTBOOKS</span>}
+  </span>
+</a>
