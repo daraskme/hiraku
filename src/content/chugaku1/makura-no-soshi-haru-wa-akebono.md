@@ -62,6 +62,11 @@ questions:
   - "「をかし」と「あはれなり」は、どんなときに使われていますか。本文中の例を引いて、二つの言葉の感じの違いを説明しましょう。"
   - "「冬はつとめて」の段では、「火桶の火も、白き灰がちになりてわろし」と、せっかくの冬の趣が崩れる場面まで書かれています。なぜ清少納言はこのマイナス面を最後に加えたのでしょう。あなたの考えを書きましょう。"
   - "清少納言の書き方（「季節 → 時間帯 → 細かな情景」の順）をまねて、あなたが好きな季節と時間帯の情景を、原稿用紙の3〜4行で書いてみましょう。"
+cover_image: /illustrations/chugaku1/makura-no-soshi-haru-wa-akebono/scene1.webp
+illustrations:
+  - src: /illustrations/chugaku1/makura-no-soshi-haru-wa-akebono/scene1.webp
+    caption: 春はあけぼの。山ぎはが、淡い紫色とあんず色に染まる。
+    alt: 明け方の山と空、薄い紫色とあんず色に染まる空、横切る黒い鳥のシルエット。
 ---
 
 <h3>原文</h3>

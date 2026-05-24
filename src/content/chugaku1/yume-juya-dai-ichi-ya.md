@@ -66,6 +66,17 @@ questions:
   - "勘定しきれないほどの「赤い日」が頭の上を通り過ぎていく場面は、何を表していると思いますか。時の感覚の描き方について考えましょう。"
   - "「自分は女に欺されたのではなかろうかと思い出した」のすぐ後に、青い茎・蕾・真白な百合が現れます。この順番にどんな意味があると思いますか。"
   - "最後の「百年はもう来ていたんだな」を読んで、あなたはどんな気持ちになりましたか。なぜそう感じたのかを、本文の表現と結び付けて書きましょう。"
+cover_image: /illustrations/chugaku1/yume-juya-dai-ichi-ya/scene1.webp
+illustrations:
+  - src: /illustrations/chugaku1/yume-juya-dai-ichi-ya/scene1.webp
+    caption: 黒い眸の女、瓜実顔。「自分」は枕の傍に坐って見ている。
+    alt: 夜、長い黒髪の女性と、その傍らに坐る男性の挿絵。和風水彩。
+  - src: /illustrations/chugaku1/yume-juya-dai-ichi-ya/scene2.webp
+    caption: 「百年待っていてください」と言う女と、自分の問いかけ。
+    alt: 夜の部屋、藤色の葦蒛を装う女性と、男性が静かに対峙する挿絵。
+  - src: /illustrations/chugaku1/yume-juya-dai-ichi-ya/scene3.webp
+    caption: 朝、藤色の百合の中に、女の面影がよみがえる。
+    alt: 朝焼けの空に咲く藤色の大きな百合の花と、その中に浮かぶ面影の挿絵。
 ---
 
 <p>　こんな夢を見た。</p>
