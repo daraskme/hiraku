@@ -63,6 +63,17 @@ questions:
   - "「盛者必衰の理」とは、現代風に言うとどのような考え方ですか。あなたが知っている歴史上の出来事や物語の中から、「盛者必衰」を感じる例を一つ挙げて説明しましょう。"
   - "この冒頭を、平家の栄華と滅亡を最後まで読んだうえで読み返すと、印象がどう変わると思いますか。想像して書きましょう。"
   - "暗唱してみましょう。一週間後にもう一度読んだとき、覚えている言葉はどれでしょうか。"
+cover_image: /illustrations/chugaku1/heike-monogatari-gion-shoja/scene1.webp
+illustrations:
+  - src: /illustrations/chugaku1/heike-monogatari-gion-shoja/scene1.webp
+    caption: 祇園精舎の鐘の声、諸行無常のひびき。
+    alt: 夜明け近い古い仏寺の鐘楼、大きな金色の鐘がつるされている挿絵。
+  - src: /illustrations/chugaku1/heike-monogatari-gion-shoja/scene2.webp
+    caption: 沙羅双樹の花の色、盛者必衰のことわり。
+    alt: 夕の寺園に立つ沙羅の木と、淡い黄色に染まる花、地に散る花びらの挿絵。
+  - src: /illustrations/chugaku1/heike-monogatari-gion-shoja/scene3.webp
+    caption: 風の前の塵におなじ。ただ春の夜の夢のごとし。
+    alt: 春の夜、月と薄雲の下、平家の落人たちの後ろ姿と薄く流れる風の挿絵。
 ---
 
 <h3>原文</h3>

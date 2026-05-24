@@ -67,6 +67,12 @@ illustrations:
   - src: /illustrations/chugaku1/makura-no-soshi-haru-wa-akebono/scene1.webp
     caption: 春はあけぼの。山ぎはが、淡い紫色とあんず色に染まる。
     alt: 明け方の山と空、薄い紫色とあんず色に染まる空、横切る黒い鳥のシルエット。
+  - src: /illustrations/chugaku1/makura-no-soshi-haru-wa-akebono/scene2.webp
+    caption: 夏は夜。蛍がほの暗く飛び、水辺がしずかに光る。
+    alt: 夏の夜の水辺と藕の葉、ホタルがキラキラ浮かぶ挿絵。
+  - src: /illustrations/chugaku1/makura-no-soshi-haru-wa-akebono/scene3.webp
+    caption: 秋は夕暮れ。烏が三羽四羽と寝ぐらへ、雁が小さく空を渡る。
+    alt: 秋の夕、山に近づく夕日と空を渡る烏と雁の列の挿絵。
 ---
 
 <h3>原文</h3>
