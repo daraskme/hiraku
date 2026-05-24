@@ -1,5 +1,5 @@
 ---
-title: 金米糖（『備忘録』より）
+title: 金米糖（金平糖）— 『備忘録』より
 author: 寺田寅彦
 author_dates: "1878–1935"
 original_year: 1927

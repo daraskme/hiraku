@@ -7,6 +7,7 @@ source:
   text: 青空文庫
   url: https://www.aozora.gr.jp/cards/000121/card637.html
   base: "「新美南吉童話集」岩波文庫、岩波書店、1996年7月16日第1刷発行（入力に用いられたのは1997年7月15日第2刷）"
+school_stage: shogaku
 grade: 3
 subject: 国語
 domains:

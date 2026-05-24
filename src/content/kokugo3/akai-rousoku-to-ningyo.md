@@ -7,6 +7,7 @@ source:
   text: 青空文庫
   url: https://www.aozora.gr.jp/cards/001475/card51005.html
   base: "「定本小川未明童話全集 1」講談社、1976年11月10日初版発行"
+school_stage: shogaku
 grade: 3
 subject: 国語
 domains:

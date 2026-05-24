@@ -7,6 +7,7 @@ source:
   text: 青空文庫
   url: https://www.aozora.gr.jp/cards/000329/card43457.html
   base: "「日本の古典童話」講談社学術文庫、講談社、1983年（昭和58年）6月10日第1刷発行"
+school_stage: shogaku
 grade: 3
 subject: 国語
 domains:
