@@ -6,6 +6,7 @@ const kokugo3 = (await getCollection('kokugo3')).sort((a, b) => a.data.order - b
 const chugaku1 = (await getCollection('chugaku1')).sort((a, b) => a.data.order - b.data.order);
 const kotoko1 = (await getCollection('kotoko1')).sort((a, b) => a.data.order - b.data.order);
 const chugakurika1 = (await getCollection('chugakurika1')).sort((a, b) => a.data.order - b.data.order);
+const kotokoeigo1 = (await getCollection('kotokoeigo1')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Base title="ライブラリ" description="教材一覧" wide>
@@ -109,6 +110,38 @@ const chugakurika1 = (await getCollection('chugakurika1')).sort((a, b) => a.data
               <p class="lesson-card__author">
                 {lesson.data.author}
                 {lesson.data.era ? `（${lesson.data.era}）` : lesson.data.original_year ? `（${lesson.data.original_year}）` : ''}
+              </p>
+            </a>
+          </article>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>高等学校 英語 第1学年</h2>
+      <span class="section__subtitle">高1 ・ 英語</span>
+    </div>
+
+    {kotokoeigo1.length === 0 ? (
+      <div class="empty-state">
+        <h3>準備中です</h3>
+      </div>
+    ) : (
+      <div class="lesson-grid">
+        {kotokoeigo1.map((lesson) => (
+          <article class="lesson-card">
+            <a href={`/library/kotokoeigo1/${lesson.id}`} class="lesson-card__link">
+              <p class="lesson-card__meta">
+                Reading
+                {lesson.data.estimated_minutes && ` ・ ${lesson.data.estimated_minutes} min`}
+              </p>
+              <h3 class="lesson-card__title">{lesson.data.title}</h3>
+              <p class="lesson-card__desc">{lesson.data.description}</p>
+              <p class="lesson-card__author">
+                {lesson.data.author}
+                {lesson.data.original_year && `（${lesson.data.original_year}）`}
               </p>
             </a>
           </article>

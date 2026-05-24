@@ -63,4 +63,9 @@ const chugakurika1 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo3, chugaku1, kotoko1, chugakurika1 };
+const kotokoeigo1 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kotokoeigo1' }),
+  schema: lessonSchema,
+});
+
+export const collections = { kokugo3, chugaku1, kotoko1, chugakurika1, kotokoeigo1 };
