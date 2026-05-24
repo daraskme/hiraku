@@ -2,37 +2,98 @@
 import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
-const kokugo3 = await getCollection('kokugo3');
-const latest = kokugo3.sort((a, b) => a.data.order - b.data.order)[0];
+const COLLECTIONS = [
+  { name: 'kokugo3', label: '小3 国語' },
+  { name: 'sansu5', label: '小5 算数' },
+  { name: 'chugaku1', label: '中1 国語' },
+  { name: 'chugakurika1', label: '中1 理科' },
+  { name: 'chugakukomin3', label: '中3 公民' },
+  { name: 'kotoko1', label: '高1 国語' },
+  { name: 'kotokoeigo1', label: '高1 英語' },
+] as const;
+
+const allLessons: any[] = [];
+for (const c of COLLECTIONS) {
+  const items = await getCollection(c.name as any);
+  for (const lesson of items as any[]) {
+    allLessons.push({ collection: c.name, label: c.label, lesson });
+  }
+}
+allLessons.sort((a, b) => (a.label === b.label ? a.lesson.data.order - b.lesson.data.order : a.label.localeCompare(b.label)));
+
+// Featured: classical works + short reads, hand-picked
+const featuredSlugs = [
+  ['kokugo3', 'tebukuro-wo-kaini'],
+  ['kokugo3', 'gongitsune'],
+  ['chugaku1', 'yume-juya-dai-ichi-ya'],
+  ['kotoko1', 'rashomon'],
+  ['kotoko1', 'sangetsuki'],
+  ['kotokoeigo1', 'yuki-onna'],
+];
+const featured = featuredSlugs
+  .map(([c, s]) => allLessons.find((l) => l.collection === c && l.lesson.id === s))
+  .filter(Boolean) as any[];
 ---
 
-<Base title="リーダー" description="教材リーダー">
+<Base title="リーダーモード" description="フルスクリーンの没入型読書モード" wide>
   <section class="section">
     <div class="section__heading">
-      <h1>リーダー</h1>
+      <h1>リーダーモード</h1>
       <span class="section__subtitle">READER</span>
     </div>
     <p>
-      教材を全画面で読むためのモードです。文字サイズやふりがな表示の切替は
-      右上の <code>Aa</code> ボタンから。
+      ヘッダー・フッタなしのフルスクリーンで、縦書きの本文だけに集中して読むモードです。
+      矢印キーで前後の教材へ、Esc で通常表示に戻ります。
     </p>
+    <p style="font-size: 0.92rem; color: var(--text-soft);">
+      文字サイズやふりがな表示は、画面右上の <code>Aa</code> ボタンから切り替えられます。
+    </p>
+  </section>
 
-    {latest ? (
-      <div class="lesson-grid" style="grid-template-columns: 1fr; max-width: 520px;">
+  <section class="section">
+    <div class="section__heading">
+      <h2>おすすめの一冊</h2>
+      <span class="section__subtitle">FEATURED</span>
+    </div>
+    <div class="lesson-grid">
+      {featured.map((entry) => (
         <article class="lesson-card">
-          <a href={`/library/kokugo3/${latest.id}`} class="lesson-card__link">
-            <p class="lesson-card__meta">最近の教材</p>
-            <h3 class="lesson-card__title">{latest.data.title}</h3>
-            <p class="lesson-card__desc">{latest.data.description}</p>
-            <p class="lesson-card__author">{latest.data.author}</p>
+          <a href={`/reader/${entry.collection}/${entry.lesson.id}`} class="lesson-card__link">
+            <p class="lesson-card__meta">{entry.label}</p>
+            <h3 class="lesson-card__title">{entry.lesson.data.title}</h3>
+            <p class="lesson-card__desc">{entry.lesson.data.description}</p>
+            <p class="lesson-card__author">
+              {entry.lesson.data.author}
+              {entry.lesson.data.original_year && `（${entry.lesson.data.original_year}）`}
+            </p>
           </a>
         </article>
-      </div>
-    ) : (
-      <div class="empty-state">
-        <h3>読むものがまだありません</h3>
-        <p><a href="/library">ライブラリ</a>から教材を選んでください。</p>
-      </div>
-    )}
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>すべての教材</h2>
+      <span class="section__subtitle">ALL</span>
+    </div>
+    {COLLECTIONS.map((c) => {
+      const items = allLessons.filter((l) => l.collection === c.name);
+      if (items.length === 0) return null;
+      return (
+        <div style="margin-bottom: 2rem;">
+          <h3 style="margin-bottom: 0.6rem;">{c.label}</h3>
+          <ul style="list-style: none; padding-left: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.4rem;">
+            {items.map((entry) => (
+              <li>
+                <a href={`/reader/${entry.collection}/${entry.lesson.id}`} style="text-decoration: none; color: var(--text); display: block; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 6px; transition: background 0.15s; font-family: var(--font-serif);">
+                  {entry.lesson.data.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    })}
   </section>
 </Base>

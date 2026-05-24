@@ -32,7 +32,12 @@ const guidelineDoc = d.school_stage === 'kotoko'
 <Base title={d.title} description={d.description}>
   <article>
     <header class="lesson-header">
-      <a href="/library" class="lesson-header__back no-print">← ライブラリへ戻る</a>
+      <div class="lesson-header__top no-print">
+        <a href="/library" class="lesson-header__back">← ライブラリへ戻る</a>
+        <a href={`/reader/${lesson.collection}/${lesson.id}`} class="lesson-header__reader-link" title="フルスクリーンで読む">
+          ✦ リーダーモードで読む
+        </a>
+      </div>
       <h1 class="lesson-header__title">{d.title}</h1>
       <p class="lesson-header__badges">
         <span class="badge">{stage} {d.subject} 第{d.grade}学年</span>

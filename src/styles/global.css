@@ -679,6 +679,13 @@ blockquote {
 .lesson-header {
   margin-bottom: 1.5rem;
 }
+.lesson-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 .lesson-header__back {
   font-family: var(--font-mono);
   font-size: 0.78rem;
@@ -690,6 +697,22 @@ blockquote {
   gap: 0.4rem;
 }
 .lesson-header__back:hover { color: var(--accent); }
+.lesson-header__reader-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.lesson-header__reader-link:hover {
+  background: var(--accent);
+  color: var(--logo-fg);
+}
 .lesson-header__title {
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   margin: 0.5rem 0 0.8rem;

@@ -1,0 +1,46 @@
+---
+import ReaderMode from '../../../layouts/ReaderMode.astro';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const collectionNames = [
+    'kokugo3',
+    'chugaku1',
+    'kotoko1',
+    'chugakurika1',
+    'kotokoeigo1',
+    'sansu5',
+    'chugakukomin3',
+  ] as const;
+
+  const paths = [];
+  for (const name of collectionNames) {
+    const lessons = (await getCollection(name as any)).sort(
+      (a: any, b: any) => a.data.order - b.data.order,
+    );
+    for (let i = 0; i < lessons.length; i++) {
+      const lesson = lessons[i];
+      const prev = i > 0 ? lessons[i - 1] : null;
+      const next = i < lessons.length - 1 ? lessons[i + 1] : null;
+      paths.push({
+        params: { collection: name, slug: lesson.id },
+        props: {
+          lesson,
+          collection: name,
+          prev: prev ? { href: `/reader/${name}/${prev.id}`, title: prev.data.title } : null,
+          next: next ? { href: `/reader/${name}/${next.id}`, title: next.data.title } : null,
+        },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+const { lesson, collection, prev, next } = Astro.props;
+const { Content } = await render(lesson);
+---
+
+<ReaderMode lesson={lesson} collection={collection} prev={prev} next={next}>
+  <Content />
+</ReaderMode>
