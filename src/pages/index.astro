@@ -4,13 +4,15 @@ import { getCollection } from 'astro:content';
 
 const kokugo3 = (await getCollection('kokugo3')).map((l) => ({ collection: 'kokugo3', ...l }));
 const kokugo4 = (await getCollection('kokugo4')).map((l) => ({ collection: 'kokugo4', ...l }));
+const kokugo6 = (await getCollection('kokugo6')).map((l) => ({ collection: 'kokugo6', ...l }));
 const chugaku1 = (await getCollection('chugaku1')).map((l) => ({ collection: 'chugaku1', ...l }));
+const chugaku2 = (await getCollection('chugaku2')).map((l) => ({ collection: 'chugaku2', ...l }));
 const kotoko1 = (await getCollection('kotoko1')).map((l) => ({ collection: 'kotoko1', ...l }));
 const chugakurika1 = (await getCollection('chugakurika1')).map((l) => ({ collection: 'chugakurika1', ...l }));
 const kotokoeigo1 = (await getCollection('kotokoeigo1')).map((l) => ({ collection: 'kotokoeigo1', ...l }));
 const sansu5 = (await getCollection('sansu5')).map((l) => ({ collection: 'sansu5', ...l }));
 const chugakukomin3 = (await getCollection('chugakukomin3')).map((l) => ({ collection: 'chugakukomin3', ...l }));
-const featured = [...kokugo3, ...kokugo4, ...chugaku1, ...kotoko1, ...chugakurika1, ...kotokoeigo1, ...sansu5, ...chugakukomin3]
+const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...kotoko1, ...chugakurika1, ...kotokoeigo1, ...sansu5, ...chugakukomin3]
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
 ---

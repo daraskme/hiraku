@@ -6,7 +6,9 @@ import type { GetStaticPaths } from 'astro';
 const COLLECTION_LABEL: Record<string, string> = {
   kokugo3: '小3 国語',
   kokugo4: '小4 国語',
+  kokugo6: '小6 国語',
   chugaku1: '中1 国語',
+  chugaku2: '中2 国語',
   kotoko1: '高1 国語',
   chugakurika1: '中1 理科',
   kotokoeigo1: '高1 英語',
@@ -95,7 +97,9 @@ export const getStaticPaths = (async () => {
   const collectionNames = [
     'kokugo3',
     'kokugo4',
+    'kokugo6',
     'chugaku1',
+    'chugaku2',
     'kotoko1',
     'chugakurika1',
     'kotokoeigo1',
