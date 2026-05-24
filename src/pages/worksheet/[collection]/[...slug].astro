@@ -1,0 +1,37 @@
+---
+import Worksheet from '../../../layouts/Worksheet.astro';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const collectionNames = [
+    'kokugo3',
+    'kokugo4',
+    'chugaku1',
+    'kotoko1',
+    'chugakurika1',
+    'kotokoeigo1',
+    'sansu5',
+    'chugakukomin3',
+  ] as const;
+
+  const paths = [];
+  for (const name of collectionNames) {
+    const lessons = await getCollection(name as any);
+    for (const lesson of lessons) {
+      paths.push({
+        params: { collection: name, slug: lesson.id },
+        props: { lesson, collection: name },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+const { lesson, collection } = Astro.props;
+const { Content } = await render(lesson);
+---
+
+<Worksheet lesson={lesson} collection={collection}>
+  <Content />
+</Worksheet>

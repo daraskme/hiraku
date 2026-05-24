@@ -16,6 +16,8 @@
     "astro": "^5.14.0"
   },
   "devDependencies": {
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
     "@resvg/resvg-js": "^2.6.2",
     "gray-matter": "^4.0.3",
     "pagefind": "^1.5.2",
