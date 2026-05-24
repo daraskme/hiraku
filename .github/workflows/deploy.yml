@@ -27,9 +27,20 @@ jobs:
       - name: Build site (Astro + Pagefind)
         run: npm run build
 
+      - name: Compute single-line commit subject (ASCII-safe)
+        id: subject
+        run: |
+          # First line of commit message, ASCII-only (Cloudflare API rejects non-ASCII)
+          SUBJECT=$(git log -1 --pretty=%s)
+          # Strip non-ASCII chars to satisfy Cloudflare API
+          SAFE=$(printf '%s' "$SUBJECT" | LC_ALL=C tr -cd 'A-Za-z0-9 _.,:;@/()+\-' | head -c 120)
+          # Fallback if everything got stripped
+          if [ -z "$SAFE" ]; then SAFE="commit ${GITHUB_SHA::8}"; fi
+          echo "value=$SAFE" >> "$GITHUB_OUTPUT"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=hiraku --branch=main --commit-message="${{ github.event.head_commit.message }}" --commit-hash="${{ github.sha }}"
+          command: pages deploy dist --project-name=hiraku --branch=main --commit-message="${{ steps.subject.outputs.value }}" --commit-hash="${{ github.sha }}"
