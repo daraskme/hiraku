@@ -73,6 +73,17 @@ questions:
   - "鬼を倒すために、一寸法師はどんな工夫をしましたか。順を追って書いてみましょう。"
   - "打ち出の小槌で一寸法師は「大きくなりたい」とねがいました。あなたなら打ち出の小槌で何をねがいますか。理由もそえて書きましょう。"
   - "むかしばなしには「小さな主人公が、大きなものに打ち勝ってえらくなる」というおきまりの形がたくさんあります。あなたが知っているほかの昔話で、にた形のお話はありますか。"
+cover_image: /illustrations/kokugo3/issun-boshi/scene1.webp
+illustrations:
+  - src: /illustrations/kokugo3/issun-boshi/scene1.webp
+    caption: お椀の舟と針の刀で、住吉の浜から京の都へ旅立つ。
+    alt: 住吉の浜、お椀の舟に乗ってお箸の櫂で漕ぎ出す指ほどの小さな一寸法師の挿絵。
+  - src: /illustrations/kokugo3/issun-boshi/scene2.webp
+    caption: 都の路で、お姫さまに付き添う一寸法師。鬼たちが現れる。
+    alt: 都の路でお姫さまに付き添う小さな一寸法師の前に、長い頻颌の鬼たちが現れる挿絵。
+  - src: /illustrations/kokugo3/issun-boshi/scene3.webp
+    caption: 鬼を倒して、打ち出の小槌を手に入れた一寸法師。
+    alt: 倒した鬼たちのそばで、打ち出の小槌を抱えて立つ一寸法師の挿絵。
 ---
 
 <h3>一</h3>
