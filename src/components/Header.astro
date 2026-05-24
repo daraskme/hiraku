@@ -34,6 +34,14 @@ const navItems = [
     </nav>
 
     <div class="header-actions">
+      <a
+        href="/search"
+        class="icon-btn"
+        aria-label="検索"
+        title="検索"
+      >
+        <span aria-hidden="true">⌕</span>
+      </a>
       <div class="a11y-toggle">
         <button
           type="button"
@@ -79,6 +87,14 @@ const navItems = [
             <div class="a11y-row__controls" role="group" aria-label="高コントラスト">
               <button type="button" class="a11y-btn" data-contrast-set="normal" aria-label="標準">標準</button>
               <button type="button" class="a11y-btn" data-contrast-set="high" aria-label="高">高</button>
+            </div>
+          </div>
+
+          <div class="a11y-row">
+            <span class="a11y-row__label">縦書き</span>
+            <div class="a11y-row__controls" role="group" aria-label="縦書き">
+              <button type="button" class="a11y-btn" data-writing-set="horizontal" aria-label="横書き">横</button>
+              <button type="button" class="a11y-btn" data-writing-set="vertical" aria-label="縦書き">縦</button>
             </div>
           </div>
         </div>
@@ -181,12 +197,20 @@ const navItems = [
       b.setAttribute('aria-pressed', String(b.dataset.contrastSet === v));
     });
   }
+  function applyWriting(v: string) {
+    if (v === 'horizontal') root.removeAttribute('data-writing');
+    else root.setAttribute('data-writing', v);
+    document.querySelectorAll<HTMLButtonElement>('[data-writing-set]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.writingSet === v));
+    });
+  }
 
   // 初期値復元（明示的に切り替えない限り常にライト）
   applyTheme(ls.getItem('theme') || 'light');
   applyFontSize(ls.getItem('fontSize') || '1');
   applyRuby(ls.getItem('ruby') || 'on');
   applyContrast(ls.getItem('contrast') || 'normal');
+  applyWriting(ls.getItem('writing') || 'horizontal');
 
   document.querySelectorAll<HTMLButtonElement>('[data-theme-set]').forEach((b) => {
     b.addEventListener('click', () => {
@@ -214,6 +238,13 @@ const navItems = [
       const v = b.dataset.contrastSet!;
       ls.setItem('contrast', v);
       applyContrast(v);
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-writing-set]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.writingSet!;
+      ls.setItem('writing', v);
+      applyWriting(v);
     });
   });
 </script>

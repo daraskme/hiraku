@@ -105,6 +105,45 @@ body { margin: 0; }
 :root[data-ruby="off"] rt { display: none; }
 
 /* ============================================================
+   縦書きモード（教材本文のみ縦書きに）
+   ============================================================ */
+:root[data-writing="vertical"] .story-body {
+  writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
+  text-orientation: mixed;
+  max-height: 80vh;
+  min-height: 60vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 2rem 0;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+}
+:root[data-writing="vertical"] .story-body p {
+  margin: 0 0.4em;
+  text-indent: 0;
+}
+:root[data-writing="vertical"] .story-body blockquote.song {
+  margin: 0 1em;
+  padding: 0.5em 1em;
+  border-left: 0;
+  border-right: 3px solid var(--accent-soft);
+  background: var(--bg-soft);
+}
+/* 数字・英字は縦中横（text-combine-upright）で読みやすく */
+:root[data-writing="vertical"] .story-body {
+  -ms-text-combine-horizontal: digit 2;
+  text-combine-upright: digit 2;
+}
+/* ルビは縦書きでも自然に表示される */
+:root[data-writing="vertical"] .story-body rt {
+  font-size: 0.5em;
+}
+
+/* ============================================================
    ベースタイポ
    ============================================================ */
 html { font-size: var(--font-size-base); }

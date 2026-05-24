@@ -1,0 +1,40 @@
+name: バグ報告
+description: 不具合・表示の崩れ・誤字などの報告
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 何が起きていますか
+      placeholder: ページが表示されない、ルビがずれている、誤字を見つけた、など
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: 該当URL（あれば）
+      placeholder: https://hiraku-5cb.pages.dev/library/...
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 本来どうあるべきと思いますか
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: 環境
+      multiple: true
+      options:
+        - スマートフォン
+        - タブレット
+        - パソコン
+        - その他
+
+  - type: input
+    id: browser
+    attributes:
+      label: ブラウザ（わかれば）
+      placeholder: Chrome / Safari / Firefox / Edge…

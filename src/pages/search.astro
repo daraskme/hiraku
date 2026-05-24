@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="検索" description="ひらく の全教材を検索" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>検索</h1>
+      <span class="section__subtitle">SEARCH</span>
+    </div>
+    <p>教材タイトル・作者・本文・語句・発問のすべてから検索できます。</p>
+
+    <div id="search" class="pagefind-search"></div>
+  </section>
+
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script src="/pagefind/pagefind-ui.js" is:inline></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      new PagefindUI({
+        element: '#search',
+        showSubResults: true,
+        showImages: false,
+        resetStyles: false,
+        translations: {
+          placeholder: '教材を検索…',
+          clear_search: 'クリア',
+          load_more: 'もっと見る',
+          search_label: '検索',
+          filters_label: '絞り込み',
+          zero_results: '「[SEARCH_TERM]」に該当する教材は見つかりませんでした',
+          many_results: '「[SEARCH_TERM]」の検索結果 [COUNT] 件',
+          one_result: '「[SEARCH_TERM]」の検索結果 [COUNT] 件',
+          alt_search: '「[DISPLAY_QUERY]」では結果なし。代わりに「[SEARCH_TERM]」での結果を表示します',
+          search_suggestion: '「[DISPLAY_QUERY]」では結果が見つかりません。次のいずれかをお試しください：[SEARCH_TERMS]',
+          searching: '「[SEARCH_TERM]」を検索中…',
+        },
+      });
+    });
+  </script>
+
+  <style is:global>
+    .pagefind-search {
+      margin: 1.5rem 0;
+    }
+    .pagefind-ui {
+      --pagefind-ui-scale: 0.92;
+      --pagefind-ui-primary: var(--accent);
+      --pagefind-ui-text: var(--text);
+      --pagefind-ui-background: var(--bg-elevated);
+      --pagefind-ui-border: var(--border);
+      --pagefind-ui-tag: var(--bg-soft);
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 8px;
+      --pagefind-ui-font: var(--font-sans);
+    }
+    .pagefind-ui__search-input {
+      background: var(--bg-elevated) !important;
+      color: var(--text) !important;
+      font-family: var(--font-sans) !important;
+    }
+    .pagefind-ui__result-title a {
+      font-family: var(--font-serif);
+    }
+    .pagefind-ui__result-link {
+      color: var(--accent) !important;
+    }
+  </style>
+</Base>

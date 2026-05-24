@@ -1,0 +1,26 @@
+name: 教材の改善提案
+description: 既存教材のルビ・語注・発問・現代語訳などの改善案
+title: "[Improvement] "
+labels: ["improvement"]
+body:
+  - type: input
+    id: lesson
+    attributes:
+      label: 対象の教材
+      placeholder: 例：手袋を買いに（小3 国語）
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: どこを変えたいですか
+      placeholder: 「○○の語注を××に修正」「△△にルビを追加」「発問○番をこう書き換える」など
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: 理由
+      placeholder: なぜその変更がよいと考えますか

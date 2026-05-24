@@ -79,6 +79,17 @@ Cloudflare Pages の設定：
 
 詳細は [`docs/deploy.md`](docs/deploy.md) を参照してください。
 
+## 貢献する
+
+このプロジェクトはオープンソース・有志運営です。あなたの貢献を歓迎します：
+
+- **新しい教材を提案** — [新教材追加ガイド](docs/adding-a-lesson.md)
+- **既存教材の改善** — ルビ・語注・発問・誤字の修正など、小さい修正も大歓迎
+- **コードの改善** — UI、検索、アクセシビリティなど
+
+詳しくは [CONTRIBUTING.md](CONTRIBUTING.md) を参照。
+プロジェクトの行動規範は [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+
 ## 関連リンク
 
 - [青空文庫](https://www.aozora.gr.jp/) — 原文取得元

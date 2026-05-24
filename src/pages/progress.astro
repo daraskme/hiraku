@@ -9,38 +9,156 @@ import Base from '../layouts/Base.astro';
       <span class="section__subtitle">PROGRESS</span>
     </div>
     <p>
-      読んだ教材・学習中の単元・週ごとの学習時間などをまとめて確認できます。
-      （現在はデモ表示のみ。今後ローカル保存ベースで実装予定。）
+      読んだ教材・週ごとの学習時間・連続学習日数を表示します。
+      データはあなたのブラウザの中だけに保存され、サーバには一切送られません。
     </p>
 
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-card__label">読了教材</div>
-        <div class="kpi-card__value">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-card__label">学習中</div>
-        <div class="kpi-card__value">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-card__label">今週の時間</div>
-        <div class="kpi-card__value">0分</div>
+        <div class="kpi-card__value" data-progress-total>—</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-card__label">連続日数</div>
-        <div class="kpi-card__value">0日</div>
+        <div class="kpi-card__value" data-progress-streak>—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">今週の学習</div>
+        <div class="kpi-card__value" data-progress-week>—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__label">最終学習</div>
+        <div class="kpi-card__value" data-progress-last style="font-size: 1rem; padding-top: 0.5rem;">—</div>
       </div>
     </div>
   </section>
 
   <section class="section">
     <div class="section__heading">
-      <h2>教科別の進捗</h2>
-      <span class="section__subtitle">BY SUBJECT</span>
+      <h2>最近読んだ教材</h2>
+      <span class="section__subtitle">RECENT</span>
     </div>
-    <div class="empty-state">
-      <h3>準備中</h3>
-      <p>教材を開くと、進捗がここに表示されます。</p>
+    <div data-progress-recent>
+      <div class="empty-state">
+        <h3>まだデータがありません</h3>
+        <p>教材を開くと、ここに表示されます。</p>
+      </div>
     </div>
   </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>教科別の到達</h2>
+      <span class="section__subtitle">BY SUBJECT</span>
+    </div>
+    <div data-progress-bysubject>
+      <div class="empty-state">
+        <h3>準備中</h3>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>データの管理</h2>
+      <span class="section__subtitle">DATA</span>
+    </div>
+    <p>進捗データはあなたのブラウザの localStorage に保存されています。リセットしたい場合は以下のボタンから。</p>
+    <button type="button" class="btn btn--ghost" data-progress-reset>進捗データをリセット</button>
+  </section>
+
+  <script is:inline>
+    function fmtMinutes(min) {
+      if (min < 60) return `${min}分`;
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return `${h}時間${m > 0 ? m + '分' : ''}`;
+    }
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const day = new Date(d);
+      day.setHours(0,0,0,0);
+      const diff = Math.round((today - day) / 86400000);
+      if (diff === 0) return '今日';
+      if (diff === 1) return '昨日';
+      if (diff < 7) return `${diff}日前`;
+      return d.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' });
+    }
+    const collectionLabel = {
+      kokugo3: '小3 国語',
+      chugaku1: '中1 国語',
+      kotoko1: '高1 国語',
+      chugakurika1: '中1 理科',
+      kotokoeigo1: '高1 英語',
+      sansu5: '小5 算数',
+      chugakukomin3: '中3 公民',
+    };
+
+    function render() {
+      const p = window.HirakuProgress;
+      if (!p) {
+        setTimeout(render, 100);
+        return;
+      }
+      const s = p.summary();
+
+      // KPI
+      document.querySelector('[data-progress-total]').textContent = `${s.totalRead}`;
+      document.querySelector('[data-progress-streak]').textContent = `${s.streak}日`;
+      document.querySelector('[data-progress-week]').textContent = fmtMinutes(s.weekMinutes);
+      const last = s.recent[0];
+      document.querySelector('[data-progress-last]').textContent = last ? fmtDate(last.lastRead) : '—';
+
+      // Recent
+      const recentEl = document.querySelector('[data-progress-recent]');
+      if (s.recent.length === 0) {
+        recentEl.innerHTML = `<div class="empty-state"><h3>まだデータがありません</h3><p>教材を開くと、ここに表示されます。</p></div>`;
+      } else {
+        const html = s.recent.map(r => {
+          const label = collectionLabel[r.key.split(':')[0]] || r.key.split(':')[0];
+          const href = `/library/${r.key.split(':')[0]}/${r.key.split(':')[1]}`;
+          return `<article class="lesson-card">
+            <a href="${href}" class="lesson-card__link">
+              <p class="lesson-card__meta">${label} ・ ${fmtDate(r.lastRead)}</p>
+              <h3 class="lesson-card__title">${r.title || r.key.split(':')[1]}</h3>
+              <p class="lesson-card__desc">読了回数：${r.readCount}回</p>
+            </a>
+          </article>`;
+        }).join('');
+        recentEl.innerHTML = `<div class="lesson-grid">${html}</div>`;
+      }
+
+      // By subject
+      const subEl = document.querySelector('[data-progress-bysubject]');
+      const subjects = Object.entries(s.bySubject);
+      if (subjects.length === 0) {
+        subEl.innerHTML = `<div class="empty-state"><h3>準備中</h3></div>`;
+      } else {
+        const html = subjects.map(([key, count]) => {
+          const label = collectionLabel[key] || key;
+          return `<div class="kpi-card">
+            <div class="kpi-card__label">${label}</div>
+            <div class="kpi-card__value">${count}本</div>
+          </div>`;
+        }).join('');
+        subEl.innerHTML = `<div class="kpi-grid">${html}</div>`;
+      }
+    }
+
+    document.querySelector('[data-progress-reset]').addEventListener('click', () => {
+      if (confirm('進捗データをすべてリセットします。よろしいですか？')) {
+        window.HirakuProgress.reset();
+        render();
+      }
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', render);
+    } else {
+      render();
+    }
+  </script>
 </Base>

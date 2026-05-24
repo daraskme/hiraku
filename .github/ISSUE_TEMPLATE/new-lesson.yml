@@ -1,0 +1,98 @@
+name: 新しい教材の提案
+description: 新しい教材を追加する提案
+title: "[New Lesson] "
+labels: ["new-lesson"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        新しい教材の追加提案、ありがとうございます！
+        [編集方針](https://github.com/daraskme/hiraku/blob/main/docs/editorial-policy.md) を
+        一読のうえ、以下にご記入ください。
+
+  - type: input
+    id: title
+    attributes:
+      label: 教材タイトル
+      placeholder: 例：宮沢賢治「セロ弾きのゴーシュ」
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: 作者
+      placeholder: 例：宮沢賢治（1896-1933）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 想定する学校段
+      options:
+        - 小学校
+        - 中学校
+        - 高等学校
+    validations:
+      required: true
+
+  - type: input
+    id: grade
+    attributes:
+      label: 想定する学年
+      placeholder: "例：第4学年"
+    validations:
+      required: true
+
+  - type: input
+    id: subject
+    attributes:
+      label: 教科
+      placeholder: "例：国語 / 算数 / 理科 / 社会 / 公民 / 英語"
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: 出典
+      description: 原文の入手元（URLがあれば併記）
+      placeholder: |
+        青空文庫 https://www.aozora.gr.jp/cards/000081/card470.html
+        国立国会図書館デジタルコレクション など
+    validations:
+      required: true
+
+  - type: textarea
+    id: copyright
+    attributes:
+      label: 著作権確認
+      description: PDであることの根拠（作者没年と保護期間の計算など）
+      placeholder: |
+        例：宮沢賢治は1933年没。著作権法上の保護期間は没後70年だが、
+        2018年改正前にすでに保護期間が満了していたため、改正の影響を受けずPD。
+    validations:
+      required: true
+
+  - type: textarea
+    id: curriculum
+    attributes:
+      label: 学習指導要領との関連
+      description: 当該学年・教科の指導事項のうち、関連すると思うものを挙げてください
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: 採用の理由
+      description: なぜこの教材を「ひらく」に加えるとよいと考えますか
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 確認
+      options:
+        - label: 著作権切れの作品であることを確認しました
+          required: true
+        - label: 編集方針 (docs/editorial-policy.md) を読みました
+          required: true
