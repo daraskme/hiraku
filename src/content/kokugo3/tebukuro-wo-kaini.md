@@ -62,6 +62,23 @@ questions:
   - 子狐は「人間の手を出すんだよ」と言われていたのに、まちがって狐の手を出してしまいました。そのとき、帽子屋さんはどうしましたか。そして、なぜそうしたのでしょう。
   - 物語の最後で、お母さん狐は「ほんとうに人間はいいものかしら。ほんとうに人間はいいものかしら」と二回もつぶやきます。あなたはこのつぶやきに、母さん狐のどんな気持ちがこめられていると思いますか。
   - 「コバルトの影」「真綿のように柔らかい雪」「風呂敷のような影」など、この物語には目に見える景色をたとえた表現がたくさん出てきます。あなたの好きなたとえを一つえらび、それがどんな感じをあらわしているか説明しましょう。
+cover_image: /illustrations/kokugo3/tebukuro-wo-kaini/scene1.png
+illustrations:
+  - src: /illustrations/kokugo3/tebukuro-wo-kaini/scene1.png
+    caption: 真綿のように柔らかな雪をはじめて見た、子狐の朝。
+    alt: 雪のつもった森のほとりで雪をふしぎそうに見上げる子狐。和風水彩の挿絵。
+  - src: /illustrations/kokugo3/tebukuro-wo-kaini/scene2.png
+    caption: お母さん狐が、子狐の片手を人間の手に変える場面。
+    alt: 洞穴の中で母さん狐と子狐が向かい合い、子狐の片手にやさしく触れる。
+  - src: /illustrations/kokugo3/tebukuro-wo-kaini/scene3.png
+    caption: 雪の野のむこうに、町の灯がぽつりぽつりと見え始める。
+    alt: 雪の丘に立つ子狐が、遠くの町のあたたかな灯を見つめる夜景。
+  - src: /illustrations/kokugo3/tebukuro-wo-kaini/scene4.png
+    caption: 帽子屋の戸口。光の帯が雪の上にのびていた。
+    alt: わずかに開いた帽子屋の引き戸から光が雪の上にこぼれ、子狐がそっと近づく。
+  - src: /illustrations/kokugo3/tebukuro-wo-kaini/scene5.png
+    caption: 月夜の雪原で、子狐と母さん狐が再会する。コバルトの影が長く伸びていた。
+    alt: 月明かりの雪原で再会する母さん狐と子狐。雪の上に青い影が落ちる。
 ---
 
 <p>　寒い冬が北方から、<ruby>狐<rt>きつね</rt></ruby>の親子の<ruby>棲<rt>す</rt></ruby>んでいる森へもやって来ました。</p>

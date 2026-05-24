@@ -41,6 +41,16 @@ const lessonSchema = z.object({
     )
     .default([]),
   questions: z.array(z.string()).default([]),
+  cover_image: z.string().optional(),
+  illustrations: z
+    .array(
+      z.object({
+        src: z.string(),
+        caption: z.string().optional(),
+        alt: z.string().optional(),
+      })
+    )
+    .default([]),
 });
 
 const kokugo3 = defineCollection({

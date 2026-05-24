@@ -108,6 +108,11 @@ const guidelineDoc = d.school_stage === 'kotoko'
           ✦ リーダーモードで読む
         </a>
       </div>
+      {d.cover_image && (
+        <figure class="lesson-cover">
+          <img src={d.cover_image} alt={`${d.title} の表紙イラスト`} loading="eager" />
+        </figure>
+      )}
       <h1 class="lesson-header__title">{d.title}</h1>
       <p class="lesson-header__badges">
         <span class="badge">{stage} {d.subject} 第{d.grade}学年</span>
@@ -156,6 +161,29 @@ const guidelineDoc = d.school_stage === 'kotoko'
       <h2>本文</h2>
       <slot />
     </section>
+
+    {d.illustrations && d.illustrations.length > 0 && (
+      <section aria-label="挿絵ギャラリー" class="illustrations-section no-print">
+        <h2>挿絵ギャラリー</h2>
+        <p class="illustrations-section__intro">
+          物語の場面を、明治・大正期の児童書の挿絵を意識した和風水彩のタッチで表現しました。
+        </p>
+        <ol class="illustrations-grid">
+          {d.illustrations.map((ill, idx) => (
+            <li class="illustration-card">
+              <figure>
+                <img
+                  src={ill.src}
+                  alt={ill.alt ?? `${d.title} 挿絵 ${idx + 1}`}
+                  loading="lazy"
+                />
+                {ill.caption && <figcaption>{ill.caption}</figcaption>}
+              </figure>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
 
     {d.glossary.length > 0 && (
       <section aria-label="語句の意味">
