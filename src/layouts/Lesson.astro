@@ -30,7 +30,10 @@ const guidelineDoc = d.school_stage === 'kotoko'
 ---
 
 <Base title={d.title} description={d.description}>
-  <article>
+  <article
+    data-pagefind-filter={`段階:${stage}, 教科:${d.subject}, 学年:${stage} 第${d.grade}学年${d.classical ? ', 種別:古典' : ''}`}
+    data-pagefind-meta={`作者:${d.author}, 段階:${stage}`}
+  >
     <header class="lesson-header">
       <div class="lesson-header__top no-print">
         <a href="/library" class="lesson-header__back">← ライブラリへ戻る</a>
