@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f3efe5"/>
+  <rect x="60" y="60" width="80" height="80" fill="#1d2a3d" rx="8"/>
+  <text x="100" y="118" font-family="serif" font-size="52" font-weight="700" fill="#f3efe5" text-anchor="middle">啓</text>
+  <text x="170" y="106" font-family="serif" font-size="42" font-weight="700" fill="#2a2018">ひらく</text>
+  <text x="170" y="138" font-family="monospace" font-size="14" letter-spacing="0.18em" fill="#6b5d4f">OPEN TEXTBOOKS</text>
+  <text x="60" y="280" font-family="serif" font-size="68" font-weight="700" fill="#2a2018">みんなの教科書を、</text>
+  <text x="60" y="370" font-family="serif" font-size="68" font-weight="700" fill="#2a2018">ふたたびひらく。</text>
+  <circle cx="785" cy="350" r="14" fill="#b85c4a"/>
+  <line x1="60" y1="510" x2="1140" y2="510" stroke="#6b5d4f" stroke-width="1"/>
+  <text x="60" y="560" font-family="serif" font-size="24" fill="#6b5d4f">著作権切れの教科書を、現行学習指導要領に沿って編集</text>
+  <text x="1140" y="560" font-family="monospace" font-size="16" letter-spacing="0.12em" fill="#6b5d4f" text-anchor="end">hiraku.pages.dev</text>
+</svg>
