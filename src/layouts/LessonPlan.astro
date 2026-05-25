@@ -1,0 +1,388 @@
+---
+/**
+ * LessonPlan レイアウト — 教師向けの指導案を A4 で印刷できる体裁に整える。
+ *
+ * teaching_notes を中心に、目標・流れ・発問・配布材料・拡張案を 1〜2 ページの
+ * 印刷物としてまとめる。
+ */
+import type { CollectionEntry } from 'astro:content';
+import '../styles/global.css';
+
+type AnyLesson =
+  | CollectionEntry<'kokugo3'>
+  | CollectionEntry<'kokugo4'>
+  | CollectionEntry<'kokugo6'>
+  | CollectionEntry<'chugaku1'>
+  | CollectionEntry<'chugaku2'>
+  | CollectionEntry<'chugaku3'>
+  | CollectionEntry<'kotoko1'>
+  | CollectionEntry<'kotoko2'>
+  | CollectionEntry<'kateika5'>
+  | CollectionEntry<'chugakurika1'>
+  | CollectionEntry<'chugakurika2'>
+  | CollectionEntry<'chugakurekishi1'>
+  | CollectionEntry<'kotokoeigo1'>
+  | CollectionEntry<'sansu5'>
+  | CollectionEntry<'chugakukomin3'>
+  | CollectionEntry<'kotorekishi1'>
+  | CollectionEntry<'kotokokanbun1'>
+  | CollectionEntry<'kotosekaishi1'>;
+
+interface Props {
+  lesson: AnyLesson;
+  collection: string;
+}
+
+const { lesson, collection } = Astro.props;
+const d = lesson.data;
+const lessonUrl = `/library/${collection}/${lesson.id}`;
+const stageLabel: Record<string, string> = {
+  shogaku: '小学校',
+  chugaku: '中学校',
+  kotoko: '高等学校',
+};
+const stage = stageLabel[d.school_stage] ?? '小学校';
+const tn = d.teaching_notes;
+---
+
+<!doctype html>
+<html lang="ja" data-lessonplan-mode>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{d.title} 指導案 | ひらく</title>
+    <meta name="description" content={`${d.title} の指導案（A4 印刷用）`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap"
+    />
+  </head>
+  <body class="lessonplan">
+    <div class="lessonplan__toolbar no-print">
+      <a href={lessonUrl} class="lessonplan__back">← 教材に戻る</a>
+      <span class="lessonplan__title">指導案：{d.title}</span>
+      <button type="button" class="lessonplan__print" onclick="window.print()">⎙ 印刷</button>
+    </div>
+
+    {!tn && (
+      <div class="lessonplan__no-tn no-print">
+        <p>この教材には指導案 (teaching_notes) がまだ設定されていません。</p>
+        <p><a href={lessonUrl}>← 教材ページへ戻る</a></p>
+      </div>
+    )}
+
+    {tn && (
+      <main class="lessonplan__page">
+        <header class="lessonplan__header">
+          <h1 class="lessonplan__h1">指導案：{d.title}</h1>
+          <p class="lessonplan__byline">
+            原作：{d.author}
+            {d.original_year ? `（${d.original_year}）` : d.era ? `（${d.era}）` : ''}
+          </p>
+          <table class="lessonplan__meta-table">
+            <tbody>
+              <tr>
+                <th>学校段階・教科</th>
+                <td>{stage} {d.subject} 第{d.grade}学年</td>
+              </tr>
+              {tn.target_time && (
+                <tr>
+                  <th>所要時間</th>
+                  <td>{tn.target_time}</td>
+                </tr>
+              )}
+              {d.estimated_minutes && (
+                <tr>
+                  <th>本文の目安時間</th>
+                  <td>約 {d.estimated_minutes} 分</td>
+                </tr>
+              )}
+              {d.curriculum_items && d.curriculum_items.length > 0 && (
+                <tr>
+                  <th>学習指導要領</th>
+                  <td>
+                    <ul class="lessonplan__list">
+                      {d.curriculum_items.map((it) => (
+                        <li><strong>{it.code}</strong> ／ {it.label}</li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              )}
+              {tn.materials && tn.materials.length > 0 && (
+                <tr>
+                  <th>準備物</th>
+                  <td>
+                    <ul class="lessonplan__list">
+                      {tn.materials.map((m) => <li>{m}</li>)}
+                    </ul>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </header>
+
+        {tn.overview && (
+          <section class="lessonplan__section">
+            <h2 class="lessonplan__h2">単元概要</h2>
+            <p class="lessonplan__overview">{tn.overview}</p>
+          </section>
+        )}
+
+        {tn.objectives && tn.objectives.length > 0 && (
+          <section class="lessonplan__section">
+            <h2 class="lessonplan__h2">本時の目標</h2>
+            <ol class="lessonplan__objectives">
+              {tn.objectives.map((o) => <li>{o}</li>)}
+            </ol>
+          </section>
+        )}
+
+        {tn.flow && tn.flow.length > 0 && (
+          <section class="lessonplan__section">
+            <h2 class="lessonplan__h2">授業の流れ</h2>
+            <table class="lessonplan__flow-table">
+              <thead>
+                <tr>
+                  <th class="lessonplan__time-col">時間</th>
+                  <th>活動</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tn.flow.map((step: { time?: string; activity: string }) => (
+                  <tr>
+                    <td class="lessonplan__time">{step.time || '—'}</td>
+                    <td>{step.activity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {tn.discussion && tn.discussion.length > 0 && (
+          <section class="lessonplan__section">
+            <h2 class="lessonplan__h2">発問・話し合いの軸</h2>
+            <ul class="lessonplan__discussion">
+              {tn.discussion.map((q) => <li>{q}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {tn.extensions && tn.extensions.length > 0 && (
+          <section class="lessonplan__section">
+            <h2 class="lessonplan__h2">発展課題</h2>
+            <ul class="lessonplan__extensions">
+              {tn.extensions.map((e) => <li>{e}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section class="lessonplan__section lessonplan__memo-section">
+          <h2 class="lessonplan__h2">教師控メモ</h2>
+          <div class="lessonplan__memo-grid">
+            <div class="lessonplan__memo-box"><div class="lessonplan__memo-label">生徒の反応・気づき</div></div>
+            <div class="lessonplan__memo-box"><div class="lessonplan__memo-label">時間配分の振り返り</div></div>
+            <div class="lessonplan__memo-box"><div class="lessonplan__memo-label">次回への改善点</div></div>
+          </div>
+        </section>
+
+        <footer class="lessonplan__footer">
+          <p>
+            ひらく（https://hiraku-5cb.pages.dev/） — 著作権切れの日本語教科書素材を、
+            現行学習指導要領に沿って再編集して公開するオープン教材プロジェクト
+          </p>
+          <p>編集物：CC BY 4.0 ／ 原文：パブリックドメイン</p>
+        </footer>
+      </main>
+    )}
+
+    <style>
+      :root {
+        --lp-text: #1f1f1f;
+        --lp-soft: #555;
+        --lp-line: #999;
+        --lp-bg: #fff;
+        --lp-accent: #8b3a3a;
+      }
+      body.lessonplan {
+        background: #ccc;
+        font-family: 'Noto Sans JP', sans-serif;
+        color: var(--lp-text);
+        line-height: 1.6;
+        margin: 0;
+        padding: 2rem 0;
+      }
+      .lessonplan__toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: -2rem 0 1rem;
+      }
+      .lessonplan__back {
+        color: var(--lp-accent);
+        text-decoration: none;
+      }
+      .lessonplan__title {
+        flex: 1;
+        font-weight: 500;
+      }
+      .lessonplan__print {
+        background: var(--lp-accent);
+        color: white;
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .lessonplan__no-tn {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .lessonplan__page {
+        max-width: 21cm;
+        min-height: 29.7cm;
+        margin: 0 auto 2rem;
+        padding: 2cm 2cm;
+        background: var(--lp-bg);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        box-sizing: border-box;
+      }
+      .lessonplan__header {
+        border-bottom: 2px solid var(--lp-accent);
+        padding-bottom: 0.8rem;
+        margin-bottom: 1rem;
+      }
+      .lessonplan__h1 {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 1.5rem;
+        margin: 0 0 0.3rem;
+        color: var(--lp-accent);
+      }
+      .lessonplan__byline {
+        font-size: 0.85rem;
+        color: var(--lp-soft);
+        margin: 0 0 0.6rem;
+      }
+      .lessonplan__meta-table {
+        width: 100%;
+        font-size: 0.85rem;
+        border-collapse: collapse;
+      }
+      .lessonplan__meta-table th {
+        text-align: left;
+        background: #f5f5f5;
+        padding: 0.35rem 0.6rem;
+        border: 1px solid var(--lp-line);
+        width: 8em;
+        font-weight: 500;
+        vertical-align: top;
+      }
+      .lessonplan__meta-table td {
+        padding: 0.35rem 0.6rem;
+        border: 1px solid var(--lp-line);
+        vertical-align: top;
+      }
+      .lessonplan__list { padding-left: 1.2rem; margin: 0; }
+      .lessonplan__list li { margin: 0.15rem 0; }
+
+      .lessonplan__section {
+        margin: 1rem 0;
+        page-break-inside: avoid;
+      }
+      .lessonplan__h2 {
+        font-family: 'Noto Serif JP', serif;
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        color: var(--lp-accent);
+        border-left: 4px solid var(--lp-accent);
+        padding-left: 0.5rem;
+      }
+      .lessonplan__overview { font-size: 0.92rem; }
+      .lessonplan__objectives, .lessonplan__discussion, .lessonplan__extensions {
+        padding-left: 1.4rem;
+        font-size: 0.92rem;
+      }
+      .lessonplan__objectives li, .lessonplan__discussion li, .lessonplan__extensions li {
+        margin: 0.3rem 0;
+      }
+
+      .lessonplan__flow-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+      .lessonplan__flow-table th {
+        background: #f5f5f5;
+        padding: 0.35rem 0.6rem;
+        border: 1px solid var(--lp-line);
+        text-align: left;
+        font-weight: 500;
+      }
+      .lessonplan__flow-table td {
+        padding: 0.45rem 0.6rem;
+        border: 1px solid var(--lp-line);
+        vertical-align: top;
+      }
+      .lessonplan__time-col, .lessonplan__time {
+        width: 6em;
+        white-space: nowrap;
+        color: var(--lp-soft);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .lessonplan__memo-section { page-break-before: auto; }
+      .lessonplan__memo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+      }
+      .lessonplan__memo-box {
+        min-height: 5cm;
+        border: 1px solid var(--lp-line);
+        border-radius: 4px;
+        padding: 0.5rem;
+      }
+      .lessonplan__memo-label {
+        font-size: 0.78rem;
+        color: var(--lp-soft);
+        margin-bottom: 0.3rem;
+      }
+
+      .lessonplan__footer {
+        margin-top: 1.5rem;
+        padding-top: 0.6rem;
+        border-top: 1px dashed var(--lp-line);
+        font-size: 0.7rem;
+        color: var(--lp-soft);
+      }
+      .lessonplan__footer p { margin: 0.2rem 0; }
+
+      @media print {
+        body.lessonplan { background: white; padding: 0; }
+        .lessonplan__toolbar { display: none !important; }
+        .lessonplan__page {
+          box-shadow: none;
+          margin: 0;
+          padding: 1.5cm;
+        }
+        @page { size: A4; margin: 0; }
+      }
+    </style>
+  </body>
+</html>

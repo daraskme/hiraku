@@ -208,6 +208,11 @@ const guidelineDoc = d.school_stage === 'kotoko'
           <a href={`/worksheet/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link" title="A4 印刷用のワークシート">
             ⎙ ワークシート印刷
           </a>
+          {d.teaching_notes && (
+            <a href={`/lesson-plan/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link" title="教師向け指導案 (A4 印刷可)">
+              ⎙ 指導案
+            </a>
+          )}
           <button
             type="button"
             class="lesson-header__action-link star-toggle"

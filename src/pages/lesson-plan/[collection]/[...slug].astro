@@ -1,0 +1,32 @@
+---
+import LessonPlan from '../../../layouts/LessonPlan.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const COLLECTIONS = [
+    'kokugo3', 'kokugo4', 'kokugo6',
+    'chugaku1', 'chugaku2', 'chugaku3',
+    'kotoko1', 'kotoko2',
+    'kateika5', 'chugakurika1', 'chugakurika2',
+    'chugakurekishi1', 'kotokoeigo1',
+    'sansu5', 'chugakukomin3',
+    'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
+  ];
+  const all: any[] = [];
+  for (const c of COLLECTIONS) {
+    const items = await getCollection(c as any);
+    for (const lesson of items) {
+      all.push({
+        params: { collection: c, slug: lesson.id },
+        props: { lesson, collection: c },
+      });
+    }
+  }
+  return all;
+}) satisfies GetStaticPaths;
+
+const { lesson, collection } = Astro.props;
+---
+
+<LessonPlan lesson={lesson} collection={collection} />
