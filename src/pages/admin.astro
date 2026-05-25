@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="管理ダッシュボード"
+  description="所有者向けの運用統計サマリー。"
+>
+  <section class="section">
+    <p class="cross-links no-print">
+      <a href="/profile">← プロフィール</a>
+    </p>
+    <div class="section__heading">
+      <h1>管理ダッシュボード</h1>
+      <span class="section__subtitle">ADMIN</span>
+    </div>
+    <p>
+      所有者 (env <code>ADMIN_EMAIL</code> に一致するアカウント) 限定の運用ビュー。
+      ニュースレター登録者、最近のエラー、クラス数を確認できます。
+    </p>
+    <div data-admin-root>
+      <p style="color:var(--text-soft);">読み込み中…</p>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const root = document.querySelector('[data-admin-root]');
+      function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      function fmtTs(ts) { return ts ? new Date(ts).toLocaleString('ja-JP', { dateStyle: 'short', timeStyle: 'short' }) : '—'; }
+
+      async function load() {
+        try {
+          const resp = await fetch('/api/admin/stats', { credentials: 'same-origin' });
+          if (resp.status === 401) { root.innerHTML = '<div class="empty-state"><h3>ログインが必要です</h3></div>'; return; }
+          if (resp.status === 403) { root.innerHTML = '<div class="empty-state"><h3>管理者権限がありません</h3></div>'; return; }
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          render(data);
+        } catch (_) {
+          root.innerHTML = '<div class="empty-state"><h3>読み込みに失敗しました</h3></div>';
+        }
+      }
+      function render(data) {
+        const s = data.stats || {};
+        const errs = (s.recentErrors || []).slice(0, 10);
+        const errRows = errs.length === 0
+          ? '<p style="color:var(--text-soft);">エラーログなし</p>'
+          : '<table class="admin-table"><thead><tr><th>時刻</th><th>URL</th><th>メッセージ</th></tr></thead><tbody>' +
+            errs.map((e) => `<tr>
+              <td>${fmtTs(e.ts)}</td>
+              <td style="font-size:0.78rem;color:var(--text-soft)">${escapeHtml((e.url || '').slice(0, 60))}</td>
+              <td>${escapeHtml((e.message || '').slice(0, 100))}</td>
+            </tr>`).join('') + '</tbody></table>';
+
+        root.innerHTML = `
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card__num">${s.subscribers || 0}</div>
+              <div class="admin-card__label">ニュースレター登録者</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card__num">${s.classes || 0}</div>
+              <div class="admin-card__label">クラス数 (概算)</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card__num">${(s.recentErrors || []).length}</div>
+              <div class="admin-card__label">最近のエラー</div>
+            </div>
+          </div>
+          <h2 style="margin-top:2rem;">最近のクライアントエラー</h2>
+          ${errRows}
+          <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-soft);">
+            ログイン: ${escapeHtml(data.requestedBy || '?')}
+            ${data.isAdmin ? ' (管理者)' : ''}
+            <br />
+            ${escapeHtml(data.note || '')}
+          </p>
+        `;
+      }
+
+      const tryInit = () => {
+        if (window.HirakuAuth) load();
+        else setTimeout(tryInit, 100);
+      };
+      tryInit();
+    })();
+  </script>
+
+  <style>
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.7rem;
+      margin: 1rem 0 1.5rem;
+    }
+    .admin-card {
+      padding: 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      text-align: center;
+    }
+    .admin-card__num {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .admin-card__label {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-top: 0.3rem;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .admin-table th {
+      text-align: left;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg-soft);
+      border-bottom: 2px solid var(--border);
+    }
+    .admin-table td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid var(--border-soft);
+      word-break: break-all;
+    }
+  </style>
+</Base>

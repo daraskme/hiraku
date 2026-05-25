@@ -1,70 +1,243 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const COLLECTION_NAMES = [
+  'kokugo1', 'kokugo2', 'kokugo3', 'kokugo4', 'kokugo6',
+  'chugaku1', 'chugaku2', 'chugaku3',
+  'kotoko1', 'kotoko2', 'kotoko3',
+  'kateika5', 'chugakurika1', 'chugakurika2',
+  'chugakurekishi1', 'kotokoeigo1', 'koteoyaku1',
+  'sansu5', 'chugakukomin3',
+  'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
+];
+
+let totalLessons = 0;
+let totalMinutes = 0;
+let classicalCount = 0;
+let withIllustrations = 0;
+let withTeachingNotes = 0;
+const subjectCounts: Record<string, number> = {};
+const eraSet = new Set<string>();
+const authorSet = new Set<string>();
+
+for (const c of COLLECTION_NAMES) {
+  const items = await getCollection(c as any);
+  for (const l of items) {
+    totalLessons++;
+    totalMinutes += l.data.estimated_minutes || 0;
+    if (l.data.classical) classicalCount++;
+    if (l.data.illustrations && l.data.illustrations.length > 0) withIllustrations++;
+    if (l.data.teaching_notes) withTeachingNotes++;
+    subjectCounts[l.data.subject] = (subjectCounts[l.data.subject] || 0) + 1;
+    if (l.data.era) eraSet.add(l.data.era);
+    if (l.data.author) authorSet.add(l.data.author);
+  }
+}
+
+const subjectsSorted = Object.entries(subjectCounts).sort((a, b) => b[1] - a[1]);
 ---
 
-<Base title="このサイトについて" description="project_procopios の目的、編集方針、参加方法">
-  <h1>このサイトについて</h1>
+<Base title="このサイトについて" description="ひらく / project_procopios の目的、編集方針、規模、参加方法。">
+  <section class="section">
+    <div class="section__heading">
+      <h1>このサイトについて</h1>
+      <span class="section__subtitle">ABOUT</span>
+    </div>
+    <p>
+      <strong>ひらく</strong> (project_procopios) は、著作権が満了したパブリックドメインの
+      近代日本の読み物 ―― 明治・大正・昭和初期の小説、童話、教科書素材、
+      古典 ―― を、現行の <strong>学習指導要領 (平成29年告示)</strong> に
+      沿って再編集し、無償・オープンライセンスで公開するプロジェクトです。
+    </p>
+  </section>
 
-  <h2>プロジェクトの目的</h2>
-  <p>
-    project_procopios は、著作権が満了したパブリックドメインの近代日本の読み物
-    （明治・大正・昭和初期の小説、童話、教科書素材など）を、現行の
-    <strong>学習指導要領（平成29年告示）</strong>に沿って再編集し、
-    無償・オープンライセンスで公開するプロジェクトです。
-  </p>
-  <p>
-    既に著作権切れの優れた素材は数多くデジタル化されていますが、明治・大正期の
-    日本語表記をそのまま現代の児童が読むのは難しいことがあります。
-    現代仮名遣いへの修正、ルビ（フリガナ）の付与、語注、発問、
-    そして現行指導要領との対応関係を明示することで、教室・家庭・自学のいずれでも
-    すぐに使える教材を整えていきます。
-  </p>
+  <section class="section">
+    <div class="section__heading">
+      <h2>規模 (現在)</h2>
+      <span class="section__subtitle">SIZE</span>
+    </div>
+    <div class="about-stats">
+      <div class="about-stat">
+        <span class="about-stat__num">{totalLessons}</span>
+        <span class="about-stat__label">収載教材</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{COLLECTION_NAMES.length}</span>
+        <span class="about-stat__label">コレクション (科目×学年)</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{authorSet.size}</span>
+        <span class="about-stat__label">著者</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{eraSet.size}</span>
+        <span class="about-stat__label">時代</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{Math.round(totalMinutes / 60)}</span>
+        <span class="about-stat__label">時間の学習量</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{classicalCount}</span>
+        <span class="about-stat__label">古典作品</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{withIllustrations}</span>
+        <span class="about-stat__label">挿絵付き教材</span>
+      </div>
+      <div class="about-stat">
+        <span class="about-stat__num">{withTeachingNotes}</span>
+        <span class="about-stat__label">指導案付き教材</span>
+      </div>
+    </div>
+    <h3 style="margin-top:1.2rem">教科別内訳</h3>
+    <ul class="subjects-list">
+      {subjectsSorted.map(([s, n]) => (
+        <li><span>{s}</span><span class="subjects-list__num">{n} 教材</span></li>
+      ))}
+    </ul>
+  </section>
 
-  <h2>本サイトの位置づけ</h2>
-  <div class="callout">
-    <strong>本サイトは文部科学省検定済教科書ではありません。</strong>
-    あくまで自主教材・副教材としてお使いください。
-  </div>
-  <p>
-    本プロジェクトは個人・有志による編集物です。学校現場での主たる教科書は、
-    所属の自治体・学校が採択している検定済教科書となります。本サイトの教材は、
-    そうした正規教材と併用する補助資料、学習者の自由な追加学習、
-    あるいは家庭学習の素材として利用されることを想定しています。
-  </p>
+  <section class="section">
+    <h2>本サイトの位置づけ</h2>
+    <div class="callout">
+      <strong>本サイトは文部科学省検定済教科書ではありません。</strong>
+      あくまで自主教材・副教材としてお使いください。
+    </div>
+    <p>
+      本プロジェクトは個人・有志による編集物です。学校現場での主たる教科書は、
+      所属の自治体・学校が採択している検定済教科書となります。本サイトの教材は、
+      そうした正規教材と併用する補助資料、学習者の自由な追加学習、
+      あるいは家庭学習の素材として利用されることを想定しています。
+    </p>
+  </section>
 
-  <h2>編集方針</h2>
-  <p>
-    詳しい編集の原則は <a href="https://github.com/daraskme/hiraku" target="_blank" rel="noopener">GitHub
-    リポジトリ</a> をご覧ください。要点は以下のとおりです：
-  </p>
-  <ul>
-    <li>原文（パブリックドメイン）への敬意を最優先する</li>
-    <li>改変は最小限に。旧字体・旧仮名遣いの現代化、ルビ追加、語注付加が中心</li>
-    <li>戦前教材に含まれる差別的表現については「注釈付きで残す／改稿する／不採用」のいずれかを編集会議で判断</li>
-    <li>各教材ページに、編集物のライセンスと出典を明記する</li>
-  </ul>
+  <section class="section">
+    <h2>編集方針</h2>
+    <p>
+      編集の原則は <a href="/editorial-policy">編集ポリシー</a> をご覧ください。要点：
+    </p>
+    <ul>
+      <li>原文 (パブリックドメイン) への敬意を最優先する</li>
+      <li>改変は最小限に。旧字体・旧仮名遣いの現代化、ルビ追加、語注付加が中心</li>
+      <li>戦前教材に含まれる差別的表現については「注釈付きで残す／改稿する／不採用」のいずれかを編集判断</li>
+      <li>各教材ページに、編集物のライセンスと出典を明記する</li>
+    </ul>
+  </section>
 
-  <h2>原典素材の出典</h2>
-  <ul>
-    <li><a href="https://www.aozora.gr.jp/" target="_blank" rel="noopener">青空文庫</a> — 公有著作のデジタル化</li>
-    <li><a href="https://dl.ndl.go.jp/" target="_blank" rel="noopener">国立国会図書館デジタルコレクション</a> — 戦前の教科書原本（インターネット公開資料のみ）</li>
-  </ul>
+  <section class="section">
+    <h2>原典素材の出典</h2>
+    <ul>
+      <li><a href="https://www.aozora.gr.jp/" target="_blank" rel="noopener">青空文庫</a> — 公有著作のデジタル化</li>
+      <li><a href="https://dl.ndl.go.jp/" target="_blank" rel="noopener">国立国会図書館デジタルコレクション</a> — 戦前の教科書原本</li>
+    </ul>
+  </section>
 
-  <h2>学習指導要領との関係</h2>
-  <p>
-    本サイトは <a href="https://www.mext.go.jp/a_menu/shotou/new-cs/" target="_blank" rel="noopener">文部科学省「学習指導要領（平成29年告示）」</a> に
-    準拠して教材を編集しています。各教材ページの「指導要領との対応」欄に、
-    その教材で意識した指導事項を明示しています。
-  </p>
-  <p>
-    なお、学習指導要領本文は文部科学省告示の著作物であり、本サイトでは項目名・
-    領域構造の引用と要旨のパラフレーズにとどめ、本文転載は行っていません。
-  </p>
+  <section class="section">
+    <h2>学習指導要領との関係</h2>
+    <p>
+      本サイトは <a href="https://www.mext.go.jp/a_menu/shotou/new-cs/" target="_blank" rel="noopener">文部科学省「学習指導要領（平成29年告示）」</a> に
+      準拠して教材を編集しています。各教材ページの「指導要領との対応」欄に、
+      その教材で意識した指導事項を明示しています。
+    </p>
+    <p>
+      なお、学習指導要領本文は文部科学省告示の著作物であり、本サイトでは項目名・
+      領域構造の引用と要旨のパラフレーズにとどめ、本文転載は行っていません。
+    </p>
+  </section>
 
-  <h2>参加する</h2>
-  <p>
-    新しい教材の追加、既存教材の改訂、誤字・ルビ・語注の修正など、
-    どんな貢献も歓迎します。GitHub リポジトリでイシュー・プルリクエストを
-    お送りください。
-  </p>
+  <section class="section">
+    <h2>技術スタック</h2>
+    <ul>
+      <li><a href="https://astro.build/" target="_blank" rel="noopener">Astro</a> — 静的サイトジェネレータ</li>
+      <li><a href="https://pages.cloudflare.com/" target="_blank" rel="noopener">Cloudflare Pages</a> — ホスティング・Functions・KV・Workers AI</li>
+      <li><a href="https://pagefind.app/" target="_blank" rel="noopener">Pagefind</a> — 静的全文検索</li>
+      <li><a href="https://developers.google.com/identity/gsi/web" target="_blank" rel="noopener">Google Identity Services</a> — ログイン (任意)</li>
+    </ul>
+    <p>すべてオープンソースで、ソースコードは <a href="https://github.com/daraskme/hiraku" target="_blank" rel="noopener">GitHub</a> で公開。</p>
+  </section>
+
+  <section class="section">
+    <h2>ロードマップ・寄付・参加</h2>
+    <p>
+      新しい教材の追加、既存教材の改訂、誤字・ルビ・語注の修正、新機能の提案、
+      多言語版への翻訳、挿絵・デザインへの貢献など、どんな関わり方も歓迎します。
+    </p>
+    <p class="cross-links">
+      <a href="/community">コミュニティ・GitHub Issues</a> ・
+      <a href="/support">プロジェクトを応援する</a> ・
+      <a href="/subscribe">ニュースレター</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>プロジェクト名の由来</h2>
+    <p>
+      内部コード名「<em>project_procopios</em>」は、6 世紀東ローマ帝国の歴史家
+      プロコピオス (Procopius of Caesarea, c. 500–565) に因みます。
+      ユスティニアヌス帝の時代を、表向きの歴史『戦史』と、宮廷の暗部を暴く
+      『秘史』(<em>Anecdota</em>) の二面から書き残した人物。「表に出ない言葉も
+      書き留める」という姿勢に共感しての命名です。
+    </p>
+    <p>
+      公開向けの名前「ひらく」は、「<em>本を ひらく / 戸を ひらく / 道を ひらく</em>」
+      の意味から。日本語にとって「ひらく」は穏やかで多義的な動詞で、教育の理想に
+      重なるとして選びました。
+    </p>
+  </section>
+
+  <style>
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.7rem;
+      margin: 1rem 0;
+    }
+    .about-stat {
+      padding: 0.9rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      text-align: center;
+      border-left: 3px solid var(--accent);
+    }
+    .about-stat__num {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .about-stat__label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-top: 0.3rem;
+    }
+    .subjects-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.4rem;
+    }
+    .subjects-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0.7rem;
+      background: var(--bg-soft);
+      border-radius: 4px;
+    }
+    .subjects-list__num {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
 </Base>
