@@ -273,6 +273,81 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </section>
     )}
 
+    {d.teaching_notes && (
+      <details class="teaching-notes no-print" open>
+        <summary>
+          <span class="teaching-notes__badge">指導案</span>
+          <span class="teaching-notes__hint">教員向け・授業展開の例</span>
+        </summary>
+
+        {d.teaching_notes.overview && (
+          <p class="teaching-notes__overview">{d.teaching_notes.overview}</p>
+        )}
+
+        {(d.teaching_notes.target_time || d.teaching_notes.materials.length > 0) && (
+          <dl class="teaching-notes__meta">
+            {d.teaching_notes.target_time && (
+              <>
+                <dt>授業時数</dt>
+                <dd>{d.teaching_notes.target_time}</dd>
+              </>
+            )}
+            {d.teaching_notes.materials.length > 0 && (
+              <>
+                <dt>準備</dt>
+                <dd>{d.teaching_notes.materials.join('、')}</dd>
+              </>
+            )}
+          </dl>
+        )}
+
+        {d.teaching_notes.objectives.length > 0 && (
+          <>
+            <h3>指導目標</h3>
+            <ul>
+              {d.teaching_notes.objectives.map((o) => <li>{o}</li>)}
+            </ul>
+          </>
+        )}
+
+        {d.teaching_notes.flow.length > 0 && (
+          <>
+            <h3>授業の流れ</h3>
+            <ol class="teaching-notes__flow">
+              {d.teaching_notes.flow.map((step) => (
+                <li>
+                  {step.time && <span class="teaching-notes__time">{step.time}</span>}
+                  <span>{step.activity}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+
+        {d.teaching_notes.discussion.length > 0 && (
+          <>
+            <h3>発問例・議論のポイント</h3>
+            <ul>
+              {d.teaching_notes.discussion.map((q) => <li>{q}</li>)}
+            </ul>
+          </>
+        )}
+
+        {d.teaching_notes.extensions.length > 0 && (
+          <>
+            <h3>発展課題</h3>
+            <ul>
+              {d.teaching_notes.extensions.map((e) => <li>{e}</li>)}
+            </ul>
+          </>
+        )}
+
+        <p class="teaching-notes__footer">
+          ※ ここに書かれている内容はあくまで参考例です。授業者の判断と学級の実態に合わせて、自由に組み替えてご活用ください。
+        </p>
+      </details>
+    )}
+
     {relatedTop.length > 0 && (
       <section aria-label="関連する教材" class="no-print">
         <h2>関連する教材</h2>

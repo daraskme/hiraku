@@ -51,6 +51,24 @@ const lessonSchema = z.object({
       })
     )
     .default([]),
+  teaching_notes: z
+    .object({
+      overview: z.string().optional(),
+      target_time: z.string().optional(),
+      objectives: z.array(z.string()).default([]),
+      flow: z
+        .array(
+          z.object({
+            time: z.string().optional(),
+            activity: z.string(),
+          })
+        )
+        .default([]),
+      discussion: z.array(z.string()).default([]),
+      extensions: z.array(z.string()).default([]),
+      materials: z.array(z.string()).default([]),
+    })
+    .optional(),
 });
 
 const kokugo3 = defineCollection({
