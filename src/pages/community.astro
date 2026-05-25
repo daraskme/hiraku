@@ -1,24 +1,148 @@
 ---
 import Base from '../layouts/Base.astro';
+
+const REPO_URL = 'https://github.com/daraskme/hiraku';
+const ISSUES_URL = `${REPO_URL}/issues`;
+const NEW_ISSUE_URL = `${REPO_URL}/issues/new`;
+
+const channels = [
+  {
+    icon: '⚑',
+    title: '誤字・誤訳・事実誤認の報告',
+    desc: 'ふりがな、語注、現代語訳、解説で気になる点を見つけたら教えてください。教材ページのタイトルとあわせて、該当箇所を引用していただけると助かります。',
+    href: `${NEW_ISSUE_URL}?labels=correction&title=%5B%E8%AA%A4%E5%AD%97%E3%83%BB%E8%AA%A4%E8%A8%B3%5D+`,
+    cta: 'Issue で報告する',
+  },
+  {
+    icon: '✎',
+    title: '教材の追加リクエスト',
+    desc: '取り上げて欲しい作品・著者・指導要領コードがあれば。「この単元の補助教材が欲しい」「この作家の○○を扱って欲しい」など、具体的にお知らせください。',
+    href: `${NEW_ISSUE_URL}?labels=lesson-request&title=%5B%E6%95%99%E6%9D%90%E3%83%AA%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%5D+`,
+    cta: 'Issue でリクエスト',
+  },
+  {
+    icon: '⌖',
+    title: '機能の提案・不具合報告',
+    desc: '読書体験を良くするアイデア、サイトの動作で困った点など。スクリーンショット、ブラウザ・OS の情報を添えていただけると素早く対応できます。',
+    href: `${NEW_ISSUE_URL}?labels=feature%2Cbug&title=%5B%E6%A9%9F%E8%83%BD%E3%83%BB%E4%B8%8D%E5%85%B7%E5%90%88%5D+`,
+    cta: 'Issue で報告・提案',
+  },
+  {
+    icon: '⚙',
+    title: 'コードに貢献したい',
+    desc: '教材コンテンツ (Markdown)、Astro レイアウト、CSS、Pages Functions など、どこへの貢献も歓迎です。フォーク → ブランチ → Pull Request の流れで。',
+    href: `${REPO_URL}/blob/main/README.md`,
+    cta: 'README を読む',
+  },
+];
 ---
 
-<Base title="対話" description="コミュニティ・ディスカッション">
+<Base title="対話" description="教材についての感想・修正提案・追加リクエスト・コード貢献はすべて GitHub Issues で受け付けています。">
   <section class="section">
     <div class="section__heading">
       <h1>対話</h1>
       <span class="section__subtitle">COMMUNITY</span>
     </div>
     <p>
-      教材についての感想、現場での使い方、編集の提案などを共有する場所です。
-      GitHub の Discussions / Issues を活用していきます。
+      ひらくは <strong>オープンソース・オープンコンテンツ</strong> のプロジェクトです。
+      教材についてのご意見、修正の提案、新しい作品のリクエスト、コードへの貢献は、
+      すべて GitHub の <a href={ISSUES_URL} target="_blank" rel="noopener">Issues</a>
+      で受け付けています。Issue は <strong>誰でも</strong> 立てることができ、
+      GitHub アカウントさえあれば日本語でも英語でも構いません。
     </p>
+    <p class="cross-links">
+      <a href={REPO_URL} target="_blank" rel="noopener">📁 GitHub リポジトリ</a>
+      <span aria-hidden="true">・</span>
+      <a href={ISSUES_URL} target="_blank" rel="noopener">⚑ Issues 一覧</a>
+      <span aria-hidden="true">・</span>
+      <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noopener">© ライセンス</a>
+    </p>
+  </section>
 
-    <div class="empty-state">
-      <h3>準備中</h3>
-      <p>
-        当面は <a href="https://github.com/" target="_blank" rel="noopener">GitHub リポジトリ</a> の
-        Issues / Discussions をご利用ください。
-      </p>
+  <section class="section">
+    <div class="section__heading">
+      <h2>参加のチャンネル</h2>
+      <span class="section__subtitle">CHANNELS</span>
+    </div>
+    <div class="channel-grid">
+      {channels.map((c) => (
+        <article class="channel-card">
+          <div class="channel-card__icon" aria-hidden="true">{c.icon}</div>
+          <h3 class="channel-card__title">{c.title}</h3>
+          <p class="channel-card__desc">{c.desc}</p>
+          <a href={c.href} target="_blank" rel="noopener" class="btn btn--ghost channel-card__cta">
+            {c.cta} →
+          </a>
+        </article>
+      ))}
     </div>
   </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>Issue を立てるときのお願い</h2>
+      <span class="section__subtitle">GUIDELINES</span>
+    </div>
+    <ul class="guidelines">
+      <li>該当する教材ページの URL を貼っていただけると、特定が早くなります。</li>
+      <li>誤字・事実誤認の報告は、原典 (青空文庫など) のリンクも添えてもらえると助かります。</li>
+      <li>議論はやさしく、建設的に。教育の現場で使う方々が読む場所なので、攻撃的な言葉は避けます。</li>
+      <li>差別的表現を含む戦前教材の扱いについては、「注釈付きで残す／現代化する／不採用」のいずれかを編集会議で判断しています。具体的な改善提案を歓迎します。</li>
+      <li>個人情報・著作権侵害に関わるご報告は、Issue ではなく非公開チャンネル（GitHub のリポジトリオーナーへの直接連絡）からお願いします。</li>
+    </ul>
+  </section>
+
+  <style>
+    .cross-links { font-size: 0.95rem; }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .channel-card {
+      padding: 1.2rem;
+      background: var(--bg-soft);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+    }
+    .channel-card__icon {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+    .channel-card__title {
+      font-size: 1.05rem;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+    }
+    .channel-card__desc {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin: 0 0 1rem;
+      flex: 1;
+    }
+    .channel-card__cta {
+      align-self: flex-start;
+      font-size: 0.88rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    .guidelines {
+      padding-left: 1.2rem;
+      line-height: 1.7;
+    }
+    .guidelines li { margin: 0.4rem 0; }
+  </style>
 </Base>
