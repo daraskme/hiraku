@@ -3,8 +3,10 @@
  * OG画像（1200×630）を全教材ページ用に生成する。
  *
  * - 入力：src/content/*&#x2F;*.md の frontmatter
- * - 出力：dist/og/<collection>/<slug>.png
+ * - 出力：dist/og/<collection>/<slug>.webp（および互換用に <slug>.png）
+ * - デフォルト：dist/og/default.webp（トップページ・ライブラリ等の非教材ページ用）
  *
+ * Twitter/X・Facebook・Discord・Slack・LINE は WebP に対応済み（2020–）。
  * フォントは .fonts/ に置く。なければ jsDelivr から自動取得。
  */
 import { readFile, writeFile, mkdir, access, readdir } from 'node:fs/promises';
@@ -14,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import matter from 'gray-matter';
+import sharp from 'sharp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -227,6 +230,81 @@ function ogTree({ title, author, era, original_year, collectionLabel, classical 
   };
 }
 
+/**
+ * Satoriで作るデフォルトOG画像（教材以外のページ用）。
+ * トップ・ライブラリ・著者一覧などにすべて使われる。
+ */
+function defaultOgTree() {
+  const accent = '#b85c4a';
+  const logoBg = '#1d2a3d';
+  const cream = '#f3efe5';
+  const text = '#2a2018';
+  const sub = '#6b5d4f';
+
+  return {
+    type: 'div',
+    props: {
+      style: {
+        width: '1200px', height: '630px', display: 'flex', flexDirection: 'column',
+        background: cream, padding: '60px 80px', fontFamily: 'NotoSerifJP', color: text,
+      },
+      children: [
+        {
+          type: 'div',
+          props: {
+            style: { display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '60px' },
+            children: [
+              { type: 'div', props: {
+                style: { width: '80px', height: '80px', background: logoBg, color: cream, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', fontSize: '52px', fontWeight: 700, borderRadius: '8px' },
+                children: '啓',
+              } },
+              { type: 'div', props: {
+                style: { display: 'flex', flexDirection: 'column' },
+                children: [
+                  { type: 'div', props: { style: { fontSize: '42px', fontWeight: 700, letterSpacing: '0.04em' }, children: 'ひらく' } },
+                  { type: 'div', props: { style: { fontSize: '14px', letterSpacing: '0.18em', color: sub, fontFamily: 'NotoSansJP', marginTop: '4px' }, children: 'OPEN TEXTBOOKS' } },
+                ],
+              } },
+            ],
+          },
+        },
+        { type: 'div', props: {
+          style: { fontSize: '88px', fontWeight: 700, lineHeight: 1.25, marginBottom: '20px', display: 'flex' },
+          children: 'みんなの教科書を、',
+        } },
+        { type: 'div', props: {
+          style: { fontSize: '88px', fontWeight: 700, lineHeight: 1.25, marginBottom: '40px', display: 'flex' },
+          children: [
+            { type: 'span', props: { style: { display: 'flex' }, children: 'ふたたび' } },
+            { type: 'span', props: { style: { display: 'flex', color: accent }, children: 'ひらく' } },
+            { type: 'span', props: { style: { display: 'flex' }, children: '。' } },
+          ],
+        } },
+        { type: 'div', props: {
+          style: { marginTop: 'auto', borderTop: `1px solid ${sub}`, paddingTop: '24px', display: 'flex', alignItems: 'baseline' },
+          children: [
+            { type: 'div', props: { style: { fontSize: '24px', color: sub }, children: '著作権切れの教科書を、現行学習指導要領（平成29年告示）に沿って編集' } },
+            { type: 'div', props: { style: { marginLeft: 'auto', fontSize: '18px', letterSpacing: '0.12em', color: sub, fontFamily: 'NotoSansJP' }, children: 'hiraku.pages.dev' } },
+          ],
+        } },
+      ],
+    },
+  };
+}
+
+async function renderToPng(tree, serifFont, sansFont) {
+  const svg = await satori(tree, {
+    width: 1200, height: 630,
+    fonts: [
+      { name: 'NotoSerifJP', data: serifFont, weight: 700, style: 'normal' },
+      { name: 'NotoSansJP', data: sansFont, weight: 400, style: 'normal' },
+    ],
+  });
+  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 }, font: { loadSystemFonts: false } });
+  return resvg.render().asPng();
+}
+
 async function run() {
   await ensureFonts();
 
@@ -236,10 +314,19 @@ async function run() {
   ]);
 
   const lessons = await loadAllLessons();
-  console.log(`Generating OG images for ${lessons.length} lessons...`);
+  console.log(`Generating OG images for ${lessons.length} lessons + 1 default...`);
 
   const outRoot = join(ROOT, 'dist', 'og');
   await mkdir(outRoot, { recursive: true });
+
+  // ─── Default OG image (used by home/library/about/etc.) ───
+  {
+    const png = await renderToPng(defaultOgTree(), serifFont, sansFont);
+    // Write WebP (preferred) + PNG (legacy compat)
+    const webp = await sharp(png).webp({ quality: 88, effort: 6 }).toBuffer();
+    await writeFile(join(outRoot, 'default.webp'), webp);
+    await writeFile(join(outRoot, 'default.png'), png);
+  }
 
   let count = 0;
   for (const { collection, slug, data } of lessons) {
@@ -252,28 +339,17 @@ async function run() {
       classical: !!data.classical,
     });
 
-    const svg = await satori(tree, {
-      width: 1200,
-      height: 630,
-      fonts: [
-        { name: 'NotoSerifJP', data: serifFont, weight: 700, style: 'normal' },
-        { name: 'NotoSansJP', data: sansFont, weight: 400, style: 'normal' },
-      ],
-    });
-
-    const resvg = new Resvg(svg, {
-      fitTo: { mode: 'width', value: 1200 },
-      font: { loadSystemFonts: false },
-    });
-    const png = resvg.render().asPng();
+    const png = await renderToPng(tree, serifFont, sansFont);
+    const webp = await sharp(png).webp({ quality: 88, effort: 6 }).toBuffer();
 
     const outDir = join(outRoot, collection);
     await mkdir(outDir, { recursive: true });
-    await writeFile(join(outDir, `${slug}.png`), png);
+    await writeFile(join(outDir, `${slug}.webp`), webp);
+    await writeFile(join(outDir, `${slug}.png`), png); // PNG fallback for older clients
     count++;
   }
 
-  console.log(`✓ Generated ${count} OG images at dist/og/`);
+  console.log(`✓ Generated ${count} lesson OG images + 1 default (WebP+PNG) at dist/og/`);
 }
 
 run().catch((err) => {

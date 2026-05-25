@@ -17,11 +17,21 @@ const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`;
 const containerClass = wide ? 'container container--wide' : 'container';
 
 // 教材ページの URL パターンを検知して OG 画像を自動選択
+// WebP を主、PNG をフォールバック（古いクライアント互換）として出力
 const path = Astro.url.pathname;
 const lessonMatch = path.match(/^\/(?:library|reader)\/([^/]+)\/([^/]+)\/?$/);
 const computedOgImage = ogImage
-  || (lessonMatch ? `/og/${lessonMatch[1]}/${lessonMatch[2]}.png` : '/og/default.svg');
-const ogImageUrl = new URL(computedOgImage, Astro.site || 'https://hiraku-5cb.pages.dev/').toString();
+  || (lessonMatch ? `/og/${lessonMatch[1]}/${lessonMatch[2]}.webp` : '/og/default.webp');
+const computedOgImagePng = ogImage
+  || (lessonMatch ? `/og/${lessonMatch[1]}/${lessonMatch[2]}.png` : '/og/default.png');
+const siteUrl = Astro.site || new URL('https://hiraku-5cb.pages.dev/');
+const ogImageUrl = new URL(computedOgImage, siteUrl).toString();
+const ogImagePngUrl = new URL(computedOgImagePng, siteUrl).toString();
+const ogImageType = ogImage ? (ogImage.endsWith('.png') ? 'image/png' : ogImage.endsWith('.jpg') || ogImage.endsWith('.jpeg') ? 'image/jpeg' : 'image/webp') : 'image/webp';
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageAlt = title === siteName
+  ? 'ひらく — 著作権切れの教科書を、現行学習指導要領（平成29年告示）に沿って再編集して公開するオープン教材プロジェクト'
+  : `${title} — ひらく（教材）`;
 ---
 
 <!doctype html>
@@ -33,14 +43,37 @@ const ogImageUrl = new URL(computedOgImage, Astro.site || 'https://hiraku-5cb.pa
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonicalUrl} />
+
+    {/* ─── Open Graph (Facebook, LINE, Slack, Discord, Telegram, etc.) ─── */}
     <meta property="og:title" content={fullTitle} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="ja_JP" />
+    {/* WebP を主に。互換性のため PNG も併記。og:image を複数出すと最初に処理可能なものが選ばれる */}
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content={ogImageType} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    {ogImageUrl !== ogImagePngUrl && (
+      <>
+        <meta property="og:image" content={ogImagePngUrl} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={ogImageAlt} />
+      </>
+    )}
+
+    {/* ─── Twitter / X Cards ─── */}
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    {description && <meta name="twitter:description" content={description} />}
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="alternate" type="application/rss+xml" title="ひらく — 新着教材" href="/feed.xml" />
     <meta name="theme-color" content="#1d2a3d" media="(prefers-color-scheme: dark)" />
