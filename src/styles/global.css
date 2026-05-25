@@ -954,6 +954,60 @@ blockquote {
   object-fit: cover;
 }
 
+/* ─── 本文ヘッダーと読み上げコントロール ───────── */
+.body-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0 0.6rem;
+  flex-wrap: wrap;
+}
+.tts-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.tts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.tts-btn:hover {
+  background: var(--accent);
+  color: var(--logo-fg);
+}
+.tts-btn--small {
+  padding: 0.35rem 0.7rem;
+  border-color: var(--border);
+  color: var(--text-soft);
+}
+.tts-btn--small:hover {
+  background: var(--bg-soft);
+  border-color: var(--text-soft);
+  color: var(--text);
+}
+.tts-select {
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-soft);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.tts-select:hover { border-color: var(--text-soft); }
+
 /* ─── 挿絵ギャラリー ─────────────────────────────── */
 .illustrations-section {
   margin-top: 2.5rem;

@@ -122,6 +122,11 @@ const guidelineDoc = d.school_stage === 'kotoko'
               ? クイズで考える
             </a>
           )}
+          {d.glossary && d.glossary.length > 0 && (
+            <a href={`/flashcards/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link" title="語句をフラッシュカードで覚える">
+              ▣ 単語カード
+            </a>
+          )}
           <a href={`/worksheet/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link" title="A4 印刷用のワークシート">
             ⎙ ワークシート印刷
           </a>
@@ -179,8 +184,26 @@ const guidelineDoc = d.school_stage === 'kotoko'
     )}
 
     <section aria-label="本文">
-      <h2>本文</h2>
-      <slot />
+      <div class="body-header no-print">
+        <h2 style="margin: 0;">本文</h2>
+        <div class="tts-controls" data-tts-controls hidden>
+          <button type="button" class="tts-btn" data-tts-play title="本文を読み上げる" aria-label="読み上げ">
+            <span data-tts-icon-play aria-hidden="true">♪</span>
+            <span data-tts-icon-pause aria-hidden="true" hidden>❚❚</span>
+            <span class="tts-btn__label" data-tts-label>読み上げ</span>
+          </button>
+          <button type="button" class="tts-btn tts-btn--small" data-tts-stop title="停止" aria-label="停止" hidden>■</button>
+          <select class="tts-select" data-tts-rate aria-label="読み上げ速度">
+            <option value="0.8">ゆっくり</option>
+            <option value="1" selected>標準</option>
+            <option value="1.2">速め</option>
+            <option value="1.5">速い</option>
+          </select>
+        </div>
+      </div>
+      <div data-tts-body>
+        <slot />
+      </div>
     </section>
 
     {d.illustrations && d.illustrations.length > 0 && (
@@ -291,4 +314,122 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </ul>
     </section>
   </article>
+
+  <script is:inline>
+    // 本文読み上げ（Web Speech API）。日本語の SpeechSynthesis 音声があるブラウザのみで動作。
+    (function () {
+      if (!('speechSynthesis' in window)) return;
+      const controls = document.querySelector('[data-tts-controls]');
+      const body = document.querySelector('[data-tts-body]');
+      if (!controls || !body) return;
+
+      // 日本語音声が利用できるか確認（voices は非同期で来る環境がある）
+      function pickJapaneseVoice() {
+        const voices = speechSynthesis.getVoices();
+        return voices.find((v) => v.lang.startsWith('ja')) || voices.find((v) => /Japanese|Kyoko|Otoya/i.test(v.name));
+      }
+      function tryShowControls() {
+        const v = pickJapaneseVoice();
+        if (v) { controls.hidden = false; controls.dataset.ttsVoice = v.name; }
+      }
+      tryShowControls();
+      speechSynthesis.onvoiceschanged = tryShowControls;
+
+      const playBtn = controls.querySelector('[data-tts-play]');
+      const stopBtn = controls.querySelector('[data-tts-stop]');
+      const iconPlay = controls.querySelector('[data-tts-icon-play]');
+      const iconPause = controls.querySelector('[data-tts-icon-pause]');
+      const labelEl = controls.querySelector('[data-tts-label]');
+      const rateSelect = controls.querySelector('[data-tts-rate]');
+
+      // 本文を ruby 抜きの素文字列で取得し、句読点や改行で文単位に分割する
+      function extractText() {
+        const clone = body.cloneNode(true);
+        // <rt> は読み仮名なので除去（ruby の親文字だけ残す）
+        clone.querySelectorAll('rt, rp').forEach((el) => el.remove());
+        // 連続改行や空行を正規化
+        return clone.textContent.replace(/\s+/g, ' ').trim();
+      }
+      function splitIntoSentences(text) {
+        // 「。」「！」「？」「.」「!」「?」で区切る。区切り文字は残す。
+        const parts = text.split(/(?<=[。．！？!?])\s*/);
+        return parts.filter((s) => s.trim().length > 0);
+      }
+
+      const sentences = splitIntoSentences(extractText());
+      let idx = 0;
+      let isPlaying = false;
+      let isPaused = false;
+
+      function utter(s) {
+        const u = new SpeechSynthesisUtterance(s);
+        u.lang = 'ja-JP';
+        u.rate = parseFloat(rateSelect.value);
+        u.pitch = 1;
+        const voiceName = controls.dataset.ttsVoice;
+        if (voiceName) {
+          const v = speechSynthesis.getVoices().find((vv) => vv.name === voiceName);
+          if (v) u.voice = v;
+        }
+        return u;
+      }
+
+      function speakFrom(i) {
+        speechSynthesis.cancel();
+        if (i >= sentences.length) { reset(); return; }
+        idx = i;
+        const u = utter(sentences[i]);
+        u.onend = () => {
+          if (isPlaying && !isPaused) speakFrom(i + 1);
+        };
+        u.onerror = () => reset();
+        speechSynthesis.speak(u);
+      }
+
+      function setPlayingUI(playing) {
+        isPlaying = playing;
+        iconPlay.hidden = playing;
+        iconPause.hidden = !playing;
+        labelEl.textContent = playing ? '一時停止' : (idx > 0 && idx < sentences.length ? '続きから再生' : '読み上げ');
+        stopBtn.hidden = !playing && idx === 0;
+      }
+      function reset() {
+        speechSynthesis.cancel();
+        idx = 0;
+        isPlaying = false;
+        isPaused = false;
+        setPlayingUI(false);
+        stopBtn.hidden = true;
+      }
+
+      playBtn.addEventListener('click', () => {
+        if (isPlaying && !isPaused) {
+          speechSynthesis.pause();
+          isPaused = true;
+          setPlayingUI(false);
+          stopBtn.hidden = false;
+          return;
+        }
+        if (isPaused) {
+          speechSynthesis.resume();
+          isPaused = false;
+          setPlayingUI(true);
+          return;
+        }
+        // 新規再生
+        setPlayingUI(true);
+        speakFrom(idx);
+      });
+      stopBtn.addEventListener('click', reset);
+      rateSelect.addEventListener('change', () => {
+        if (isPlaying) {
+          // rate 変更時は現在の文から speak し直し
+          speakFrom(idx);
+        }
+      });
+
+      // ページを離れたら停止
+      window.addEventListener('beforeunload', () => speechSynthesis.cancel());
+    })();
+  </script>
 </Base>

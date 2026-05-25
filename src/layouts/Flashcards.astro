@@ -1,0 +1,445 @@
+---
+/**
+ * Flashcards レイアウト — 教材の glossary を 1 枚ずつめくるフラッシュカード。
+ *
+ * - 表面：語句（term）　裏面：意味（meaning）
+ * - クリック/タップ/スペースキーでカードをめくる
+ * - 「覚えた」「もう一度」で次に進む
+ * - 「覚えた」状態は localStorage に保存され、次回開いた時にスキップ
+ * - シャッフル / 順序固定 / 「覚えていない」だけリプレイの切替
+ */
+import type { CollectionEntry } from 'astro:content';
+import '../styles/global.css';
+
+type AnyLesson =
+  | CollectionEntry<'kokugo3'>
+  | CollectionEntry<'kokugo4'>
+  | CollectionEntry<'kokugo6'>
+  | CollectionEntry<'chugaku1'>
+  | CollectionEntry<'chugaku2'>
+  | CollectionEntry<'kotoko1'>
+  | CollectionEntry<'chugakurika1'>
+  | CollectionEntry<'kotokoeigo1'>
+  | CollectionEntry<'sansu5'>
+  | CollectionEntry<'chugakukomin3'>;
+
+interface Props {
+  lesson: AnyLesson;
+  collection: string;
+}
+
+const { lesson, collection } = Astro.props;
+const d = lesson.data;
+const lessonUrl = `/library/${collection}/${lesson.id}`;
+const storageKey = `hiraku.flashcards.v1.${collection}.${lesson.id}`;
+const glossary = d.glossary || [];
+---
+
+<!doctype html>
+<html lang="ja" data-flashcards-mode>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{d.title} — 単語カード | ひらく</title>
+    <meta name="description" content={`「${d.title}」の語句を一枚ずつめくって覚える単語カード`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap"
+    />
+    <style>
+      :root[data-flashcards-mode] body { background: var(--bg); margin: 0; }
+      .fc-shell { min-height: 100vh; display: flex; flex-direction: column; }
+      .fc-topbar {
+        position: sticky; top: 0; z-index: 10;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.7rem 1rem; gap: 1rem;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+      .fc-topbar a, .fc-topbar button {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 36px; min-width: 36px; padding: 0 0.9rem;
+        border: 1px solid var(--border); border-radius: 999px;
+        background: transparent; color: var(--text-soft);
+        font-family: var(--font-sans); font-size: 0.85rem;
+        text-decoration: none; cursor: pointer;
+      }
+      .fc-topbar button:hover, .fc-topbar a:hover {
+        background: var(--bg-soft); color: var(--text);
+      }
+      .fc-topbar__title {
+        font-family: var(--font-serif); font-weight: 700; color: var(--text);
+        max-width: 50vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .fc-progress {
+        height: 4px; background: var(--bg-soft); position: relative;
+      }
+      .fc-progress__bar {
+        position: absolute; left: 0; top: 0; height: 100%; background: var(--accent);
+        transition: width 0.25s ease-out;
+      }
+
+      .fc-main {
+        flex: 1;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 1.5rem 1rem 8rem;
+      }
+      .fc-meta {
+        font-family: var(--font-mono); font-size: 0.78rem;
+        letter-spacing: 0.1em; color: var(--text-faint);
+        margin-bottom: 0.8rem;
+      }
+
+      .fc-card {
+        width: min(540px, 100%);
+        aspect-ratio: 5 / 3;
+        perspective: 1200px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .fc-card__inner {
+        position: relative; width: 100%; height: 100%;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+      }
+      .fc-card.is-flipped .fc-card__inner {
+        transform: rotateY(180deg);
+      }
+      .fc-card__face {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 1.5rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .fc-card__face--back {
+        transform: rotateY(180deg);
+        background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-soft) 100%);
+      }
+      .fc-card__term {
+        font-family: var(--font-serif);
+        font-size: clamp(1.5rem, 4vw, 2.4rem);
+        font-weight: 700;
+        text-align: center;
+        line-height: 1.35;
+        color: var(--text);
+        word-break: keep-all;
+      }
+      .fc-card__hint {
+        position: absolute; bottom: 1rem;
+        font-family: var(--font-mono); font-size: 0.7rem;
+        letter-spacing: 0.1em; color: var(--text-faint);
+        text-transform: uppercase;
+      }
+      .fc-card__meaning {
+        font-family: var(--font-serif);
+        font-size: clamp(0.95rem, 2vw, 1.1rem);
+        line-height: 1.8;
+        color: var(--text);
+        max-width: 92%;
+        text-align: center;
+      }
+
+      .fc-controls {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        display: flex; gap: 1rem; padding: 1rem;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid var(--border);
+        justify-content: center;
+      }
+      .fc-btn {
+        flex: 1; max-width: 220px;
+        padding: 0.9rem 1.4rem;
+        border: 1px solid var(--border); border-radius: 999px;
+        background: var(--bg-elevated); color: var(--text);
+        font-family: var(--font-sans); font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 0.35em;
+        transition: transform 0.06s;
+      }
+      .fc-btn:active { transform: scale(0.97); }
+      .fc-btn--again {
+        background: #b85c4a; border-color: #b85c4a; color: white;
+      }
+      .fc-btn--known {
+        background: #5b8c5a; border-color: #5b8c5a; color: white;
+      }
+      .fc-btn--neutral { background: var(--bg-elevated); }
+      .fc-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+      .fc-options {
+        display: flex; gap: 0.6rem; align-items: center;
+        font-family: var(--font-sans); font-size: 0.82rem;
+        color: var(--text-soft);
+      }
+      .fc-option-btn {
+        padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px;
+        background: transparent; color: var(--text-soft); cursor: pointer;
+        font-size: 0.78rem; font-family: var(--font-sans);
+      }
+      .fc-option-btn[aria-pressed="true"] {
+        background: var(--logo-bg); color: var(--logo-fg); border-color: var(--logo-bg);
+      }
+
+      .fc-done {
+        text-align: center; padding: 3rem 1.5rem;
+        max-width: 560px;
+      }
+      .fc-done h2 {
+        font-family: var(--font-serif); font-size: 1.8rem; margin: 0 0 0.5rem;
+      }
+      .fc-done__stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.8rem;
+        margin: 1.5rem 0;
+      }
+      .fc-done__stat {
+        padding: 1rem; border-radius: 10px;
+        background: var(--bg-elevated); border: 1px solid var(--border);
+      }
+      .fc-done__stat-num {
+        font-size: 1.8rem; font-family: var(--font-serif); font-weight: 700;
+      }
+      .fc-done__stat-label {
+        font-family: var(--font-mono); font-size: 0.72rem;
+        letter-spacing: 0.1em; color: var(--text-soft);
+      }
+
+      .fc-empty {
+        text-align: center; padding: 4rem 1rem; color: var(--text-soft);
+      }
+
+      @media (max-width: 600px) {
+        .fc-card { aspect-ratio: 4 / 3; }
+        .fc-controls { padding: 0.7rem; gap: 0.6rem; }
+        .fc-btn { padding: 0.7rem 0.8rem; font-size: 0.85rem; }
+        .fc-topbar__title { max-width: 40vw; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fc-shell">
+      <header class="fc-topbar" role="banner">
+        <div style="display: flex; align-items: center; gap: 0.6rem; min-width: 0;">
+          <a href={lessonUrl} title="教材ページへ戻る" aria-label="戻る">× 戻る</a>
+          <span class="fc-topbar__title">{d.title} — 単語カード</span>
+        </div>
+        <div class="fc-options" data-fc-options>
+          <button type="button" class="fc-option-btn" data-fc-shuffle aria-pressed="false">シャッフル</button>
+          <button type="button" class="fc-option-btn" data-fc-reset>リセット</button>
+        </div>
+      </header>
+
+      <div class="fc-progress" aria-hidden="true">
+        <div class="fc-progress__bar" data-fc-progress style="width: 0%"></div>
+      </div>
+
+      <main class="fc-main">
+        {glossary.length === 0 ? (
+          <div class="fc-empty">
+            <h2>この教材には語句が設定されていません</h2>
+            <p><a href={lessonUrl}>教材ページへ戻る</a></p>
+          </div>
+        ) : (
+          <>
+            <p class="fc-meta" data-fc-counter>0 / {glossary.length}</p>
+            <div class="fc-card" data-fc-card role="button" tabindex="0" aria-label="カードをめくる">
+              <div class="fc-card__inner" data-fc-inner>
+                <div class="fc-card__face fc-card__face--front">
+                  <p class="fc-card__term" data-fc-term>—</p>
+                  <p class="fc-card__hint">クリックで意味を見る</p>
+                </div>
+                <div class="fc-card__face fc-card__face--back">
+                  <p class="fc-card__meaning" data-fc-meaning>—</p>
+                </div>
+              </div>
+            </div>
+            <div class="fc-done" data-fc-done hidden>
+              <h2>すべての単語を見ました</h2>
+              <p style="color: var(--text-soft);">
+                これまでの学習結果は localStorage に保存されています。
+                「もう一度」のカードだけをもう一周復習することもできます。
+              </p>
+              <div class="fc-done__stats">
+                <div class="fc-done__stat"><div class="fc-done__stat-num" style="color:#5b8c5a" data-fc-stat-known>0</div><div class="fc-done__stat-label">覚えた</div></div>
+                <div class="fc-done__stat"><div class="fc-done__stat-num" style="color:#b85c4a" data-fc-stat-again>0</div><div class="fc-done__stat-label">もう一度</div></div>
+                <div class="fc-done__stat"><div class="fc-done__stat-num" data-fc-stat-total>0</div><div class="fc-done__stat-label">全カード</div></div>
+              </div>
+              <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="fc-btn fc-btn--neutral" data-fc-replay-again>もう一度のカードだけ復習</button>
+                <a href={lessonUrl} class="fc-btn fc-btn--neutral">教材へ戻る</a>
+              </div>
+            </div>
+          </>
+        )}
+      </main>
+
+      {glossary.length > 0 && (
+        <nav class="fc-controls" data-fc-controls aria-label="カード操作">
+          <button type="button" class="fc-btn fc-btn--again" data-fc-mark="again">もう一度</button>
+          <button type="button" class="fc-btn fc-btn--known" data-fc-mark="known">覚えた</button>
+        </nav>
+      )}
+    </div>
+
+    <script is:inline define:vars={{ storageKey, glossary }}>
+      (function () {
+        if (!glossary || glossary.length === 0) return;
+
+        const inner = document.querySelector('[data-fc-inner]');
+        const card = document.querySelector('[data-fc-card]');
+        const termEl = document.querySelector('[data-fc-term]');
+        const meaningEl = document.querySelector('[data-fc-meaning]');
+        const counter = document.querySelector('[data-fc-counter]');
+        const progress = document.querySelector('[data-fc-progress]');
+        const done = document.querySelector('[data-fc-done]');
+        const shuffleBtn = document.querySelector('[data-fc-shuffle]');
+        const resetBtn = document.querySelector('[data-fc-reset]');
+        const replayBtn = document.querySelector('[data-fc-replay-again]');
+        const controls = document.querySelector('[data-fc-controls]');
+
+        // state: { [index]: 'known'|'again', shuffle: bool }
+        function loadState() {
+          try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) { return {}; }
+        }
+        function saveState() {
+          try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {}
+        }
+        let state = loadState();
+        let shuffle = !!state.__shuffle;
+
+        // どのカードを今回の round で見せるか
+        let queue = [];
+        let pos = 0;
+        let flipped = false;
+
+        function buildQueue(filterAgainOnly = false) {
+          const indices = glossary.map((_, i) => i);
+          let filtered = indices;
+          if (filterAgainOnly) {
+            filtered = indices.filter((i) => state[i] === 'again');
+          } else {
+            // 既に「覚えた」になっているものはスキップ
+            filtered = indices.filter((i) => state[i] !== 'known');
+          }
+          if (filtered.length === 0) filtered = indices; // 全部スキップだったら全件
+          if (shuffle) {
+            for (let i = filtered.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+            }
+          }
+          queue = filtered;
+          pos = 0;
+        }
+
+        function showCard() {
+          if (pos >= queue.length) {
+            showDone();
+            return;
+          }
+          const idx = queue[pos];
+          const item = glossary[idx];
+          termEl.textContent = item.term;
+          meaningEl.textContent = item.meaning;
+          flipped = false;
+          card.classList.remove('is-flipped');
+          counter.textContent = `${pos + 1} / ${queue.length}`;
+          progress.style.width = `${Math.round(((pos) / queue.length) * 100)}%`;
+          done.hidden = true;
+          card.hidden = false;
+          counter.hidden = false;
+          controls.style.display = '';
+        }
+
+        function showDone() {
+          done.hidden = false;
+          card.hidden = true;
+          counter.hidden = true;
+          progress.style.width = '100%';
+          controls.style.display = 'none';
+          let known = 0, again = 0;
+          for (let i = 0; i < glossary.length; i++) {
+            if (state[i] === 'known') known++;
+            else if (state[i] === 'again') again++;
+          }
+          document.querySelector('[data-fc-stat-known]').textContent = known;
+          document.querySelector('[data-fc-stat-again]').textContent = again;
+          document.querySelector('[data-fc-stat-total]').textContent = glossary.length;
+          replayBtn.disabled = again === 0;
+          replayBtn.style.opacity = again === 0 ? 0.4 : 1;
+        }
+
+        function flip() {
+          flipped = !flipped;
+          card.classList.toggle('is-flipped', flipped);
+        }
+
+        function mark(label) {
+          const idx = queue[pos];
+          state[idx] = label;
+          saveState();
+          pos++;
+          showCard();
+        }
+
+        card.addEventListener('click', flip);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); }
+        });
+
+        controls.addEventListener('click', (e) => {
+          const t = e.target.closest('[data-fc-mark]');
+          if (t) mark(t.dataset.fcMark);
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          if (done.hidden === false) return;
+          if (e.key === '1' || e.key === 'a') mark('again');
+          else if (e.key === '2' || e.key === 'k' || e.key === 'ArrowRight') mark('known');
+        });
+
+        shuffleBtn.addEventListener('click', () => {
+          shuffle = !shuffle;
+          shuffleBtn.setAttribute('aria-pressed', String(shuffle));
+          state.__shuffle = shuffle;
+          saveState();
+          buildQueue();
+          showCard();
+        });
+        shuffleBtn.setAttribute('aria-pressed', String(shuffle));
+
+        resetBtn.addEventListener('click', () => {
+          if (confirm('この教材の単語カードの「覚えた」「もう一度」の記録をすべて消去します。よろしいですか？')) {
+            try { localStorage.removeItem(storageKey); } catch (_) {}
+            state = {};
+            shuffle = false;
+            shuffleBtn.setAttribute('aria-pressed', 'false');
+            buildQueue();
+            showCard();
+          }
+        });
+
+        replayBtn.addEventListener('click', () => {
+          buildQueue(true);
+          showCard();
+        });
+
+        buildQueue();
+        showCard();
+      })();
+    </script>
+  </body>
+</html>
