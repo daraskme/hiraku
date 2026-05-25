@@ -14,7 +14,7 @@ compatibility_date = "2025-01-01"
 # 本番値は Cloudflare ダッシュボード「Settings → Environment variables」で
 # Production / Preview 別に設定する想定。ここはローカル wrangler dev 用のダミー。
 [vars]
-GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_ID = "525872082477-6chggap23l8giuako66qcufs13qtlmqk.apps.googleusercontent.com"
 SESSION_TTL_DAYS = "30"
 
 # ─── KV バインディング ───
@@ -23,5 +23,5 @@ SESSION_TTL_DAYS = "30"
 # 初回セットアップ手順は SETUP.md を参照。
 [[kv_namespaces]]
 binding = "HIRAKU_KV"
-id = "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
-preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+id = "212cc908837d4b8f88c94b782adc2953"
+preview_id = "d4ce89915c6b4229848186c20b040cfa"

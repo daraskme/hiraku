@@ -26,6 +26,14 @@ jobs:
 
       - name: Build site (Astro + Pagefind)
         run: npm run build
+        env:
+          # Google ログインボタンをクライアント JS に焼き込むためのビルド時変数。
+          # GitHub: Settings → Secrets and variables → Actions → Variables タブで
+          # PUBLIC_GOOGLE_CLIENT_ID という名前のリポジトリ変数を追加してください。
+          # 値が公開値 (Google OAuth Client ID) なので「シークレット」ではなく
+          # 「Variable」が適切です。未設定でもビルドは通り、ログイン機能だけが
+          # 無効化されます (オフラインファースト設計)。
+          PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.PUBLIC_GOOGLE_CLIENT_ID }}
 
       - name: Compute single-line commit subject (ASCII-safe)
         id: subject
