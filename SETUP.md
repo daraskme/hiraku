@@ -22,11 +22,22 @@
    - Scopes: `openid`, `email`, `profile` のみで十分
 3. **「APIs & Services → Credentials」 → 「+ CREATE CREDENTIALS → OAuth client ID」**
    - Application type: **Web application**
-   - **Authorized JavaScript origins**:
+   - **Authorized JavaScript origins** (とても重要 — ここに登録されてない origin からのログインは Google が拒否します):
      - 開発時: `http://localhost:4321`（Astro dev のポート。`wrangler pages dev` を使う場合は `http://localhost:8788` も追加）
-     - 本番: `https://<your-pages-domain>.pages.dev` および独自ドメイン
+     - **本番**: `https://hiraku-5cb.pages.dev` (Cloudflare Pages のデフォルト URL)
+     - 独自ドメインを使う場合: そのドメインも追加（`https://example.com`）
+     - プレビューデプロイで動作確認したい場合: `https://*.hiraku.pages.dev` のようなワイルドカードは Google が認めないため、必要なプレビュー URL を一つずつ追加
    - **Authorized redirect URIs** は不要（GIS の credential フローは redirect しない）
 4. 生成された **Client ID** をコピー (`xxxxx.apps.googleusercontent.com` 形式)
+
+### Authorized origins の確認方法
+
+ログインボタンが本番でだけ動かない、`The given origin is not allowed for the given client ID` のようなエラーが出るときは、ここが疑わしいです：
+
+1. <https://console.cloud.google.com/apis/credentials> を開く
+2. 該当の OAuth 2.0 Client ID をクリック
+3. **「Authorized JavaScript origins」** の一覧に、ブラウザの URL バーに表示されているドメイン (スキーム `https://` 含む、パスは除く) がそのまま入っているか確認
+4. 足りなければ追加して「保存」 — 反映まで数分〜10分ほどかかる場合があります
 
 ## 2. Cloudflare で KV namespace を作成
 

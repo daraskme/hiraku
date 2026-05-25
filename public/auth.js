@@ -201,6 +201,15 @@
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     return resp.json();
   }
+  async function apiDelete(path) {
+    const resp = await fetch(path, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+      cache: 'no-store',
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.json();
+  }
 
   // ─── 同期：pull → merge → push (サインイン直後 / 明示的呼び出し) ───
   async function forceSync() {
@@ -227,6 +236,7 @@
 
   // ─── 同期：localStorage 変更時の debounced push ───
   let scheduleTimer = null;
+  let pendingPush = false;  // オフラインで貯まった変更を online 復帰時に push するためのフラグ
   // markModified:
   //   true  (default) — ユーザー操作起点の変更。lastModified を Date.now() に更新する
   //   false           — 別タブの storage event 起点。タイムスタンプは触らない
@@ -237,18 +247,29 @@
     }
     if (!currentUser) return;
     if (scheduleTimer) clearTimeout(scheduleTimer);
-    scheduleTimer = setTimeout(async () => {
-      scheduleTimer = null;
-      try {
-        const state = readLocalState();
-        const r = await apiPut('/api/sync', state);
-        try { localStorage.setItem(LAST_SYNC_KEY, String(r.serverUpdatedAt || Date.now())); } catch (_) {}
-        try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: true } })); } catch (_) {}
-      } catch (e) {
-        // 失敗時は次回試行に任せる
-        try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: false, error: String(e) } })); } catch (_) {}
-      }
-    }, 2500);
+    scheduleTimer = setTimeout(doPush, 2500);
+  }
+
+  async function doPush() {
+    scheduleTimer = null;
+    if (!currentUser) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      // オフラインなので保留。online 復帰時に再試行する
+      pendingPush = true;
+      try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: false, offline: true } })); } catch (_) {}
+      return;
+    }
+    try {
+      const state = readLocalState();
+      const r = await apiPut('/api/sync', state);
+      pendingPush = false;
+      try { localStorage.setItem(LAST_SYNC_KEY, String(r.serverUpdatedAt || Date.now())); } catch (_) {}
+      try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: true } })); } catch (_) {}
+    } catch (e) {
+      // ネットワークエラー以外も含むが、いずれにせよ次回 (online 復帰 or 次の変更) で再試行
+      pendingPush = true;
+      try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: false, error: String(e) } })); } catch (_) {}
+    }
   }
 
   // ─── 認証API ───
@@ -280,6 +301,21 @@
     dispatchAuthChange();
   }
 
+  // クラウド上の自分のデータを KV から削除する。ローカルは残す。
+  // (削除後すぐに scheduleSync が走るとローカルから再 push されてしまうので、
+  //  保留中のタイマーをキャンセルし、lastModified もクリアして、次の操作までは
+  //  サーバが空のままになるようにする)
+  async function deleteCloudData() {
+    if (!currentUser) throw new Error('not_signed_in');
+    if (scheduleTimer) { clearTimeout(scheduleTimer); scheduleTimer = null; }
+    await apiDelete('/api/sync');
+    try {
+      localStorage.removeItem(LOCAL_MODIFIED_KEY);
+      localStorage.removeItem(LAST_SYNC_KEY);
+    } catch (_) {}
+    try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: true, deleted: true } })); } catch (_) {}
+  }
+
   async function refreshUser() {
     try {
       const r = await apiGet('/api/auth/me');
@@ -305,6 +341,7 @@
     scheduleSync,
     forceSync,
     refreshUser,
+    deleteCloudData,
     // 内部実装を露出 (デバッグ用)
     _readLocalState: readLocalState,
   };
@@ -329,6 +366,14 @@
   // タブ復帰時にユーザー情報を refresh
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') refreshUser();
+  });
+
+  // オンライン復帰時：保留中の push があれば実行
+  window.addEventListener('online', () => {
+    if (currentUser && pendingPush) doPush();
+  });
+  window.addEventListener('offline', () => {
+    try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: false, offline: true } })); } catch (_) {}
   });
 
   // 初期化：me を聞いて状態を整える

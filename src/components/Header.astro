@@ -116,6 +116,20 @@ const authEnabled = !!googleClientId;
               <button type="button" class="user-panel__signout" data-user-signout>
                 ログアウト
               </button>
+              <details class="user-panel__danger">
+                <summary>クラウドデータの管理…</summary>
+                <button
+                  type="button"
+                  class="user-panel__delete-cloud"
+                  data-user-delete-cloud
+                >
+                  クラウドの学習データを削除
+                </button>
+                <p class="user-panel__danger-note">
+                  サーバ上の進捗・ブックマーク・履歴・設定を完全に削除します。
+                  この端末のデータは残ります。元に戻せません。
+                </p>
+              </details>
             </div>
           </div>
         </div>
@@ -475,22 +489,55 @@ const authEnabled = !!googleClientId;
     // 同期ステータス表示
     const syncStatus = userPanel.querySelector<HTMLElement>('[data-user-sync-status]');
     let syncTimer: number | null = null;
+    function setSyncStatus(text: string, classMod: string = '') {
+      if (!syncStatus) return;
+      syncStatus.textContent = text;
+      syncStatus.classList.remove('user-panel__sync-status--ok', 'user-panel__sync-status--err', 'user-panel__sync-status--offline');
+      if (classMod) syncStatus.classList.add(classMod);
+    }
     window.addEventListener('hiraku:sync', (e: any) => {
       if (!syncStatus) return;
-      const ok = e.detail && e.detail.ok;
-      syncStatus.textContent = ok ? '同期しました' : '同期に失敗 — オフラインかも';
+      const d = e.detail || {};
+      if (d.deleted) {
+        setSyncStatus('クラウドのデータを削除しました', 'user-panel__sync-status--ok');
+      } else if (d.offline || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
+        setSyncStatus('オフライン — 復帰時に同期します', 'user-panel__sync-status--offline');
+      } else if (d.ok) {
+        setSyncStatus('同期しました', 'user-panel__sync-status--ok');
+      } else {
+        setSyncStatus('同期に失敗しました — 次の変更時に再試行', 'user-panel__sync-status--err');
+      }
       if (syncTimer) window.clearTimeout(syncTimer);
       syncTimer = window.setTimeout(() => {
-        if (syncStatus) syncStatus.textContent = '同期済み';
+        setSyncStatus(navigator.onLine === false ? 'オフライン' : '同期済み');
         syncTimer = null;
-      }, 3000);
+      }, 4000);
     });
+    // 起動時にオフラインなら初期表示
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      setSyncStatus('オフライン', 'user-panel__sync-status--offline');
+    }
 
     // ログアウト
     const signOutBtn = userPanel.querySelector<HTMLButtonElement>('[data-user-signout]');
     signOutBtn?.addEventListener('click', async () => {
       const w = window as any;
       if (w.HirakuAuth) await w.HirakuAuth.signOut();
+    });
+
+    // クラウドデータ削除
+    const deleteCloudBtn = userPanel.querySelector<HTMLButtonElement>('[data-user-delete-cloud]');
+    deleteCloudBtn?.addEventListener('click', async () => {
+      if (!confirm('サーバ上の進捗・ブックマーク・履歴・設定をすべて削除します。\nこの端末のデータは残ります。\n\n本当に削除しますか？')) return;
+      const w = window as any;
+      if (w.HirakuAuth && typeof w.HirakuAuth.deleteCloudData === 'function') {
+        try {
+          await w.HirakuAuth.deleteCloudData();
+          if (syncStatus) syncStatus.textContent = 'クラウドのデータを削除しました';
+        } catch (err) {
+          if (syncStatus) syncStatus.textContent = '削除に失敗しました';
+        }
+      }
     });
 
     // ボタンが出ない場合の再読み込み (GIS スクリプトの後追い登録が必要なケース)
