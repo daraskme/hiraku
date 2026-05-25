@@ -1,0 +1,351 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+// 全教材数を計算
+const COLLECTION_NAMES = [
+  'kokugo3', 'kokugo4', 'kokugo6',
+  'chugaku1', 'chugaku2', 'chugaku3',
+  'kotoko1', 'kotoko2',
+  'kateika5', 'chugakurika1', 'chugakurekishi1',
+  'kotokoeigo1', 'sansu5', 'chugakukomin3',
+  'kotorekishi1', 'kotosekaishi1',
+];
+
+let totalLessons = 0;
+const collectionCount: Record<string, number> = {};
+for (const name of COLLECTION_NAMES) {
+  const lessons = await getCollection(name as any);
+  totalLessons += lessons.length;
+  collectionCount[name] = lessons.length;
+}
+
+// 英語版が読みやすい教材（Lafcadio Hearn の原典など）
+const enLessons = await getCollection('kotokoeigo1');
+
+// 古典の名作（英語圏読者にとっての関心ポイント）
+interface FeaturedWork {
+  href: string;
+  title: string;
+  titleJp?: string;
+  author: string;
+  era: string;
+  blurb: string;
+}
+const featuredWorks: FeaturedWork[] = [
+  {
+    href: '/library/kotoko1/heike-monogatari-gion',
+    title: 'The Tale of the Heike (opening)',
+    titleJp: '平家物語・祇園精舎',
+    author: 'Anonymous',
+    era: '13th c.',
+    blurb: 'The famous opening on impermanence (mujō) — the bell of Gion temple, the falling sala blossoms, the haughty proud last only a spring night.',
+  },
+  {
+    href: '/library/kotoko1/hojoki-bouto',
+    title: 'Hōjōki (opening)',
+    titleJp: '方丈記',
+    author: 'Kamo no Chōmei',
+    era: '1212',
+    blurb: 'The river flows on, but the water is never the same. Written after wars and earthquakes, in a 10-foot hut.',
+  },
+  {
+    href: '/library/kotoko1/oku-no-hosomichi-bouto',
+    title: 'The Narrow Road to the Deep North (opening)',
+    titleJp: '奥の細道・冒頭',
+    author: 'Matsuo Bashō',
+    era: '1689 / pub. 1702',
+    blurb: 'A haikai-prose journey of 1,500 miles. The opening echoes Li Bai: "The days and months are eternal travellers; the years that pass and return are travellers too."',
+  },
+  {
+    href: '/library/kotoko1/makura-no-soshi-dai-ichi',
+    title: 'The Pillow Book (Chapter 1)',
+    titleJp: '枕草子・第一段「春はあけぼの」',
+    author: 'Sei Shōnagon',
+    era: 'c. 1002',
+    blurb: 'In spring, the dawn. A Heian court lady\'s eye for fleeting beauty, recorded a thousand years ago.',
+  },
+  {
+    href: '/library/kotoko2/genji-monogatari-kiritsubo',
+    title: 'The Tale of Genji (Kiritsubo)',
+    titleJp: '源氏物語・桐壺',
+    author: 'Murasaki Shikibu',
+    era: 'c. 1008',
+    blurb: 'The world\'s first psychological novel, opening with the Emperor\'s favorite consort and her death.',
+  },
+  {
+    href: '/library/kotokoeigo1/mujina',
+    title: 'Mujina (English original)',
+    titleJp: '貉',
+    author: 'Lafcadio Hearn',
+    era: '1904',
+    blurb: 'A Greek-Irish writer\'s retelling of a Japanese ghost story, used here as an English-reading lesson with Japanese annotations.',
+  },
+];
+---
+
+<Base
+  title="Hiraku — Reopening Japan's Public Domain Textbooks"
+  description="Hiraku is an open-source educational project that re-edits public-domain Japanese writing to align with Japan's current Course of Study (MEXT, 2017–18 revision). Free, CC BY-SA."
+  lang="en"
+  hrefAlt="/"
+  wide
+>
+  <section class="hero hero--en">
+    <p class="hero__eyebrow">FREE ・ OPEN SOURCE ・ CC BY-SA</p>
+    <h1 class="hero__title">Reopening Japan's classic texts,<br /> aligned to today's classroom.</h1>
+    <p class="hero__lead">
+      <strong>Hiraku</strong> (ひらく, "to open") re-edits public-domain Japanese writing —
+      from <em>The Tale of Genji</em> to Meiji-era science essays — to align with Japan's
+      <strong>current Course of Study</strong> (学習指導要領, MEXT 2017–18 revision).
+      Free for classrooms, families, and self-study.
+    </p>
+    <div class="hero__ctas">
+      <a href="/library" class="btn btn--primary">Browse the library →</a>
+      <a href="/" class="btn btn--ghost">日本語版へ</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>What's inside</h2>
+      <span class="section__subtitle">CONTENTS</span>
+    </div>
+    <p>
+      Currently <strong>{totalLessons}</strong> annotated lessons across
+      Japanese literature, history, civics, science, math, English (as L2),
+      and home economics — spanning material from <strong>the 8th century</strong>
+      (<em>Man'yōshū</em>, <em>Kojiki</em>) to <strong>postwar Japan</strong>
+      (1946 Constitution).
+    </p>
+    <div class="en-stats">
+      <div class="en-stat">
+        <span class="en-stat__num">{collectionCount.kokugo3 + collectionCount.kokugo4 + collectionCount.kokugo6 + collectionCount.chugaku1 + collectionCount.chugaku2 + collectionCount.chugaku3 + collectionCount.kotoko1 + collectionCount.kotoko2}</span>
+        <span class="en-stat__label">Japanese literature lessons</span>
+      </div>
+      <div class="en-stat">
+        <span class="en-stat__num">{collectionCount.chugakurekishi1 + collectionCount.kotorekishi1 + collectionCount.kotosekaishi1}</span>
+        <span class="en-stat__label">history lessons (JP &amp; world)</span>
+      </div>
+      <div class="en-stat">
+        <span class="en-stat__num">{collectionCount.chugakukomin3}</span>
+        <span class="en-stat__label">civics &amp; constitutional documents</span>
+      </div>
+      <div class="en-stat">
+        <span class="en-stat__num">{collectionCount.chugakurika1 + collectionCount.sansu5}</span>
+        <span class="en-stat__label">science &amp; mathematics</span>
+      </div>
+      <div class="en-stat">
+        <span class="en-stat__num">{collectionCount.kotokoeigo1}</span>
+        <span class="en-stat__label">English-as-L2 lessons</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>Featured works</h2>
+      <span class="section__subtitle">HIGHLIGHTS</span>
+    </div>
+    <p>
+      A starting point. Lesson pages have the Japanese original text, modern-Japanese
+      glossing, contextual notes (in Japanese), discussion questions, and links to printable
+      worksheets. All lesson pages are written in Japanese — they're designed for a
+      Japanese-speaking learner — but the works themselves may be familiar.
+    </p>
+    <div class="en-featured">
+      {featuredWorks.map((w) => (
+        <article class="en-featured__card">
+          <a href={w.href}>
+            <h3 class="en-featured__title">{w.title}</h3>
+            {w.titleJp && <p class="en-featured__title-jp" lang="ja">{w.titleJp}</p>}
+            <p class="en-featured__meta">{w.author} ・ {w.era}</p>
+            <p class="en-featured__blurb">{w.blurb}</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>Who is this for?</h2>
+      <span class="section__subtitle">AUDIENCE</span>
+    </div>
+    <ul class="en-audience">
+      <li>
+        <strong>Japanese-language educators</strong> outside Japan who want primary
+        source material with modern annotations and discussion questions.
+      </li>
+      <li>
+        <strong>JET program participants</strong> and ALTs looking for context on
+        what their Japanese counterparts are teaching.
+      </li>
+      <li>
+        <strong>Comparative literature researchers</strong> exploring the relationship
+        between Japanese classical texts and their place in the modern curriculum.
+      </li>
+      <li>
+        <strong>Heritage learners</strong> reconnecting with Japanese literary canon
+        through annotated public-domain texts.
+      </li>
+      <li>
+        <strong>Anyone curious</strong> about how a country re-presents its own
+        literature to the next generation.
+      </li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>How it works</h2>
+      <span class="section__subtitle">METHOD</span>
+    </div>
+    <p>
+      Each lesson takes a public-domain Japanese text — typically from the
+      <a href="https://www.aozora.gr.jp/" target="_blank" rel="noopener noreferrer">Aozora Bunko</a>
+      digital archive, or pre-1928 Meiji/Taisho-era state textbooks — and adds:
+    </p>
+    <ul class="en-method">
+      <li>Modern <strong>kana orthography</strong> and <strong>furigana</strong> (reading aids)</li>
+      <li>A <strong>glossary</strong> of archaic words, allusions, and proper nouns</li>
+      <li>A <strong>modern-Japanese translation</strong> when the original is classical</li>
+      <li><strong>Discussion questions</strong> mapped to the current Course of Study</li>
+      <li>A <strong>teacher's lesson plan</strong> (objectives, materials, two-period flow)</li>
+      <li><strong>AI-generated illustrations</strong> as scroll-following backgrounds</li>
+      <li>Cross-references to the curriculum code (e.g. <code>古典 B(2)</code>) and related works</li>
+    </ul>
+    <p>
+      All editorial additions are released under <strong>CC BY 4.0</strong>; the original
+      texts remain in the public domain. The site itself is open source — see the
+      <a href="/license">license page</a> for details.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>Why "ひらく / Hiraku"?</h2>
+      <span class="section__subtitle">NAME</span>
+    </div>
+    <p>
+      The verb <em>hiraku</em> (ひらく / 開く) means "to open" — a book, a door, a
+      flower, a possibility. The project name pairs the idea of <strong>re-opening</strong>
+      texts that have already been closed by the passage of time, with the gesture of
+      <strong>opening up</strong> education itself: free, modifiable, redistributable.
+    </p>
+    <p>
+      The original codename is <em>project_procopios</em>, after Procopius of Caesarea
+      (c. 500–565 CE), the Byzantine historian who insisted on writing down the things
+      he had seen. The full Japanese version of this site is at
+      <a href="/">hiraku-5cb.pages.dev/</a>.
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>Get involved</h2>
+      <span class="section__subtitle">CONTRIBUTE</span>
+    </div>
+    <p>
+      Hiraku is built with <a href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>,
+      deployed on <a href="https://pages.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare Pages</a>,
+      and licensed under CC BY-SA. Pull requests, issue reports, and new lesson
+      contributions are all welcome.
+    </p>
+    <div class="hero__ctas">
+      <a href="/library" class="btn btn--primary">Browse all lessons →</a>
+      <a href="/timeline" class="btn btn--ghost">View timeline</a>
+    </div>
+    <div class="callout">
+      <strong>Note:</strong> Hiraku is <em>not</em> a MEXT-approved textbook. It is a
+      supplementary (副教材) open-content project. Lesson pages are written in Japanese
+      and intended for Japanese-speaking learners.
+    </div>
+  </section>
+
+  <style>
+    .hero--en .hero__title { font-family: 'Noto Serif JP', serif; }
+    .en-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+    .en-stat {
+      padding: 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .en-stat__num {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .en-stat__label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-top: 0.3rem;
+    }
+
+    .en-featured {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .en-featured__card a {
+      display: block;
+      padding: 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s, transform 0.15s;
+      height: 100%;
+    }
+    .en-featured__card a:hover {
+      background: var(--bg-elevated);
+      transform: translateY(-2px);
+    }
+    .en-featured__title {
+      font-size: 1.05rem;
+      color: var(--accent);
+      margin: 0 0 0.2rem;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .en-featured__title-jp {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin: 0 0 0.3rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .en-featured__meta {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin: 0 0 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .en-featured__blurb {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .en-audience, .en-method {
+      padding-left: 1.2rem;
+    }
+    .en-audience li, .en-method li {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+  </style>
+</Base>

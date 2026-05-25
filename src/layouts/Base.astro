@@ -9,10 +9,12 @@ interface Props {
   description?: string;
   wide?: boolean;
   ogImage?: string;
+  lang?: 'ja' | 'en';
+  hrefAlt?: string; // 翻訳版へのリンク URL（hreflang alternate 用）
 }
 
-const { title, description, wide = false, ogImage } = Astro.props;
-const siteName = 'ひらく';
+const { title, description, wide = false, ogImage, lang = 'ja', hrefAlt } = Astro.props;
+const siteName = lang === 'en' ? 'Hiraku' : 'ひらく';
 const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`;
 const containerClass = wide ? 'container container--wide' : 'container';
 
@@ -30,12 +32,18 @@ const ogImagePngUrl = new URL(computedOgImagePng, siteUrl).toString();
 const ogImageType = ogImage ? (ogImage.endsWith('.png') ? 'image/png' : ogImage.endsWith('.jpg') || ogImage.endsWith('.jpeg') ? 'image/jpeg' : 'image/webp') : 'image/webp';
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageAlt = title === siteName
-  ? 'ひらく — 著作権切れの教科書を、現行学習指導要領（平成29年告示）に沿って再編集して公開するオープン教材プロジェクト'
-  : `${title} — ひらく（教材）`;
+  ? (lang === 'en'
+      ? 'Hiraku — an open-source educational project re-editing public-domain Japanese textbook materials per the current Course of Study (MEXT, 2017–2018 revision).'
+      : 'ひらく — 著作権切れの教科書を、現行学習指導要領（平成29年告示）に沿って再編集して公開するオープン教材プロジェクト')
+  : (lang === 'en'
+      ? `${title} — Hiraku`
+      : `${title} — ひらく（教材）`);
+const ogLocale = lang === 'en' ? 'en_US' : 'ja_JP';
+const ogLocaleAlt = lang === 'en' ? 'ja_JP' : 'en_US';
 ---
 
 <!doctype html>
-<html lang="ja">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,6 +52,12 @@ const ogImageAlt = title === siteName
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonicalUrl} />
+    {hrefAlt && (
+      <link rel="alternate" hreflang={lang === 'en' ? 'ja' : 'en'} href={new URL(hrefAlt, siteUrl).toString()} />
+    )}
+    {hrefAlt && (
+      <link rel="alternate" hreflang="x-default" href={new URL(lang === 'en' ? hrefAlt : Astro.url.pathname, siteUrl).toString()} />
+    )}
 
     {/* ─── Open Graph (Facebook, LINE, Slack, Discord, Telegram, etc.) ─── */}
     <meta property="og:title" content={fullTitle} />
@@ -51,7 +65,8 @@ const ogImageAlt = title === siteName
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content={siteName} />
-    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:locale" content={ogLocale} />
+    {hrefAlt && <meta property="og:locale:alternate" content={ogLocaleAlt} />}
     {/* WebP を主に。互換性のため PNG も併記。og:image を複数出すと最初に処理可能なものが選ばれる */}
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:type" content={ogImageType} />
@@ -89,7 +104,7 @@ const ogImageAlt = title === siteName
     />
   </head>
   <body>
-    <a href="#main" class="skip-link">本文へスキップ</a>
+    <a href="#main" class="skip-link">{lang === 'en' ? 'Skip to main content' : '本文へスキップ'}</a>
     <Header />
     <main id="main" class={containerClass} tabindex="-1">
       <slot />
