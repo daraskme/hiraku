@@ -17,7 +17,8 @@ const kotokoeigo1 = (await getCollection('kotokoeigo1')).map((l) => ({ collectio
 const sansu5 = (await getCollection('sansu5')).map((l) => ({ collection: 'sansu5', ...l }));
 const chugakukomin3 = (await getCollection('chugakukomin3')).map((l) => ({ collection: 'chugakukomin3', ...l }));
 const kotorekishi1 = (await getCollection('kotorekishi1')).map((l) => ({ collection: 'kotorekishi1', ...l }));
-const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...chugaku3, ...kotoko1, ...kotoko2, ...kateika5, ...chugakurika1, ...chugakurekishi1, ...kotokoeigo1, ...sansu5, ...chugakukomin3, ...kotorekishi1]
+const kotosekaishi1 = (await getCollection('kotosekaishi1')).map((l) => ({ collection: 'kotosekaishi1', ...l }));
+const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...chugaku3, ...kotoko1, ...kotoko2, ...kateika5, ...chugakurika1, ...chugakurekishi1, ...kotokoeigo1, ...sansu5, ...chugakukomin3, ...kotorekishi1, ...kotosekaishi1]
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
 ---

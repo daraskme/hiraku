@@ -146,4 +146,9 @@ const kotorekishi1 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kateika5, chugakurika1, chugakurekishi1, kotokoeigo1, sansu5, chugakukomin3, kotorekishi1 };
+const kotosekaishi1 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kotosekaishi1' }),
+  schema: lessonSchema,
+});
+
+export const collections = { kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kateika5, chugakurika1, chugakurekishi1, kotokoeigo1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1 };

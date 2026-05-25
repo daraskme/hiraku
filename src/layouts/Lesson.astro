@@ -17,6 +17,7 @@ interface Props {
     | CollectionEntry<'chugakurika1'>
     | CollectionEntry<'chugakurekishi1'>
     | CollectionEntry<'kotorekishi1'>
+    | CollectionEntry<'kotosekaishi1'>
     | CollectionEntry<'kotokoeigo1'>
     | CollectionEntry<'sansu5'>
     | CollectionEntry<'chugakukomin3'>;
@@ -42,6 +43,7 @@ const COLLECTION_NAMES = [
   'sansu5',
   'chugakukomin3',
   'kotorekishi1',
+  'kotosekaishi1',
 ] as const;
 const COLLECTION_LABEL: Record<string, string> = {
   kokugo3: '小3 国語',
@@ -59,6 +61,7 @@ const COLLECTION_LABEL: Record<string, string> = {
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
   kotorekishi1: '高1 日本史',
+  kotosekaishi1: '高1 世界史',
 };
 
 const allLessons: any[] = [];

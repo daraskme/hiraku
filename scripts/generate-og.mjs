@@ -49,6 +49,7 @@ const COLLECTION_LABEL = {
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
   kotorekishi1: '高1 日本史',
+  kotosekaishi1: '高1 世界史',
 };
 
 async function ensureFonts() {
