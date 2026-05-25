@@ -1,0 +1,173 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="変更履歴"
+  description="ひらくに最近加えられた変更・新教材・新機能の一覧。GitHub のコミット履歴から自動取得。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>変更履歴</h1>
+      <span class="section__subtitle">CHANGELOG</span>
+    </div>
+    <p>
+      ひらくに最近加えられた変更・新教材・新機能の一覧です。
+      GitHub のコミット履歴から自動取得しています。
+    </p>
+    <p class="cross-links no-print">
+      <a href="https://github.com/daraskme/hiraku/commits/main" target="_blank" rel="noopener">
+        GitHub のフルコミット履歴を見る →
+      </a>
+      ・
+      <a href="/about">プロジェクトについて</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <div data-changelog-root>
+      <p style="color:var(--text-soft);">読み込み中…</p>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const root = document.querySelector('[data-changelog-root]');
+      if (!root) return;
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      function fmtDate(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleDateString('ja-JP', { dateStyle: 'medium' });
+      }
+      function fmtTime(iso) {
+        if (!iso) return '';
+        return new Date(iso).toLocaleTimeString('ja-JP', { timeStyle: 'short' });
+      }
+      // コミットを「タイプ」別に分類するための簡易マッピング
+      function classify(message) {
+        const m = message.toLowerCase();
+        if (/挿絵|illustration|wiki|☓ |scene/i.test(message)) return { kind: 'illust', label: '挿絵' };
+        if (/教材|追加.*md|新規.*md|を kotoko|を chugaku|を kokugo|を sansu|chugakurika|kotokokanbun|kotokoeigo/i.test(message)) return { kind: 'lesson', label: '新教材' };
+        if (/^L\d|^E\d|^P\d|^Q\d|^T\d|^AI\d|^X\d|^G\d|^I\d|^S\d|^N\d|^A\d|^D\d|^C\d|^F\d/i.test(message) || /機能|追加|実装|api|ui|component|button|page/i.test(m)) return { kind: 'feat', label: '機能' };
+        if (/修正|fix|bug|エラー|改善/i.test(message)) return { kind: 'fix', label: '修正' };
+        if (/ドキュメント|readme|setup|doc/i.test(m)) return { kind: 'docs', label: 'ドキュメント' };
+        return { kind: 'other', label: '更新' };
+      }
+
+      async function load() {
+        try {
+          const resp = await fetch('https://api.github.com/repos/daraskme/hiraku/commits?per_page=50', {
+            headers: { Accept: 'application/vnd.github+json' },
+          });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const commits = await resp.json();
+          render(commits);
+        } catch (e) {
+          root.innerHTML = `<div class="empty-state"><h3>読み込みに失敗しました</h3>
+            <p>GitHub API の制限に達した可能性があります。<a href="https://github.com/daraskme/hiraku/commits/main" target="_blank" rel="noopener">GitHub で直接見る</a></p></div>`;
+        }
+      }
+
+      function render(commits) {
+        if (!commits || commits.length === 0) {
+          root.innerHTML = '<p>コミットがありません。</p>';
+          return;
+        }
+        // 日付ごとにグループ化
+        const groups = new Map();
+        commits.forEach((c) => {
+          const date = (c.commit && c.commit.author && c.commit.author.date) || '';
+          const day = date ? date.slice(0, 10) : 'unknown';
+          if (!groups.has(day)) groups.set(day, []);
+          groups.get(day).push(c);
+        });
+
+        const html = Array.from(groups.entries()).map(([day, items]) => {
+          const itemsHtml = items.map((c) => {
+            const msg = (c.commit && c.commit.message) || '';
+            const firstLine = msg.split('\n')[0];
+            const cls = classify(firstLine);
+            const sha = (c.sha || '').slice(0, 7);
+            const date = c.commit && c.commit.author && c.commit.author.date;
+            const author = (c.commit && c.commit.author && c.commit.author.name) || '?';
+            return `<li class="changelog__item changelog__item--${cls.kind}">
+              <div class="changelog__time">${fmtTime(date)}</div>
+              <div class="changelog__body">
+                <div class="changelog__head">
+                  <span class="changelog__kind changelog__kind--${cls.kind}">${cls.label}</span>
+                  <span class="changelog__msg">${escapeHtml(firstLine)}</span>
+                </div>
+                <div class="changelog__meta">
+                  <a href="${escapeHtml(c.html_url)}" target="_blank" rel="noopener">${sha}</a>
+                  ・ ${escapeHtml(author)}
+                </div>
+              </div>
+            </li>`;
+          }).join('');
+          return `<div class="changelog__day">
+            <h3 class="changelog__date">${fmtDate(day + 'T00:00:00')}</h3>
+            <ul class="changelog__list">${itemsHtml}</ul>
+          </div>`;
+        }).join('');
+        root.innerHTML = html;
+      }
+
+      load();
+    })();
+  </script>
+
+  <style>
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .changelog__day { margin-bottom: 1.5rem; }
+    .changelog__date {
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+      margin: 0 0 0.6rem;
+    }
+    .changelog__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .changelog__item {
+      display: flex;
+      gap: 0.7rem;
+      padding: 0.5rem 0.8rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+      border-left: 3px solid var(--border);
+    }
+    .changelog__item--feat { border-left-color: #3e7ec9; }
+    .changelog__item--lesson { border-left-color: #c97a3e; }
+    .changelog__item--illust { border-left-color: #b85c4a; }
+    .changelog__item--fix { border-left-color: #c9923e; }
+    .changelog__item--docs { border-left-color: #7a8a98; }
+    .changelog__time {
+      width: 4em;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+    .changelog__body { flex: 1; min-width: 0; }
+    .changelog__head { display: flex; gap: 0.4rem; align-items: baseline; flex-wrap: wrap; }
+    .changelog__kind {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      background: var(--bg);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      color: var(--text-soft);
+    }
+    .changelog__kind--feat { background: color-mix(in srgb, #3e7ec9 18%, transparent); color: #2c5e9c; }
+    .changelog__kind--lesson { background: color-mix(in srgb, #c97a3e 18%, transparent); color: #a85e2a; }
+    .changelog__kind--illust { background: color-mix(in srgb, #b85c4a 18%, transparent); color: #963d2f; }
+    .changelog__kind--fix { background: color-mix(in srgb, #c9923e 18%, transparent); color: #a87526; }
+    .changelog__msg { font-size: 0.9rem; flex: 1; word-break: break-word; }
+    .changelog__meta { font-size: 0.75rem; color: var(--text-soft); margin-top: 0.1rem; }
+    .changelog__meta a { color: var(--accent); }
+  </style>
+</Base>

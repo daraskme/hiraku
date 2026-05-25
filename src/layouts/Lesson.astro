@@ -214,7 +214,13 @@ const guidelineDoc = d.school_stage === 'kotoko'
     : '小学校学習指導要領（平成29年告示）';
 ---
 
-<Base title={d.title} description={d.description}>
+<Base
+  title={d.title}
+  description={d.description}
+  ogImage={d.cover_image
+    ? d.cover_image
+    : `/api/cover?collection=${encodeURIComponent(lesson.collection)}&title=${encodeURIComponent(d.title)}&author=${encodeURIComponent(d.author)}&subject=${encodeURIComponent(d.subject)}&era=${encodeURIComponent(d.era || '')}`}
+>
   {/*
     Pagefind は日本語の場合、単語境界（スペース）を自動推定できないため、
     検索ヒット率を上げるための「補助キーワード」を非表示で埋め込む。

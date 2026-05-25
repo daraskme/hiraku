@@ -1545,6 +1545,104 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
 .cite-dialog__close:hover { background: var(--bg-soft); color: var(--text); }
 
 /* ============================================================
+   オンボーディングバナー (初回訪問者向け)
+   ============================================================ */
+.onboarding-banner {
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 210;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 1.1rem 1.3rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--bg-elevated)), var(--bg-elevated));
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.onboarding-banner.is-visible { opacity: 1; transform: translateY(0); }
+.onboarding-banner__body { padding-right: 1.5rem; }
+.onboarding-banner__step {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+.onboarding-banner__title {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--accent);
+}
+.onboarding-banner__text {
+  margin: 0 0 0.8rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+.onboarding-banner__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.onboarding-banner__cta {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+.onboarding-banner__next {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+.onboarding-banner__next:hover { background: var(--bg-soft); color: var(--text); }
+.onboarding-banner__dots {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+  justify-content: center;
+}
+.onboarding-banner__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.onboarding-banner__dot.is-active { background: var(--accent); }
+.onboarding-banner__close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--text-soft);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+.onboarding-banner__close:hover { background: var(--bg-soft); color: var(--text); }
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-banner { transition: opacity 0.2s; transform: none; }
+  .onboarding-banner.is-visible { transform: none; }
+}
+
+/* ============================================================
    Cookie 同意バナー
    ============================================================ */
 .cookie-banner {

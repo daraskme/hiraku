@@ -1,0 +1,118 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="ランダムに教材を読む" description="ひらく収載 75 教材のうち、ランダムに 1 つを開きます。新しい出会いのために。">
+  <section class="section">
+    <div class="section__heading">
+      <h1>ランダムに教材を読む</h1>
+      <span class="section__subtitle">RANDOM</span>
+    </div>
+    <p>
+      ひらく収載のすべての教材から、ランダムに 1 つ選んで開きます。
+      <strong>偶然の出会い</strong>のために。
+    </p>
+
+    <div data-random-root>
+      <p class="random-status" data-random-status>選んでいます…</p>
+    </div>
+
+    <p class="cross-links" style="margin-top: 2rem;">
+      <a href="/library">教材ライブラリへ</a> ・
+      <a href="/paths">学習パス</a> ・
+      <a href="/jlpt">JLPT 別索引</a>
+    </p>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const status = document.querySelector('[data-random-status]');
+      const root = document.querySelector('[data-random-root]');
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      async function pick() {
+        status.textContent = '読み込んでいます…';
+        try {
+          const resp = await fetch('/api/lessons.json', { cache: 'force-cache' });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          const lessons = data.lessons || [];
+          if (lessons.length === 0) {
+            root.innerHTML = '<p>教材が見つかりません。</p>';
+            return;
+          }
+          const pick = lessons[Math.floor(Math.random() * lessons.length)];
+          root.innerHTML = `
+            <article class="random-card">
+              <p class="random-card__crumb">${escapeHtml(pick.subject || '')}・${escapeHtml(pick.era || (pick.original_year ? pick.original_year + '年' : ''))}</p>
+              <h2 class="random-card__title">${escapeHtml(pick.title)}</h2>
+              <p class="random-card__author">${escapeHtml(pick.author || '')}</p>
+              <p class="random-card__desc">${escapeHtml(pick.description || '')}</p>
+              <div class="random-card__actions">
+                <a class="btn btn--primary" href="${escapeHtml(pick.url)}">この教材を開く →</a>
+                <button type="button" class="btn btn--ghost" data-random-again>↻ もう一回 引く</button>
+              </div>
+            </article>
+          `;
+          const again = root.querySelector('[data-random-again]');
+          if (again) again.addEventListener('click', pick);
+        } catch (e) {
+          root.innerHTML = '<p>読み込みに失敗しました。<a href="/library">ライブラリ</a>へどうぞ。</p>';
+        }
+      }
+
+      pick();
+    })();
+  </script>
+
+  <style>
+    .random-status { color: var(--text-soft); font-style: italic; padding: 2rem 0; text-align: center; }
+    .random-card {
+      padding: 1.4rem 1.6rem;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--bg-soft)), var(--bg-soft));
+      border-radius: 10px;
+      border-left: 4px solid var(--accent);
+      margin: 1rem 0;
+    }
+    .random-card__crumb {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      margin: 0 0 0.3rem;
+    }
+    .random-card__title {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin: 0 0 0.4rem;
+    }
+    .random-card__author {
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      margin: 0 0 0.8rem;
+    }
+    .random-card__desc {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin: 0 0 1rem;
+    }
+    .random-card__actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .cross-links {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
+</Base>
