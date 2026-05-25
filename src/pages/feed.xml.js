@@ -16,6 +16,7 @@ const COLLECTION_LABEL = {
   kotokoeigo1: '高1 英語',
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
 };
 
 const COLLECTION_NAMES = Object.keys(COLLECTION_LABEL);

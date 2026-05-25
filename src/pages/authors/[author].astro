@@ -18,6 +18,7 @@ const COLLECTION_LABEL: Record<string, string> = {
   kotokoeigo1: '高1 英語',
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
 };
 
 export const getStaticPaths = (async () => {
@@ -36,6 +37,7 @@ export const getStaticPaths = (async () => {
     'kotokoeigo1',
     'sansu5',
     'chugakukomin3',
+    'kotorekishi1',
   ] as const;
 
   const byAuthor: Record<string, any[]> = {};

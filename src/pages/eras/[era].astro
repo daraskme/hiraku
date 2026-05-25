@@ -18,6 +18,7 @@ const COLLECTION_LABEL: Record<string, string> = {
   kotokoeigo1: '高1 英語',
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
 };
 
 // 年号判定。lesson の era 文字列から、または original_year から、標準的な時代名を一つ返す。
@@ -113,6 +114,7 @@ export const getStaticPaths = (async () => {
     'kotokoeigo1',
     'sansu5',
     'chugakukomin3',
+    'kotorekishi1',
   ] as const;
 
   const byEra: Record<string, any[]> = {};
