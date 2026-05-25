@@ -437,9 +437,11 @@ const guidelineDoc = d.school_stage === 'kotoko'
 
   <script is:inline>
     // 本文の挿絵背景化：本文の <h3> セクション境界を見つけて、対応する挿絵を
-    // 各セクションの薄い背景として敷く。挿絵数 < h3 数なら冒頭から順、
-    // 挿絵数 > h3 数なら余りはギャラリーのみ。h3 が無ければ段落数で均等分割。
-    // 「背景挿絵」ボタンと localStorage で個別 ON/OFF できる。
+    // 挿絵を viewport 固定の背景としてスクロール追従させる。
+    // IntersectionObserver で h3 セクションの visibility を監視し、
+    // 現在もっとも本文中央に近いセクションの挿絵を crossfade で表示。
+    // ギャラリーは別途下部に残るので、本文を読んでいる前後（特に該当 h3
+    // セクションが viewport の中央付近にあるとき）に挿絵が薄く浮かぶ。
     (function () {
       const STORAGE_KEY = 'hiraku.sceneBg.v1';
       const host = document.querySelector('[data-scene-bg-host]');
@@ -449,55 +451,137 @@ const guidelineDoc = d.school_stage === 'kotoko'
       try { illusts = JSON.parse(host.dataset.illustrations || '[]'); } catch (_) {}
       if (!illusts.length) return;
 
-      function wrap() {
-        if (host.dataset.sceneBgApplied === '1') return;
+      // ─── 背景 canvas を body 直下に作成 ───
+      let canvas = document.querySelector('[data-scene-bg-canvas]');
+      if (!canvas) {
+        canvas = document.createElement('div');
+        canvas.className = 'scene-bg-canvas';
+        canvas.setAttribute('data-scene-bg-canvas', '');
+        canvas.setAttribute('aria-hidden', 'true');
+        // 2 レイヤー: current（現在表示中）と next（次の場面、crossfade 用）
+        const layerA = document.createElement('div');
+        layerA.className = 'scene-bg-canvas__layer';
+        layerA.dataset.layer = 'a';
+        const layerB = document.createElement('div');
+        layerB.className = 'scene-bg-canvas__layer';
+        layerB.dataset.layer = 'b';
+        const overlay = document.createElement('div');
+        overlay.className = 'scene-bg-canvas__overlay';
+        canvas.appendChild(layerA);
+        canvas.appendChild(layerB);
+        canvas.appendChild(overlay);
+        document.body.insertBefore(canvas, document.body.firstChild);
+      }
+      const layers = canvas.querySelectorAll('.scene-bg-canvas__layer');
+      let activeLayer = 0; // 0=a, 1=b
+
+      // ─── h3 (またはなければ段落チャンク) ごとに data-scene-id を振る ───
+      function markSections() {
+        if (host.dataset.sceneMarked === '1') return;
         const children = Array.from(host.children);
         const h3idx = [];
         children.forEach((el, i) => {
           if (el.tagName === 'H3') h3idx.push(i);
         });
-        let groups = [];
+        let starts = [];
         if (h3idx.length > 0) {
-          for (let i = 0; i < h3idx.length; i++) {
-            const start = h3idx[i];
-            const end = h3idx[i + 1] ?? children.length;
-            groups.push(children.slice(start, end));
-          }
+          starts = h3idx;
         } else {
           // h3 が無い場合：段落を illustrations 数で均等分割
           const n = Math.min(illusts.length, Math.max(1, Math.ceil(children.length / 6)));
           const per = Math.ceil(children.length / n);
-          for (let i = 0; i < n; i++) {
-            groups.push(children.slice(i * per, (i + 1) * per));
-          }
+          for (let i = 0; i < n; i++) starts.push(i * per);
         }
-        groups.forEach((group, idx) => {
-          if (group.length === 0) return;
-          const illust = illusts[idx];
+        starts.forEach((startIdx, i) => {
+          const illust = illusts[i];
           if (!illust) return;
-          const section = document.createElement('div');
-          section.className = 'scene-section';
-          section.style.setProperty('--scene-bg', 'url("' + illust.src + '")');
-          section.dataset.scene = String(idx + 1);
-          if (illust.alt) section.setAttribute('aria-label', '挿絵背景: ' + illust.alt);
-          group[0].parentNode.insertBefore(section, group[0]);
-          group.forEach((el) => section.appendChild(el));
+          const el = children[startIdx];
+          if (!el) return;
+          el.setAttribute('data-scene-marker', String(i));
+          el.setAttribute('data-scene-src', illust.src);
+          if (illust.alt) el.setAttribute('data-scene-alt', illust.alt);
         });
-        host.dataset.sceneBgApplied = '1';
+        host.dataset.sceneMarked = '1';
       }
-      function unwrap() {
-        const sections = host.querySelectorAll(':scope > .scene-section');
-        sections.forEach((sec) => {
-          const parent = sec.parentNode;
-          while (sec.firstChild) parent.insertBefore(sec.firstChild, sec);
-          parent.removeChild(sec);
-        });
-        host.dataset.sceneBgApplied = '0';
+
+      function setCurrent(idx) {
+        const illust = illusts[idx];
+        if (!illust) return;
+        const cur = layers[activeLayer];
+        const next = layers[1 - activeLayer];
+        // すでに表示中の画像と同じならスキップ
+        const url = 'url("' + illust.src + '")';
+        if (next.style.backgroundImage === url || cur.style.backgroundImage === url) {
+          if (cur.style.backgroundImage === url) return; // 何もしない
+        }
+        next.style.backgroundImage = url;
+        next.classList.add('is-current');
+        cur.classList.remove('is-current');
+        activeLayer = 1 - activeLayer;
+      }
+
+      let observer = null;
+      function startObserving() {
+        if (observer) return;
+        markSections();
+        const markers = host.querySelectorAll('[data-scene-marker]');
+        if (!markers.length) return;
+        // viewport の中央付近に来たセクションをアクティブにする
+        observer = new IntersectionObserver(
+          (entries) => {
+            // viewport 中央に最も近い entry を選ぶ
+            let bestIdx = null;
+            let bestDist = Infinity;
+            const center = window.innerHeight / 2;
+            entries.forEach((e) => {
+              if (!e.isIntersecting) return;
+              const rect = e.target.getBoundingClientRect();
+              const elCenter = rect.top + rect.height / 2;
+              const dist = Math.abs(elCenter - center);
+              if (dist < bestDist) {
+                bestDist = dist;
+                bestIdx = parseInt(e.target.getAttribute('data-scene-marker'), 10);
+              }
+            });
+            // 全 marker から、最後に visible になったもの（=現在 viewport 内のもの）を再計算
+            const allMarkers = Array.from(host.querySelectorAll('[data-scene-marker]'));
+            allMarkers.forEach((m) => {
+              const r = m.getBoundingClientRect();
+              const elCenter = r.top + r.height / 2;
+              const isInView = r.top < window.innerHeight && r.bottom > 0;
+              if (isInView) {
+                const dist = Math.abs(elCenter - center);
+                if (dist < bestDist) {
+                  bestDist = dist;
+                  bestIdx = parseInt(m.getAttribute('data-scene-marker'), 10);
+                }
+              }
+            });
+            if (bestIdx !== null) setCurrent(bestIdx);
+          },
+          {
+            // 中央 60% の領域に入ったら反応
+            rootMargin: '-20% 0% -20% 0%',
+            threshold: [0, 0.1, 0.5, 1.0],
+          }
+        );
+        markers.forEach((m) => observer.observe(m));
+        // 初期表示：先頭のシーンを敷く
+        setCurrent(0);
+      }
+      function stopObserving() {
+        if (observer) {
+          observer.disconnect();
+          observer = null;
+        }
+        layers.forEach((l) => l.classList.remove('is-current'));
       }
       function applyState(on) {
-        if (on) wrap(); else unwrap();
+        canvas.classList.toggle('is-active', on);
+        document.body.classList.toggle('has-scene-bg-canvas', on);
         if (toggle) toggle.setAttribute('aria-pressed', String(on));
         host.classList.toggle('has-scene-bg', on);
+        if (on) startObserving(); else stopObserving();
       }
       const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; } })();
       const initial = saved === null ? true : saved === '1';

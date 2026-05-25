@@ -1131,67 +1131,75 @@ blockquote {
   color: var(--text-faint);
 }
 
-/* ─── 本文の挿絵背景（scene-section） ─────────────
-   本文の <h3> セクションごとに薄い挿絵を背景に敷く。マスクで上下を
-   自然にフェードさせ、本文と背景の間に微妙な余韻を生む。
-   本文の文字色はそのまま、背景には半透過オーバーレイで読みやすさを確保。 */
-.scene-section {
-  position: relative;
-  margin: 1.5rem 0;
-  padding: 1.6rem 1.4rem 1.8rem;
-  border-radius: 12px;
-  isolation: isolate;
-  overflow: hidden;
+/* ─── 本文の挿絵背景 — スクロール追従型（fixed canvas + crossfade） ────
+   本文をスクロールすると、現在読んでいる場所に対応する挿絵が viewport
+   固定の背景に表示される。前のシーンと次のシーンの間で滑らかに crossfade。
+   ギャラリー（記事末尾のカード一覧）はそのまま残す。
+   本文の上下は半透過オーバーレイで読みやすさを確保。 */
+
+/* スクロール追従の固定背景 canvas — body 直下に配置、本文の真後ろに敷く */
+.scene-bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
 }
-.scene-section::before {
-  content: "";
+.scene-bg-canvas.is-active { opacity: 1; }
+.scene-bg-canvas__layer {
   position: absolute;
   inset: 0;
-  background-image: var(--scene-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.18;
-  z-index: -2;
-  /* 上下を自然にフェード */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
-          mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
-  transition: opacity 0.4s;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  /* 上下のフェード — 中央ほど鮮明、上下端は背景に溶ける */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 18%, rgba(0,0,0,0.65) 82%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 18%, rgba(0,0,0,0.65) 82%, transparent 100%);
 }
+.scene-bg-canvas__layer.is-current { opacity: 0.42; }
 /* 読みやすさのための薄い色付きオーバーレイ — クリーム色を一段乗せる */
-.scene-section::after {
-  content: "";
+.scene-bg-canvas__overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--bg) 55%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 35%, transparent) 50%,
-    color-mix(in srgb, var(--bg) 55%, transparent) 100%);
-  z-index: -1;
+    color-mix(in srgb, var(--bg) 75%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 55%, transparent) 50%,
+    color-mix(in srgb, var(--bg) 75%, transparent) 100%);
   pointer-events: none;
 }
-.scene-section > * { position: relative; }
-.scene-section > h3 {
-  margin-top: 0;
-  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
-  padding: 0.3rem 0.7rem;
-  border-radius: 4px;
-  display: inline-block;
-}
-/* ダークモード時は背景画像をやや暗くしてコントラスト確保 */
-:root[data-theme="dark"] .scene-section::before {
-  opacity: 0.12;
-  filter: brightness(0.7);
-}
-:root[data-theme="dark"] .scene-section::after {
+/* ダークモード時は背景画像をやや抑える */
+:root[data-theme="dark"] .scene-bg-canvas__layer.is-current { opacity: 0.32; }
+:root[data-theme="dark"] .scene-bg-canvas__layer { filter: brightness(0.85); }
+:root[data-theme="dark"] .scene-bg-canvas__overlay {
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--bg) 70%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 50%, transparent) 50%,
-    color-mix(in srgb, var(--bg) 70%, transparent) 100%);
+    color-mix(in srgb, var(--bg) 80%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 65%, transparent) 50%,
+    color-mix(in srgb, var(--bg) 80%, transparent) 100%);
 }
-/* prefers-reduced-motion 時には背景画像をさらに薄くする */
+/* prefers-reduced-motion: トランジションを無効化、効果も控えめに */
 @media (prefers-reduced-motion: reduce) {
-  .scene-section::before { opacity: 0.08; }
+  .scene-bg-canvas, .scene-bg-canvas__layer { transition: none; }
+  .scene-bg-canvas__layer.is-current { opacity: 0.18; }
+}
+
+/* レガシー .scene-section（h3 でくるんでいた古い形式） — 互換性のため残す
+   が、scroll 追従 canvas を使う際は body の方で OFF にする */
+.scene-section { position: relative; }
+.scene-section > h3 { position: relative; }
+
+/* 本文 (.story-body) を背景 canvas の上に置く — z-index で前面に */
+.has-scene-bg .story-body,
+.has-scene-bg-canvas .story-body {
+  position: relative;
+  z-index: 1;
+}
+/* シーンの境界マーカー (data-scene-marker) — 視覚的な区切りはない、
+   IntersectionObserver の目印として h3 などに付与 */
+[data-scene-marker] {
+  scroll-margin-top: 80px;
 }
 
 /* 背景挿絵 ON/OFF トグル */
