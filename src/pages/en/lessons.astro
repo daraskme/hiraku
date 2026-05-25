@@ -1,0 +1,198 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+// English-readable lessons (original-English content with Japanese annotations).
+// We surface kotokoeigo1 lessons here for non-Japanese-speaking visitors.
+const enLessons = await getCollection('kotokoeigo1');
+
+interface Spotlight {
+  id: string;
+  englishTitle: string;
+  japaneseTitle: string;
+  blurb: string;
+  audience: string;
+}
+const SPOTLIGHTS: Record<string, Spotlight> = {
+  mujina: {
+    id: 'mujina',
+    englishTitle: 'Mujina',
+    japaneseTitle: '貉',
+    blurb:
+      'Lafcadio Hearn\'s 1904 retelling of a Japanese ghost story — the faceless creature, the noodle-vendor, and the night journey along the slope of Akasaka.',
+    audience:
+      'Intermediate English reader. Late-Meiji English prose, but the vocabulary stays in everyday range. ~1,500 words.',
+  },
+  'yuki-onna': {
+    id: 'yuki-onna',
+    englishTitle: 'Yuki-Onna (The Snow Woman)',
+    japaneseTitle: '雪女',
+    blurb:
+      'Hearn\'s most famous Japanese folktale rewriting (1904). A young woodcutter spared by a snow-spirit, and the wife he must never speak of her to. A meditation on memory, secrets, and love.',
+    audience:
+      'Intermediate English reader. ~2,000 words. The lesson includes Japanese annotations and vocabulary support.',
+  },
+  'sentence-patterns': {
+    id: 'sentence-patterns',
+    englishTitle: 'The Five Sentence Patterns — A Comprehensive Lesson',
+    japaneseTitle: '5文型統合教材',
+    blurb:
+      'This one is the reverse: a Japanese-language lesson on the five basic English sentence patterns (S+V, S+V+C, S+V+O, S+V+O+O, S+V+O+C), with comprehensive vocabulary and idiom coverage at the college-entry level.',
+    audience:
+      'Japanese learners of English at intermediate-to-advanced level. The lesson is in Japanese; English speakers may use it to understand how Japanese schools teach English grammar.',
+  },
+};
+---
+
+<Base
+  title="English-Readable Lessons"
+  description="Lessons whose original text is in English: Lafcadio Hearn's Japanese ghost stories, plus a window into how Japanese schools teach English grammar."
+  lang="en"
+  hrefAlt="/"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>English-Readable Lessons</h1>
+      <span class="section__subtitle">EN</span>
+    </div>
+    <p>
+      Most of Hiraku\'s lessons are written in Japanese for Japanese learners.
+      A few, however, are <strong>originally written in English</strong> — and
+      these are surfaced here for visitors who don\'t read Japanese.
+    </p>
+    <p>
+      <strong>Lafcadio Hearn</strong> (1850–1904) was a Greek-Irish writer who
+      spent the last fourteen years of his life in Japan, married a Japanese
+      woman, and re-told Japanese folktales in lyrical, careful English. His
+      writing is now used in Japanese high schools as English-reading material —
+      an interesting loop where Japan re-imports its own stories through his
+      voice.
+    </p>
+    <p class="cross-links">
+      <a href="/en/">← Hiraku home (English)</a>
+      <span aria-hidden="true">・</span>
+      <a href="/library">All lessons (Japanese)</a>
+      <span aria-hidden="true">・</span>
+      <a href="/">日本語版</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="en-lessons-grid">
+      {enLessons.map((lesson) => {
+        const sp = SPOTLIGHTS[lesson.id];
+        return (
+          <article class="en-lesson-card">
+            <h2 class="en-lesson-card__title">
+              {sp ? sp.englishTitle : lesson.data.title}
+            </h2>
+            {sp && <p class="en-lesson-card__jp" lang="ja">原題：{sp.japaneseTitle}</p>}
+            <p class="en-lesson-card__author">
+              {lesson.data.author}{lesson.data.original_year ? ` (${lesson.data.original_year})` : ''}
+            </p>
+            <p class="en-lesson-card__blurb">{sp ? sp.blurb : lesson.data.description}</p>
+            {sp && (
+              <p class="en-lesson-card__audience">
+                <strong>For whom:</strong> {sp.audience}
+              </p>
+            )}
+            <p class="en-lesson-card__cta">
+              <a href={`/library/${lesson.collection}/${lesson.id}`}>
+                Open the lesson →
+              </a>
+              <span class="en-lesson-card__note" lang="ja">
+                （教材ページの注釈は日本語）
+              </span>
+            </p>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>Why these lessons exist in Hiraku</h2>
+      <span class="section__subtitle">CONTEXT</span>
+    </div>
+    <p>
+      Japan\'s English curriculum (<em lang="ja">高校英語</em>) traditionally
+      includes Lafcadio Hearn\'s tales as accessible, atmospheric English prose.
+      For a student in Japan, reading <em>Mujina</em> in English is both an
+      English lesson and an encounter with a familiar Japanese story told in a
+      foreign voice — a productive double estrangement.
+    </p>
+    <p>
+      For English-speaking visitors browsing Hiraku, these lessons offer a
+      different angle: <strong>here is what Japanese teenagers read in their
+      English class</strong>, with the kind of annotations a Japanese
+      schoolteacher would add (vocabulary glosses, cultural notes, discussion
+      questions). The annotations are in Japanese — but the original text is
+      English, and you can read it directly.
+    </p>
+  </section>
+
+  <style>
+    .cross-links { font-size: 0.95rem; }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .en-lessons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .en-lesson-card {
+      padding: 1.2rem;
+      background: var(--bg-soft);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+    }
+    .en-lesson-card__title {
+      font-size: 1.15rem;
+      margin: 0 0 0.2rem;
+      font-family: 'Noto Serif JP', serif;
+    }
+    .en-lesson-card__jp {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin: 0 0 0.3rem;
+    }
+    .en-lesson-card__author {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin: 0 0 0.8rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .en-lesson-card__blurb {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 0 0 0.7rem;
+    }
+    .en-lesson-card__audience {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      line-height: 1.5;
+      margin: 0 0 0.8rem;
+      padding: 0.5rem 0.7rem;
+      background: var(--bg);
+      border-radius: 6px;
+    }
+    .en-lesson-card__cta a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      font-weight: 500;
+    }
+    .en-lesson-card__note {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      margin-left: 0.4rem;
+    }
+  </style>
+</Base>

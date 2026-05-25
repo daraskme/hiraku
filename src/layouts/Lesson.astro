@@ -15,8 +15,10 @@ interface Props {
     | CollectionEntry<'kotoko2'>
     | CollectionEntry<'kateika5'>
     | CollectionEntry<'chugakurika1'>
+    | CollectionEntry<'chugakurika2'>
     | CollectionEntry<'chugakurekishi1'>
     | CollectionEntry<'kotorekishi1'>
+    | CollectionEntry<'kotokokanbun1'>
     | CollectionEntry<'kotosekaishi1'>
     | CollectionEntry<'kotokoeigo1'>
     | CollectionEntry<'sansu5'>
@@ -38,11 +40,13 @@ const COLLECTION_NAMES = [
   'kotoko2',
   'kateika5',
   'chugakurika1',
+  'chugakurika2',
   'chugakurekishi1',
   'kotokoeigo1',
   'sansu5',
   'chugakukomin3',
   'kotorekishi1',
+  'kotokokanbun1',
   'kotosekaishi1',
 ] as const;
 const COLLECTION_LABEL: Record<string, string> = {
@@ -56,11 +60,13 @@ const COLLECTION_LABEL: Record<string, string> = {
   kotoko2: '高2 国語',
   kateika5: '小5 家庭科',
   chugakurika1: '中1 理科',
+  chugakurika2: '中2 理科',
   chugakurekishi1: '中1 歴史',
   kotokoeigo1: '高1 英語',
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
   kotorekishi1: '高1 日本史',
+  kotokokanbun1: '高1 漢文',
   kotosekaishi1: '高1 世界史',
 };
 
@@ -192,6 +198,12 @@ const guidelineDoc = d.school_stage === 'kotoko'
         {d.classical && <span class="badge badge--accent">古典</span>}
         {d.domains.map((dom) => <span class="badge">{dom}</span>)}
         {d.estimated_minutes && <span class="badge">目安 {d.estimated_minutes} 分</span>}
+        {d.jlpt && <span class="badge badge--level" title="日本語能力試験レベル">JLPT {d.jlpt}</span>}
+        {d.kanji_level && <span class="badge badge--level" title="学年別漢字配当表の最上学年">漢字 {d.kanji_level === 10 ? '常用漢字以上' : `第${d.kanji_level}学年`}</span>}
+        {d.vocab_level && <span class="badge badge--level" title="語彙難易度">語彙 {d.vocab_level}</span>}
+        {d.reading_difficulty && (
+          <span class="badge badge--level" title="総合的な読みやすさ (1=易 〜 5=難)">難易度 {'★'.repeat(d.reading_difficulty)}{'☆'.repeat(5 - d.reading_difficulty)}</span>
+        )}
       </p>
 
       <section class="meta-panel" aria-label="教材メタ情報">

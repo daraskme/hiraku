@@ -26,6 +26,15 @@ const lessonSchema = z.object({
     )
     .default([]),
   estimated_minutes: z.number().int().optional(),
+  // 学習者向けの難易度メタ。すべて任意。
+  // jlpt: 日本語能力試験 N1〜N5。N5 が初級、N1 が最上級。
+  // kanji_level: 文部科学省「学年別漢字配当表」基準の最上学年 (1〜10、10 は中高常用漢字以上)
+  // vocab_level: 「初級／中級／上級」あるいはおおよその語彙数感
+  // reading_difficulty: 全体の読みやすさを5段階で (1=非常に易しい … 5=非常に難しい)
+  jlpt: z.enum(['N5', 'N4', 'N3', 'N2', 'N1']).optional(),
+  kanji_level: z.number().int().min(1).max(10).optional(),
+  vocab_level: z.enum(['初級', '中級', '上級']).optional(),
+  reading_difficulty: z.number().int().min(1).max(5).optional(),
   order: z.number().int().default(0),
   description: z.string(),
   keywords: z.array(z.string()).default([]),
@@ -121,6 +130,16 @@ const chugakurika1 = defineCollection({
   schema: lessonSchema,
 });
 
+const chugakurika2 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/chugakurika2' }),
+  schema: lessonSchema,
+});
+
+const kotokokanbun1 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kotokokanbun1' }),
+  schema: lessonSchema,
+});
+
 const chugakurekishi1 = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/chugakurekishi1' }),
   schema: lessonSchema,
@@ -151,4 +170,4 @@ const kotosekaishi1 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kateika5, chugakurika1, chugakurekishi1, kotokoeigo1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1 };
+export const collections = { kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1 };

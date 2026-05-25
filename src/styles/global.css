@@ -733,6 +733,12 @@ blockquote {
   border-color: var(--accent);
   color: var(--logo-fg);
 }
+.badge--level {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: color-mix(in srgb, var(--accent) 70%, var(--text-soft));
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  font-variant-numeric: tabular-nums;
+}
 
 /* ============================================================
    ライブラリ フィルタ
