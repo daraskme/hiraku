@@ -1,6 +1,7 @@
 ---
 title: 羅生門
 author: 芥川龍之介
+author_wikidata: Q170509
 author_dates: "1892–1927"
 original_year: 1915
 source:

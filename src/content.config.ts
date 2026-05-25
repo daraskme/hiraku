@@ -35,6 +35,11 @@ const lessonSchema = z.object({
   kanji_level: z.number().int().min(1).max(10).optional(),
   vocab_level: z.enum(['初級', '中級', '上級']).optional(),
   reading_difficulty: z.number().int().min(1).max(5).optional(),
+  // 著者 Wikidata Q番号 (例: 'Q19185' = 夏目漱石)。著者ページから外部情報を引く
+  author_wikidata: z.string().regex(/^Q[0-9]+$/).optional(),
+  // やさしい日本語版 (小学生にも分かる平易な文体への書き換え)
+  // 設定があれば、教材ページに「やさしい日本語版」トグルが出る
+  easy_japanese: z.string().optional(),
   order: z.number().int().default(0),
   description: z.string(),
   keywords: z.array(z.string()).default([]),

@@ -1,0 +1,85 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="リーディングチャレンジ"
+  description="期間内に複数教材を読むチャレンジ。完了で特別バッジを獲得。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>リーディングチャレンジ</h1>
+      <span class="section__subtitle">CHALLENGES</span>
+    </div>
+    <p>
+      期間と教材数を決めて、自分でチャレンジを設定する仕組み。
+      <strong>完了するごとに特別バッジが獲得</strong> できます。
+    </p>
+    <p>
+      チャレンジは <a href="/goals">学習目標</a> 機能の応用形です。
+      まず「30 日で 5 教材」「今週 60 分」のような目標を設定してみてください。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>おすすめチャレンジ</h2>
+    <div class="challenges-grid">
+      <article class="challenge-card">
+        <h3>🌸 古典文学 7 日間</h3>
+        <p>平家物語 → 方丈記 → 枕草子 → 徒然草 → 伊勢物語 → 源氏物語 → 奥の細道 を 1 週間で巡る。</p>
+        <p>所要時間：約 130 分 (毎日 20 分)</p>
+        <p>
+          <a class="btn btn--ghost" href="/paths/koten-yondai-bashira">パスを開く →</a>
+        </p>
+      </article>
+      <article class="challenge-card">
+        <h3>📚 古事記神話の旅 (5日間)</h3>
+        <p>古事記の代表的な 6 神話を、5 日間で読み通す。</p>
+        <p>所要時間：約 100 分 (毎日 20 分)</p>
+        <p>
+          <a class="btn btn--ghost" href="/paths/kojiki-shinwa">パスを開く →</a>
+        </p>
+      </article>
+      <article class="challenge-card">
+        <h3>🔬 寺田寅彦の科学随筆 (4日間)</h3>
+        <p>「茶碗の湯」「線香花火」「金平糖」「電車の混雑」を 4 日連続で。</p>
+        <p>所要時間：約 75 分</p>
+        <p>
+          <a class="btn btn--ghost" href="/paths/rika-zuihitsu">パスを開く →</a>
+        </p>
+      </article>
+      <article class="challenge-card">
+        <h3>📜 立憲主義の系譜 (10日間)</h3>
+        <p>マグナ・カルタ → 大日本帝国憲法 → 教育勅語 → 日本国憲法 と歴史を辿る。</p>
+        <p>所要時間：約 90 分</p>
+        <p>
+          <a class="btn btn--ghost" href="/paths/kindai-kenpo-rekishi">パスを開く →</a>
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <p style="color:var(--text-soft);font-size:0.85rem;">
+      <strong>注：</strong> 現在、専用のチャレンジ追跡 UI はまだ開発中です。
+      <a href="/goals">学習目標</a> で「30 日で 5 教材」のような目標を設定してください。
+      完了すると <a href="/progress">進捗ページ</a> でバッジを確認できます。
+    </p>
+  </section>
+
+  <style>
+    .challenges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.8rem;
+    }
+    .challenge-card {
+      padding: 1.2rem;
+      background: var(--bg-soft);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+    }
+    .challenge-card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+    .challenge-card p { margin: 0 0 0.5rem; font-size: 0.9rem; line-height: 1.5; }
+  </style>
+</Base>

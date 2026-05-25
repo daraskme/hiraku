@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="ニュースレター購読"
+  description="ひらくの新教材・新機能を月一回のメールでお届けします。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>ニュースレター</h1>
+      <span class="section__subtitle">SUBSCRIBE</span>
+    </div>
+    <p>
+      新しい教材・新しい機能を、<strong>月一回</strong> メールでお届けします。
+      広告は入りません。配信停止はいつでも可能 (メール末尾のリンクから)。
+    </p>
+    <form data-subscribe-form class="subscribe-form">
+      <label>
+        <span>メールアドレス</span>
+        <input type="email" name="email" required placeholder="you@example.com" />
+      </label>
+      <label>
+        <span>お名前 (任意)</span>
+        <input type="text" name="name" maxlength="80" placeholder="学校教師、家庭学習者など" />
+      </label>
+      <button type="submit" class="btn btn--primary">購読を申し込む</button>
+    </form>
+    <p data-subscribe-result style="margin-top:1rem;"></p>
+  </section>
+
+  <section class="section">
+    <h2>取り扱うデータ</h2>
+    <ul style="line-height:1.7;">
+      <li>メールアドレス・お名前のみを Cloudflare KV に保存</li>
+      <li>第三者には提供しません</li>
+      <li>配信停止リクエストはメール末尾のリンク or <a href="/community">GitHub Issues</a> から</li>
+    </ul>
+    <p>詳しくは <a href="/privacy">プライバシーポリシー</a> をご覧ください。</p>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const form = document.querySelector('[data-subscribe-form]');
+      const result = document.querySelector('[data-subscribe-result]');
+      if (!form) return;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        result.textContent = '送信中…';
+        try {
+          const resp = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: fd.get('email'), name: fd.get('name') }),
+          });
+          const data = await resp.json();
+          if (resp.ok) {
+            result.textContent = data.alreadySubscribed
+              ? '既に購読登録済みです。'
+              : '購読登録ありがとうございます。月一回お届けします。';
+            form.reset();
+          } else {
+            result.textContent = 'エラー: ' + (data.error || 'unknown');
+          }
+        } catch (_) {
+          result.textContent = '送信に失敗しました。';
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    .subscribe-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+      max-width: 480px;
+      padding: 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+    }
+    .subscribe-form label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; }
+    .subscribe-form input {
+      padding: 0.5rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+  </style>
+</Base>

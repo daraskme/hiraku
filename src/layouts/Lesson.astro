@@ -95,17 +95,21 @@ interface RelatedScore {
   reason: string;
 }
 const lessonKeywords = new Set<string>(d.keywords || []);
+const lessonCurriculumCodes = new Set<string>((d.curriculum_items || []).map((i: any) => i.code));
+const lessonYear = typeof d.original_year === 'number' ? d.original_year : null;
 const related: RelatedScore[] = [];
 for (const entry of allLessons) {
   if (entry.collection === lesson.collection && entry.lesson.id === lesson.id) continue;
   let score = 0;
   let reason = '';
-  // Same author = strong
+
+  // (1) 同じ作者 = 強
   if (entry.lesson.data.author === d.author) {
     score += 10;
     reason = '同じ作者';
   }
-  // Keyword overlap
+
+  // (2) キーワード重複 — 重複数 × 3
   const otherKeywords = new Set<string>(entry.lesson.data.keywords || []);
   let overlap = 0;
   for (const k of lessonKeywords) if (otherKeywords.has(k)) overlap++;
@@ -113,16 +117,53 @@ for (const entry of allLessons) {
     score += overlap * 3;
     if (!reason) reason = `共通テーマ：${[...lessonKeywords].filter((k) => otherKeywords.has(k)).slice(0, 2).join('・')}`;
   }
-  // Same collection (school stage + subject)
+
+  // (3) 学習指導要領コード共有 (大きな指標)
+  const otherCodes = new Set<string>((entry.lesson.data.curriculum_items || []).map((i: any) => i.code));
+  let codeOverlap = 0;
+  for (const c of lessonCurriculumCodes) if (otherCodes.has(c)) codeOverlap++;
+  if (codeOverlap > 0) {
+    score += codeOverlap * 4;
+    if (!reason) reason = '同じ指導要領単元';
+  }
+
+  // (4) 同じ collection (科目・学年が同じ)
   if (entry.collection === lesson.collection) {
     score += 2;
     if (!reason) reason = COLLECTION_LABEL[entry.collection] + ' の別教材';
   }
-  // Classical kinship
+
+  // (5) 古典 vs 古典 の親和性
   if (d.classical && entry.lesson.data.classical) {
     score += 3;
     if (!reason) reason = '同じ古典作品の系列';
   }
+
+  // (6) 時代近接 (±50年以内なら +2、±200年以内なら +1)
+  const otherYear = typeof entry.lesson.data.original_year === 'number' ? entry.lesson.data.original_year : null;
+  if (lessonYear != null && otherYear != null) {
+    const gap = Math.abs(lessonYear - otherYear);
+    if (gap <= 50) {
+      score += 2;
+      if (!reason) reason = '近い時代の作品';
+    } else if (gap <= 200) {
+      score += 1;
+    }
+  }
+
+  // (7) JLPT / reading_difficulty が近いなら +1 (難易度の近さ)
+  if (d.jlpt && entry.lesson.data.jlpt && d.jlpt === entry.lesson.data.jlpt) {
+    score += 1;
+    if (!reason) reason = `同じ JLPT ${d.jlpt} レベル`;
+  }
+  if (
+    typeof d.reading_difficulty === 'number' &&
+    typeof entry.lesson.data.reading_difficulty === 'number' &&
+    Math.abs(d.reading_difficulty - entry.lesson.data.reading_difficulty) <= 1
+  ) {
+    score += 1;
+  }
+
   if (score >= 3) related.push({ collection: entry.collection, lesson: entry.lesson, score, reason });
 }
 related.sort((a, b) => b.score - a.score);
@@ -328,9 +369,22 @@ const guidelineDoc = d.school_stage === 'kotoko'
           </div>
         </div>
       </div>
+      {d.easy_japanese && (
+        <div class="easy-toggle no-print" role="region" aria-label="やさしい日本語版">
+          <button type="button" class="easy-toggle__btn" data-easy-toggle aria-pressed="false">
+            ✦ やさしい日本語版を表示
+          </button>
+        </div>
+      )}
       <div data-tts-body data-scene-bg-host data-illustrations={d.illustrations && d.illustrations.length > 0 ? JSON.stringify(d.illustrations.map((i) => ({ src: i.src, alt: i.alt, caption: i.caption }))) : ''}>
         <slot />
       </div>
+      {d.easy_japanese && (
+        <div class="easy-body" data-easy-body hidden>
+          <p class="easy-body__notice no-print">やさしい日本語版です。元の本文に戻すには上のボタンをもう一度押してください。</p>
+          <div class="story-body">{d.easy_japanese.split(/\n\n+/).map((p) => <p>{p}</p>)}</div>
+        </div>
+      )}
     </section>
 
     {d.illustrations && d.illustrations.length > 0 && (
@@ -1135,6 +1189,24 @@ const guidelineDoc = d.school_stage === 'kotoko'
         });
       }
       renderHistoryPanel();
+    })();
+  </script>
+
+  <script is:inline>
+    // ─── やさしい日本語版トグル ───
+    (function () {
+      const toggle = document.querySelector('[data-easy-toggle]');
+      const body = document.querySelector('[data-tts-body]');
+      const easyBody = document.querySelector('[data-easy-body]');
+      if (!toggle || !body || !easyBody) return;
+      let easyOn = false;
+      toggle.addEventListener('click', () => {
+        easyOn = !easyOn;
+        body.hidden = easyOn;
+        easyBody.hidden = !easyOn;
+        toggle.setAttribute('aria-pressed', String(easyOn));
+        toggle.textContent = easyOn ? '✦ 元の本文に戻す' : '✦ やさしい日本語版を表示';
+      });
     })();
   </script>
 

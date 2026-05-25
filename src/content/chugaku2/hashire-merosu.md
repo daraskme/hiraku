@@ -1,6 +1,7 @@
 ---
 title: 走れメロス（抜粋）
 author: 太宰治
+author_wikidata: Q310577
 author_dates: "1909–1948"
 original_year: 1940
 source:

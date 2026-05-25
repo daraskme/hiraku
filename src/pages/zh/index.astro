@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="ひらく — 中文导览"
+  description="ひらく (Hiraku) 是一个开源教育平台，将公有领域的日本经典文本根据日本现行教学大纲重新编辑公开。本页面为中文读者介绍本项目。"
+  lang="ja"
+  hrefAlt="/"
+  wide
+>
+  <section class="hero hero--zh">
+    <p class="hero__eyebrow">免费 · 开源 · CC BY-SA</p>
+    <h1 class="hero__title" lang="zh-Hans">重新打开日本古典文献。</h1>
+    <p class="hero__lead">
+      <strong>ひらく</strong> (Hiraku) 收录从《古事记》(8 世纪) 到战后日本 (1946 年宪法) 的
+      日本公有领域文学作品，并按照日本现行 <strong>学习指导要领</strong> (文部科学省 2017–18 年版)
+      重新编辑。免费供课堂、家庭和自学使用。
+    </p>
+    <div class="hero__ctas">
+      <a href="/library" class="btn btn--primary">浏览教材库 →</a>
+      <a href="/" class="btn btn--ghost">日本語版へ</a>
+      <a href="/en/" class="btn btn--ghost">English</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 lang="zh-Hans">汉文教材 (中国古典)</h2>
+    <p>
+      本站特别收录了日本汉文课程中常见的中国古典文本，对中文读者而言意义特殊
+      —— <strong>这些是日本高中生学习中国古典的入口</strong>。
+    </p>
+    <ul style="line-height:1.8;">
+      <li><a href="/library/kotokokanbun1/rongo-gakuji">《论语》学而第一</a> — 孔子，公元前 5 世纪</li>
+      <li><a href="/library/kotokokanbun1/rongo-onko-chishin">《论语》为政第二・温故知新</a></li>
+      <li><a href="/library/kotokokanbun1/toho-shunbo">杜甫《春望》</a> — 安史之乱中的代表作</li>
+    </ul>
+    <p>
+      所有教材采用 <strong>原文 (汉文) + 日本式训读 + 现代日语译</strong> 的三段格式，
+      日本读者通过这种方式接受中国古典。
+    </p>
+  </section>
+
+  <section class="section">
+    <h2 lang="zh-Hans">关于本项目</h2>
+    <p>
+      ひらく (字面意思「打开」) 是一个独立的、非盈利的教育平台，由编辑者一人维护，
+      运行在 Cloudflare Pages 的免费层上。源代码以 MIT 许可证公开，
+      教学内容以 CC BY 4.0 许可证公开。
+    </p>
+    <p>
+      <strong>不投放广告，不进行用户追踪。</strong>
+      所有用户数据要么仅保存在用户的设备上 (localStorage)，
+      要么仅在用户登录后保存在我们的服务器 (Cloudflare KV) 上，由用户控制。
+    </p>
+    <p>
+      <a href="https://github.com/daraskme/hiraku" target="_blank" rel="noopener">GitHub 仓库</a>
+      欢迎中文使用者提交问题或翻译协助。
+    </p>
+  </section>
+
+  <p class="cross-links">
+    <a href="/">日本語版</a> ·
+    <a href="/en/">English</a>
+  </p>
+
+  <style>
+    .hero--zh .hero__title { font-family: 'Noto Serif JP', 'Noto Serif SC', serif; }
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+  </style>
+</Base>

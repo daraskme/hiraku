@@ -1,0 +1,18 @@
+# Pagefind 設定
+# https://pagefind.app/docs/config-options/
+#
+# 488 ページのインデックス肥大対策と、日本語検索精度向上のため。
+site: dist
+
+# 検索対象から除外するパス (印刷用ワークシート / 指導案は本文と重複なので除外)
+exclude_selectors:
+  - "no-print"
+  - ".pagefind-aux"
+  - "[hidden]"
+
+# 各教材ページに data-pagefind-body 属性を付けているので、その範囲のみ
+# インデックスする (ヘッダー・フッター等を除外)
+keep_index_url: true
+
+# 出力の警告閾値 (KB)。これを超えたらビルド時にも気づける
+verbose: true

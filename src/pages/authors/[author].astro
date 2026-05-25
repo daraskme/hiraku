@@ -63,6 +63,8 @@ const sortedLessons = [...lessons].sort(
 );
 const dates = sortedLessons[0].data.author_dates;
 const totalMinutes = sortedLessons.reduce((acc: number, l: any) => acc + (l.data.estimated_minutes || 0), 0);
+// 任意：いずれかの教材に author_wikidata が設定されていれば外部リンクを出す
+const wikidataId = sortedLessons.find((l: any) => l.data.author_wikidata)?.data.author_wikidata;
 
 // Era-spanning info
 const years = sortedLessons.map((l: any) => l.data.original_year).filter(Boolean);
@@ -82,6 +84,16 @@ const latest = Math.max(...years);
     <div class="cross-page__meta">
       {dates && <span class="badge">{dates}</span>}
       <span class="badge">{lessons.length} 本収載</span>
+      {wikidataId && (
+        <a class="badge badge--accent" href={`https://www.wikidata.org/wiki/${wikidataId}`} target="_blank" rel="noopener" title="Wikidata で詳細を見る">
+          ◐ Wikidata {wikidataId}
+        </a>
+      )}
+      {wikidataId && (
+        <a class="badge" href={`https://ja.wikipedia.org/wiki/Special:GoToLinkedWikibaseItem/${wikidataId}`} target="_blank" rel="noopener">
+          📖 Wikipedia
+        </a>
+      )}
       {totalMinutes > 0 && <span class="badge">合計 {totalMinutes} 分</span>}
       {years.length > 0 && (
         <span class="badge">作品年代：{earliest === latest ? earliest : `${earliest}〜${latest}`}</span>

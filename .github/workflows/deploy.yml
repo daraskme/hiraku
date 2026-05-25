@@ -25,7 +25,21 @@ jobs:
         run: npm ci
 
       - name: Build site (Astro + Pagefind)
-        run: npm run build
+        id: build
+        run: |
+          START=$(date +%s)
+          npm run build
+          END=$(date +%s)
+          DURATION=$((END - START))
+          PAGE_COUNT=$(find dist -name "*.html" | wc -l | tr -d ' ')
+          DIST_SIZE_KB=$(du -sk dist | cut -f1)
+          echo "duration_seconds=$DURATION" >> "$GITHUB_OUTPUT"
+          echo "page_count=$PAGE_COUNT" >> "$GITHUB_OUTPUT"
+          echo "dist_size_kb=$DIST_SIZE_KB" >> "$GITHUB_OUTPUT"
+          echo "## Build metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
+          echo "- Pages: ${PAGE_COUNT}" >> $GITHUB_STEP_SUMMARY
+          echo "- dist size: ${DIST_SIZE_KB} KB" >> $GITHUB_STEP_SUMMARY
         env:
           # Google ログインボタンをクライアント JS に焼き込むためのビルド時変数。
           # GitHub: Settings → Secrets and variables → Actions → Variables タブで

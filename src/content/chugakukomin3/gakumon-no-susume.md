@@ -1,6 +1,7 @@
 ---
 title: 学問のすゝめ・初編（抜粋）
 author: 福沢諭吉
+author_wikidata: Q314380
 author_dates: "1834–1901"
 original_year: 1872
 era: 明治5年（1872年）
