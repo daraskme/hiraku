@@ -75,6 +75,13 @@ for (const c of COLLECTIONS) {
   });
 }
 
+function bucketTime(mins: number | undefined): string {
+  if (mins == null) return 'unset';
+  if (mins <= 10) return 'short';
+  if (mins <= 20) return 'medium';
+  return 'long';
+}
+
 const allStages = Array.from(new Set(sections.map((s) => s.stage)));
 const allSubjects = Array.from(new Set(sections.map((s) => s.subject)));
 const allGrades = Array.from(
@@ -138,6 +145,13 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
           </button>
         ))}
       </div>
+      <div class="library-filters__group" role="group" aria-label="所要時間で絞り込み">
+        <span class="library-filters__label">所要時間</span>
+        <button type="button" class="filter-chip" data-filter-key="time" data-filter-value="short" aria-pressed="true">〜10 分</button>
+        <button type="button" class="filter-chip" data-filter-key="time" data-filter-value="medium" aria-pressed="true">10〜20 分</button>
+        <button type="button" class="filter-chip" data-filter-key="time" data-filter-value="long" aria-pressed="true">20 分以上</button>
+        <button type="button" class="filter-chip" data-filter-key="time" data-filter-value="unset" aria-pressed="true">指定なし</button>
+      </div>
       <div class="library-filters__actions">
         <button type="button" class="filter-chip filter-chip--ghost" data-filter-reset>すべて表示</button>
         <button type="button" class="filter-chip filter-chip--ghost" data-filter-none>すべて非表示</button>
@@ -178,23 +192,26 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
         </div>
       ) : (
         <div class="lesson-grid">
-          {s.lessons.map((lesson) => (
-            <article class="lesson-card">
-              <a href={`/library/${s.name}/${lesson.id}`} class="lesson-card__link">
-                <p class="lesson-card__meta">{s.defaultMeta(lesson)}</p>
-                <h3 class="lesson-card__title">{lesson.data.title}</h3>
-                <p class="lesson-card__desc">{lesson.data.description}</p>
-                <p class="lesson-card__author">
-                  {lesson.data.author}
-                  {lesson.data.era
-                    ? `（${lesson.data.era}）`
-                    : lesson.data.original_year
-                      ? `（${lesson.data.original_year}）`
-                      : ''}
-                </p>
-              </a>
-            </article>
-          ))}
+          {s.lessons.map((lesson) => {
+            const timeBucket = bucketTime(lesson.data.estimated_minutes);
+            return (
+              <article class="lesson-card" data-card data-card-time={timeBucket}>
+                <a href={`/library/${s.name}/${lesson.id}`} class="lesson-card__link">
+                  <p class="lesson-card__meta">{s.defaultMeta(lesson)}</p>
+                  <h3 class="lesson-card__title">{lesson.data.title}</h3>
+                  <p class="lesson-card__desc">{lesson.data.description}</p>
+                  <p class="lesson-card__author">
+                    {lesson.data.author}
+                    {lesson.data.era
+                      ? `（${lesson.data.era}）`
+                      : lesson.data.original_year
+                        ? `（${lesson.data.original_year}）`
+                        : ''}
+                  </p>
+                </a>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>
@@ -216,15 +233,21 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
         stage: new Set(allValues('stage')),
         subject: new Set(allValues('subject')),
         grade: new Set(allValues('grade')),
+        time: new Set(['short', 'medium', 'long', 'unset']),
       };
 
       // Load from localStorage
-      const state = { stage: new Set(defaults.stage), subject: new Set(defaults.subject), grade: new Set(defaults.grade) };
+      const state = {
+        stage: new Set(defaults.stage),
+        subject: new Set(defaults.subject),
+        grade: new Set(defaults.grade),
+        time: new Set(defaults.time),
+      };
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          for (const k of ['stage', 'subject', 'grade']) {
+          for (const k of ['stage', 'subject', 'grade', 'time']) {
             if (Array.isArray(parsed[k])) {
               state[k] = new Set(parsed[k]);
             }
@@ -240,6 +263,7 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
               stage: [...state.stage],
               subject: [...state.subject],
               grade: [...state.grade],
+              time: [...state.time],
             }),
           );
         } catch (_) {}
@@ -251,8 +275,23 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
           const stage = s.dataset.stage;
           const subject = s.dataset.subject;
           const grade = s.dataset.grade;
-          const show =
+          const sectionPass =
             state.stage.has(stage) && state.subject.has(subject) && state.grade.has(grade);
+          if (!sectionPass) {
+            s.hidden = true;
+            return;
+          }
+          // セクション内のカードを time フィルタで個別に絞り込み
+          const cards = Array.from(s.querySelectorAll('[data-card]'));
+          let cardVisible = 0;
+          cards.forEach((c) => {
+            const tb = c.dataset.cardTime || 'unset';
+            const show = state.time.has(tb);
+            c.hidden = !show;
+            if (show) cardVisible++;
+          });
+          // 全カードが filter で消えたらセクション自体も非表示
+          const show = cardVisible > 0;
           s.hidden = !show;
           if (show) visible++;
         });
@@ -282,6 +321,7 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
           state.stage = new Set(defaults.stage);
           state.subject = new Set(defaults.subject);
           state.grade = new Set(defaults.grade);
+          state.time = new Set(defaults.time);
           persist();
           apply();
           return;
@@ -290,6 +330,7 @@ const totalLessonCount = sections.reduce((acc, s) => acc + s.lessons.length, 0);
           state.stage = new Set();
           state.subject = new Set();
           state.grade = new Set();
+          state.time = new Set();
           persist();
           apply();
           return;

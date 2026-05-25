@@ -20,9 +20,22 @@ const chugakukomin3 = (await getCollection('chugakukomin3')).map((l) => ({ colle
 const kotorekishi1 = (await getCollection('kotorekishi1')).map((l) => ({ collection: 'kotorekishi1', ...l }));
 const kotokokanbun1 = (await getCollection('kotokokanbun1')).map((l) => ({ collection: 'kotokokanbun1', ...l }));
 const kotosekaishi1 = (await getCollection('kotosekaishi1')).map((l) => ({ collection: 'kotosekaishi1', ...l }));
-const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...chugaku3, ...kotoko1, ...kotoko2, ...kateika5, ...chugakurika1, ...chugakurika2, ...chugakurekishi1, ...kotokoeigo1, ...sansu5, ...chugakukomin3, ...kotorekishi1, ...kotokokanbun1, ...kotosekaishi1]
+const allLessons = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...chugaku3, ...kotoko1, ...kotoko2, ...kateika5, ...chugakurika1, ...chugakurika2, ...chugakurekishi1, ...kotokoeigo1, ...sansu5, ...chugakukomin3, ...kotorekishi1, ...kotokokanbun1, ...kotosekaishi1];
+const featured = [...allLessons]
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
+
+// 今日の一篇: クライアントサイドで利用日付に基づいて選出するためのデータ
+// (ビルド時点では全候補をコンパクトに JSON にしておき、JS が日付ハッシュで 1 件決める)
+const dailyCandidates = allLessons.map((l) => ({
+  path: `/library/${l.collection}/${l.id}`,
+  title: l.data.title,
+  author: l.data.author,
+  description: l.data.description,
+  collection: l.collection,
+  year: l.data.original_year,
+  era: l.data.era,
+}));
 ---
 
 <Base
@@ -41,6 +54,17 @@ const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, 
     <div class="hero__ctas">
       <a href="/library" class="btn btn--primary">教材を探す →</a>
       <a href="/about" class="btn btn--ghost">サイトについて</a>
+    </div>
+  </section>
+
+  {/* 今日の一篇 (クライアントサイドで日付ハッシュ → 1 件選出) */}
+  <section class="section daily-pick-section no-print" data-daily-pick-root data-daily-candidates={JSON.stringify(dailyCandidates)}>
+    <div class="section__heading">
+      <h2>今日の一篇</h2>
+      <span class="section__subtitle">DAILY PICK</span>
+    </div>
+    <div class="daily-pick" data-daily-pick>
+      <p style="color: var(--text-soft);">読み込み中…</p>
     </div>
   </section>
 
@@ -94,6 +118,42 @@ const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, 
       </div>
     )}
   </section>
+
+  <script is:inline>
+    // ─── 今日の一篇 ───
+    (function () {
+      const root = document.querySelector('[data-daily-pick-root]');
+      const target = document.querySelector('[data-daily-pick]');
+      if (!root || !target) return;
+      let candidates = [];
+      try { candidates = JSON.parse(root.dataset.dailyCandidates || '[]'); } catch (_) {}
+      if (!candidates.length) { target.innerHTML = ''; return; }
+
+      // 利用者のローカル日付を seed にハッシュ
+      const today = new Date();
+      const key = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+      let h = 0;
+      for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+      const idx = h % candidates.length;
+      const pick = candidates[idx];
+      const yearText = pick.year ? '（' + pick.year + '年）' : pick.era ? '（' + pick.era + '）' : '';
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      target.innerHTML =
+        '<article class="daily-pick__card">' +
+          '<a href="' + escapeHtml(pick.path) + '" class="daily-pick__link">' +
+            '<p class="daily-pick__date">' + key + ' のおすすめ</p>' +
+            '<h3 class="daily-pick__title">' + escapeHtml(pick.title) + '</h3>' +
+            '<p class="daily-pick__author">' + escapeHtml(pick.author) + escapeHtml(yearText) + '</p>' +
+            '<p class="daily-pick__desc">' + escapeHtml(pick.description) + '</p>' +
+            '<p class="daily-pick__cta">この教材を開く →</p>' +
+          '</a>' +
+        '</article>';
+    })();
+  </script>
 
   <script is:inline>
     // ─── 「続きから読む」ウィジェット ───

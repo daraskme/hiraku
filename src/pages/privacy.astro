@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+const updatedAt = '2026-05-25';
+---
+
+<Base
+  title="プライバシーポリシー"
+  description="ひらく（hiraku-5cb.pages.dev）が収集する個人情報の範囲・用途・第三者送信について。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>プライバシーポリシー</h1>
+      <span class="section__subtitle">PRIVACY POLICY</span>
+    </div>
+    <p class="updated">最終更新：{updatedAt}</p>
+
+    <p>
+      ひらく（以下「本サイト」）は、利用者の個人情報を取り扱うにあたり、
+      利用者の権利・利益を尊重し、関連する法令を遵守します。本ポリシーは
+      本サイトが収集する情報の範囲、用途、第三者送信について明示することを
+      目的とします。
+    </p>
+
+    <h2>1. 収集する情報</h2>
+
+    <h3>1-1. 自動的に収集される情報</h3>
+    <ul>
+      <li><strong>localStorage に保存される学習データ</strong>: 読了履歴・ブックマーク・お気に入り・バッジ・学習メモ・表示設定。すべて利用者の端末内に保存され、サーバに送信されません（ログインしていない場合）。</li>
+      <li><strong>Cloudflare Pages のアクセスログ</strong>: IP アドレス、User-Agent、参照元 URL、アクセス日時など、ホスティング事業者である Cloudflare 社が自動収集する標準的なログ。ホスティング運用と DDoS 防御のために最大 30 日保管されます。</li>
+      <li><strong>クライアントエラーレポート</strong>: JavaScript の実行エラーが発生した場合、エラーメッセージ・スタックトレース・該当 URL・User-Agent を <code>/api/error</code> へ送信し、Cloudflare KV に 30 日間保管します。デバッグ目的にのみ利用します。</li>
+    </ul>
+
+    <h3>1-2. ログイン時に収集する情報</h3>
+    <ul>
+      <li><strong>Google アカウント情報</strong>: Google Sign-In を利用してログインした場合、Google から OAuth スコープ <code>openid email profile</code> によって取得した <strong>表示名・メールアドレス・プロフィール画像 URL・Google アカウント識別子 (sub)</strong> を Cloudflare KV に保存します。</li>
+      <li><strong>クラウド同期される学習データ</strong>: ログイン後、上記 1-1 の学習データがクラウド (Cloudflare KV) に同期されます。これにより複数端末間で学習データを共有できます。</li>
+      <li><strong>セッション Cookie</strong>: <code>hsess</code> という HttpOnly Cookie に、KV 上のセッション識別子を保存します。Cookie 自体には個人を特定する情報を含めません（KV の参照キーのみ）。有効期限はデフォルト 30 日。</li>
+    </ul>
+
+    <h2>2. 情報の用途</h2>
+    <ul>
+      <li>利用者の学習体験の提供・改善</li>
+      <li>複数端末間での学習データ同期</li>
+      <li>不正アクセス・スパムの防止</li>
+      <li>サーバ運用上の障害対応・パフォーマンス改善</li>
+    </ul>
+
+    <h2>3. 第三者への提供</h2>
+    <p>
+      本サイトは収集した個人情報を、利用者の同意なく第三者に提供しません。
+      ただし、以下のサービス事業者に対しては、サービス提供の必要上、所定の
+      情報が技術的に共有されます：
+    </p>
+    <ul>
+      <li><strong>Google LLC</strong>: Google Sign-In のための ID Token 検証 (oauth2.googleapis.com)。</li>
+      <li><strong>Cloudflare, Inc.</strong>: ホスティング・KV ストレージ・DDoS 防御。</li>
+      <li><strong>Google Fonts</strong>: Noto Sans JP / Noto Serif JP のフォント配信。User-Agent と IP アドレスが Google に送信されます。</li>
+    </ul>
+    <p>
+      法令に基づく開示請求があった場合、必要な範囲で開示することがあります。
+    </p>
+
+    <h2>4. データの保管期間</h2>
+    <ul>
+      <li>localStorage: 利用者が手動でクリアするまで端末内に保存。</li>
+      <li>セッション Cookie: デフォルト 30 日 (ログアウト時に削除可)。</li>
+      <li>クラウド同期データ: 利用者がプロフィールページで明示的に削除するまで保存。</li>
+      <li>エラーログ: 30 日後に自動削除。</li>
+      <li>Cloudflare のアクセスログ: Cloudflare 社のポリシーに従い管理。</li>
+    </ul>
+
+    <h2>5. 利用者の権利</h2>
+    <ul>
+      <li><strong>閲覧</strong>: ログイン後、<a href="/profile">プロフィールページ</a>から自分の保存データを JSON 形式でエクスポートできます。</li>
+      <li><strong>削除</strong>: 同ページの「クラウドの学習データを削除」ボタンで、サーバ上のデータを完全に削除できます。</li>
+      <li><strong>ログアウト</strong>: ヘッダー右上のユーザーメニューからログアウトできます (Cookie が即時削除されます)。</li>
+      <li><strong>localStorage の削除</strong>: ブラウザの設定からサイトデータを削除することで、端末内の情報をすべて消去できます。</li>
+    </ul>
+
+    <h2>6. Cookie の利用</h2>
+    <p>本サイトは以下の Cookie を利用します：</p>
+    <ul>
+      <li><strong>hsess</strong> (必須・第一者): セッション識別子。ログイン中のみ発行。HttpOnly + Secure + SameSite=Lax。</li>
+    </ul>
+    <p>
+      上記以外の第三者 Cookie (広告・分析)、トラッキングピクセル等は<strong>使用していません</strong>。
+      Google Analytics 等の解析ツールも導入していません。
+    </p>
+
+    <h2>7. 子どもの個人情報</h2>
+    <p>
+      本サイトは小中高校生の学習を対象とした教材を提供していますが、
+      <strong>13 歳未満の利用者は保護者の同意のうえ利用してください</strong>。
+      ログイン機能 (Google アカウント) を利用する際は、Google 自身の年齢制限に
+      準じます。
+    </p>
+
+    <h2>8. お問い合わせ</h2>
+    <p>
+      本ポリシーに関するご質問・データ削除依頼などは、
+      <a href="https://github.com/daraskme/hiraku/issues" target="_blank" rel="noopener">GitHub Issues</a>
+      または GitHub の連絡フォーム経由でご連絡ください。
+    </p>
+
+    <h2>9. 改定</h2>
+    <p>
+      本ポリシーは法令の変更やサービス内容の変更に応じて改定することがあります。
+      重大な変更がある場合は、本サイト上で告知します。
+    </p>
+
+    <p class="cross-links">
+      <a href="/terms">利用規約</a> ・
+      <a href="/license">ライセンス</a> ・
+      <a href="/editorial-policy">編集ポリシー</a>
+    </p>
+  </section>
+
+  <style>
+    .updated {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    h2 {
+      margin-top: 1.8rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { margin-top: 1rem; font-size: 1.05rem; }
+    .cross-links {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
+</Base>

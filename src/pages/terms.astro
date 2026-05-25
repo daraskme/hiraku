@@ -1,0 +1,137 @@
+---
+import Base from '../layouts/Base.astro';
+const updatedAt = '2026-05-25';
+---
+
+<Base
+  title="利用規約"
+  description="ひらく利用規約。教材コンテンツのライセンス、禁止行為、責任範囲について。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>利用規約</h1>
+      <span class="section__subtitle">TERMS OF SERVICE</span>
+    </div>
+    <p class="updated">最終更新：{updatedAt}</p>
+
+    <p>
+      本規約は、ひらく（以下「本サイト」）の利用条件を定めるものです。
+      本サイトを利用することにより、利用者は本規約に同意したものとみなされます。
+    </p>
+
+    <h2>1. サービス内容</h2>
+    <p>
+      本サイトは、著作権保護期間を満了したパブリックドメインの日本語文献を、
+      現行学習指導要領に沿って再編集して公開する、無償のオープン教材サイトです。
+      文部科学省検定済教科書ではなく、<strong>自主教材（副教材）</strong>として
+      ご活用いただくものです。
+    </p>
+
+    <h2>2. ライセンス</h2>
+    <ul>
+      <li><strong>原文</strong>: パブリックドメイン</li>
+      <li><strong>編集・語注・発問・解説</strong>: <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="license noopener">CC BY 4.0</a></li>
+      <li><strong>サイトのソースコード</strong>: <a href="https://opensource.org/licenses/MIT" target="_blank" rel="license noopener">MIT License</a></li>
+    </ul>
+    <p>
+      ライセンスの詳細は <a href="/license">ライセンスページ</a> をご覧ください。
+    </p>
+
+    <h2>3. 禁止事項</h2>
+    <p>本サイトの利用に際し、以下の行為を禁止します：</p>
+    <ul>
+      <li>法令または公序良俗に違反する行為</li>
+      <li>本サイトに対する DDoS 攻撃などのサーバへの過度な負荷をかける行為</li>
+      <li>本サイトの脆弱性を利用して不正アクセスを行う行為</li>
+      <li>他者のアカウント情報を取得・推測・なりすます行為</li>
+      <li>クラウド同期データに大量の不要データを書き込む行為（payload サイズ制限あり）</li>
+      <li>本サイトを用いて他者の名誉を毀損する行為</li>
+      <li>その他、本サイトが不適切と判断する行為</li>
+    </ul>
+
+    <h2>4. アカウントについて</h2>
+    <p>
+      本サイトはアカウント認証に Google Sign-In を採用しています。
+      アカウントの作成・管理は Google アカウントのポリシーに準じます。
+      <strong>ログインしなくても本サイトの教材は閲覧・利用できます</strong>。
+      ログインはクラウド同期およびクラス機能を利用する場合のみ必要です。
+    </p>
+
+    <h2>5. 免責事項</h2>
+    <ul>
+      <li>
+        本サイトは <strong>無償</strong> で提供されており、教材内容の正確性・
+        完全性・有用性について、編集者は最大限の注意を払いますが、保証は
+        いたしません。
+      </li>
+      <li>
+        本サイトを利用することにより生じた直接的・間接的損害について、
+        編集者は責任を負いません。
+      </li>
+      <li>
+        本サイトに含まれる戦前期教材の中には、現代の人権感覚から見て差別的・
+        不適切な表現を含むものがあります。これらは批判的読解の対象として
+        意図的に残されている場合があります（詳細は <a href="/editorial-policy">編集ポリシー</a> 参照）。
+      </li>
+      <li>
+        本サイトは検定済教科書ではなく、教育機関での正規利用には所属教育委員会の
+        判断が必要です。
+      </li>
+    </ul>
+
+    <h2>6. サービスの変更・停止</h2>
+    <p>
+      編集者は予告なく本サイトの内容を変更・停止することがあります。
+      これにより利用者に生じた不利益について責任を負いません。
+    </p>
+
+    <h2>7. 準拠法・管轄</h2>
+    <p>
+      本規約の解釈にあたっては日本法を準拠法とし、本サイトに関して生じる紛争は
+      編集者所在地を管轄する日本の裁判所を専属的合意管轄とします。
+    </p>
+
+    <h2>8. お問い合わせ</h2>
+    <p>
+      本規約に関するご質問は、
+      <a href="https://github.com/daraskme/hiraku/issues" target="_blank" rel="noopener">GitHub Issues</a>
+      よりご連絡ください。
+    </p>
+
+    <h2>9. 改定</h2>
+    <p>
+      本規約は予告なく改定することがあります。重要な変更がある場合は本サイト上で告知します。
+    </p>
+
+    <p class="cross-links">
+      <a href="/privacy">プライバシーポリシー</a> ・
+      <a href="/license">ライセンス</a> ・
+      <a href="/editorial-policy">編集ポリシー</a>
+    </p>
+  </section>
+
+  <style>
+    .updated {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    h2 {
+      margin-top: 1.8rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cross-links {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
+</Base>

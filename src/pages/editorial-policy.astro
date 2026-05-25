@@ -1,0 +1,145 @@
+---
+import Base from '../layouts/Base.astro';
+const updatedAt = '2026-05-25';
+---
+
+<Base
+  title="編集ポリシー"
+  description="ひらくが教材を選定・編集する際の基準。原文への敬意、現代化のルール、戦前教材の差別表現の扱いなど。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>編集ポリシー</h1>
+      <span class="section__subtitle">EDITORIAL POLICY</span>
+    </div>
+    <p class="updated">最終更新：{updatedAt}</p>
+
+    <p>
+      ひらくは、著作権切れの日本語文献を、現行学習指導要領に沿って再編集して
+      公開するプロジェクトです。本ページでは、教材の選定・編集の基準を公開します。
+    </p>
+
+    <h2>1. 教材選定の基準</h2>
+    <p>原則として、以下のすべてを満たす作品から選びます：</p>
+    <ul>
+      <li><strong>著作権が消滅していること</strong>: 著作権法の規定に従い、保護期間を満了したもの (青空文庫等で確認できるもの)</li>
+      <li><strong>学習指導要領との対応関係を示せること</strong>: 各教材に対応する curriculum_items を frontmatter に明示</li>
+      <li><strong>文学・歴史・思想・科学的に意義があること</strong>: 古典・近代の代表的作品、または当時の社会を映す史料</li>
+      <li><strong>適切な長さに収まること</strong>: 1 教材で 15〜30 分程度の学習を目安</li>
+    </ul>
+
+    <h2>2. 原文への敬意</h2>
+    <ul>
+      <li>原文は <strong>パブリックドメイン</strong> として尊重し、文意・構造を変えない</li>
+      <li>底本（出典）を frontmatter の <code>source.text</code> および <code>source.base</code> に明示</li>
+      <li>引用元へのリンク (青空文庫など) を可能な限り提供</li>
+    </ul>
+
+    <h2>3. 改変の原則</h2>
+    <p>原文に施す改変は以下に限定します：</p>
+    <ul>
+      <li><strong>旧字体・旧仮名遣いの現代化</strong>: 学習者が読みやすいよう、原則として常用漢字・現代仮名遣いに統一。古典作品の場合は原文と現代語訳を併記。</li>
+      <li><strong>ルビ（ふりがな）の付与</strong>: 学年配当漢字を超える漢字、固有名詞、古語などにルビを付与</li>
+      <li><strong>語注</strong>: <code>glossary</code> フィールドで難語・固有名詞・歴史背景を解説</li>
+      <li><strong>段落・改行の調整</strong>: 読みやすさのため、必要に応じて改行を整える (本文の追加・削除はしない)</li>
+    </ul>
+    <p>
+      上記以外の<strong>意味を変える編集はしません</strong>。
+      ただし抜粋は明示的に「冒頭部」「第○章のみ」など範囲を明記します。
+    </p>
+
+    <h2>4. 戦前教材における差別的表現の扱い</h2>
+    <p>
+      明治〜昭和初期に書かれた教材には、現代の人権感覚から見て差別的・
+      不適切な表現が含まれる場合があります。本サイトは以下の方針で対応します：
+    </p>
+    <ol>
+      <li>
+        <strong>注釈付きで残す</strong>（原則）: 原文の歴史的位置づけを保ち、
+        当時の社会を理解する素材として、語注で当時の文脈と現代から見た問題点を
+        併記します。
+      </li>
+      <li>
+        <strong>該当箇所を伏字化または省略</strong>（例外）: 公教育の場で
+        利用する際の支障となり得る、極度に差別的・攻撃的な表現は、
+        伏字化または省略します。その場合、省略の事実と理由を明記します。
+      </li>
+      <li>
+        <strong>不採用</strong>（最終手段）: 本文全体が現代の教育に
+        ふさわしくないと判断される作品は、教材として採用しません。
+      </li>
+    </ol>
+    <p>
+      具体的な判断は教材ごとに行います。判断に異論がある場合は
+      <a href="https://github.com/daraskme/hiraku/issues" target="_blank" rel="noopener">GitHub Issues</a>
+      でご意見をお寄せください。
+    </p>
+
+    <h2>5. 戦中教材 (1937〜1945) の扱い</h2>
+    <p>
+      戦時下教育の代表である「教育勅語」「五箇条の御誓文」「大日本帝国憲法」
+      なども、<strong>歴史史料として批判的注釈付きで掲載</strong> しています。
+      これらは「美化のための復刻」ではなく、「<strong>当時の言説を一次史料として
+      検証する</strong>」教材としての位置づけです。
+    </p>
+
+    <h2>6. 解説・発問の中立性</h2>
+    <ul>
+      <li>政治的・宗教的な立場を特定の方向に誘導しない</li>
+      <li>複数の解釈が存在する事柄については、複数の視点を併記する</li>
+      <li>発問 (questions) は「答えが一つに収束しない」開かれた問いを優先</li>
+    </ul>
+
+    <h2>7. 挿絵の取り扱い</h2>
+    <ul>
+      <li>挿絵は AI 画像生成を補助的に利用しています</li>
+      <li>原作の絵画作品 (パブリックドメインのもの) を優先的に使用する場合あり</li>
+      <li>すべての挿絵は教材の文意を補助するものであり、原典に挿絵がない場合は
+        <em>編集者による補助イラスト</em> と注記します</li>
+    </ul>
+
+    <h2>8. 訂正のフロー</h2>
+    <p>
+      誤字・誤訳・事実誤認の報告は、
+      <a href="https://github.com/daraskme/hiraku/issues" target="_blank" rel="noopener">GitHub Issues</a>
+      で受け付けています。各教材ページ下部にも「⚑ 誤字・誤訳を報告」ボタンが
+      用意されています。
+    </p>
+    <p>
+      訂正が行われた場合、コミット履歴 (GitHub) で改訂内容を追跡できます。
+    </p>
+
+    <h2>9. 関連</h2>
+    <p class="cross-links">
+      <a href="/privacy">プライバシーポリシー</a> ・
+      <a href="/terms">利用規約</a> ・
+      <a href="/license">ライセンス</a> ・
+      <a href="/community">コミュニティ</a>
+    </p>
+  </section>
+
+  <style>
+    .updated {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    h2 {
+      margin-top: 1.8rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cross-links {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
+</Base>
