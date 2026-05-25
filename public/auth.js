@@ -25,6 +25,7 @@
     progress: 'hiraku.progress.v1',
     bookmarks: 'hiraku.bookmarks.v1',
     words: 'hiraku.englishWords.v1',
+    stars: 'hiraku.stars.v1',
     sceneBg: 'hiraku.sceneBg.v1',
     // 表示設定 (Header.astro が単独キーで保存している)
     prefThemeKey: 'theme',
@@ -65,6 +66,7 @@
       localStorage.removeItem(SYNC_FIELDS.progress);
       localStorage.removeItem(SYNC_FIELDS.bookmarks);
       localStorage.removeItem(SYNC_FIELDS.words);
+      localStorage.removeItem(SYNC_FIELDS.stars);
       localStorage.removeItem(SYNC_FIELDS.sceneBg);
       PREF_KEYS.forEach((k) => localStorage.removeItem(k));
       localStorage.removeItem(LOCAL_MODIFIED_KEY);
@@ -109,6 +111,7 @@
     const progress = tryParse(SYNC_FIELDS.progress) || {};
     const bookmarks = tryParse(SYNC_FIELDS.bookmarks) || {};
     const words = tryParse(SYNC_FIELDS.words) || [];
+    const stars = tryParse(SYNC_FIELDS.stars) || {};
 
     const prefs = {};
     PREF_KEYS.forEach((k) => {
@@ -127,7 +130,8 @@
       const hasData =
         (progress && progress.reads && Object.keys(progress.reads).length > 0) ||
         (bookmarks && bookmarks.lessons && Object.keys(bookmarks.lessons).length > 0) ||
-        (Array.isArray(words) && words.length > 0);
+        (Array.isArray(words) && words.length > 0) ||
+        (stars && Object.keys(stars).length > 0);
       if (hasData) {
         clientUpdatedAt = Date.now();
         writeLocalModified(clientUpdatedAt);
@@ -138,6 +142,7 @@
       progress,
       bookmarks,
       words,
+      stars,
       prefs,
       clientUpdatedAt,
     };
@@ -150,6 +155,7 @@
       if (state.progress) localStorage.setItem(SYNC_FIELDS.progress, JSON.stringify(state.progress));
       if (state.bookmarks) localStorage.setItem(SYNC_FIELDS.bookmarks, JSON.stringify(state.bookmarks));
       if (Array.isArray(state.words)) localStorage.setItem(SYNC_FIELDS.words, JSON.stringify(state.words));
+      if (state.stars) localStorage.setItem(SYNC_FIELDS.stars, JSON.stringify(state.stars));
       const prefs = state.prefs || {};
       PREF_KEYS.forEach((k) => {
         if (prefs[k] != null) localStorage.setItem(k, String(prefs[k]));
@@ -356,6 +362,7 @@
       e.key === SYNC_FIELDS.progress ||
       e.key === SYNC_FIELDS.bookmarks ||
       e.key === SYNC_FIELDS.words ||
+      e.key === SYNC_FIELDS.stars ||
       e.key === SYNC_FIELDS.sceneBg ||
       PREF_KEYS.indexOf(e.key) >= 0
     ) {

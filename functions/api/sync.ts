@@ -17,6 +17,7 @@ interface SyncPayload {
   progress?: unknown;
   bookmarks?: unknown;
   words?: string[];
+  stars?: unknown;
   prefs?: Record<string, unknown>;
   clientUpdatedAt?: number;
 }
@@ -89,6 +90,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
     progress: safeRecord(body.progress) || {},
     bookmarks: safeRecord(body.bookmarks) || {},
     words: safeArray(body.words, 200),
+    stars: safeRecord(body.stars) || {},
     prefs: safeRecord(body.prefs) || {},
     clientUpdatedAt: typeof body.clientUpdatedAt === 'number' ? body.clientUpdatedAt : Date.now(),
     serverUpdatedAt: Date.now(),

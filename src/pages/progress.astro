@@ -95,6 +95,19 @@ for (const name of collectionNames) {
 
   <section class="section">
     <div class="section__heading">
+      <h2>お気に入り教材</h2>
+      <span class="section__subtitle">STARRED</span>
+    </div>
+    <div data-progress-stars>
+      <div class="empty-state">
+        <h3>まだお気に入りがありません</h3>
+        <p>教材ページ上部の「☆ お気に入り」ボタンで追加してください。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
       <h2>最近読んだ教材</h2>
       <span class="section__subtitle">RECENT</span>
     </div>
@@ -277,6 +290,29 @@ for (const name of collectionNames) {
               <span style="color: #b85c4a">もう一度 ${fcAgain}</span>
             </div>
           </div>`;
+      }
+
+      // お気に入り教材 ───────────────
+      const starsEl = document.querySelector('[data-progress-stars]');
+      let stars = {};
+      try { stars = JSON.parse(localStorage.getItem('hiraku.stars.v1') || '{}') || {}; } catch (_) {}
+      const starItems = Object.values(stars)
+        .filter((x) => x && x.path)
+        .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      if (starItems.length === 0) {
+        starsEl.innerHTML = `<div class="empty-state"><h3>まだお気に入りがありません</h3><p>教材ページ上部の「☆ お気に入り」ボタンで追加してください。</p></div>`;
+      } else {
+        const html = starItems.map((it) => {
+          const label = collectionStats[it.collection]?.label || it.collection;
+          return `<article class="lesson-card">
+            <a href="${escapeHtml(it.path)}" class="lesson-card__link">
+              <p class="lesson-card__meta">★ ${escapeHtml(label)}</p>
+              <h3 class="lesson-card__title">${escapeHtml(it.title || it.id)}</h3>
+              <p class="lesson-card__desc">${escapeHtml(it.author || '')}</p>
+            </a>
+          </article>`;
+        }).join('');
+        starsEl.innerHTML = `<div class="lesson-grid">${html}</div>`;
       }
 
       // 最近読んだ教材 ───────────────

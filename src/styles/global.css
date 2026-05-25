@@ -1294,6 +1294,22 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
 .word-history-panel__clear:hover { background: var(--bg-elevated); }
 
 /* ============================================================
+   お気に入り (スター) トグル
+   ============================================================ */
+.star-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+}
+.star-toggle[aria-pressed="true"] {
+  color: #b58c2a;
+  border-color: #d4ab4d;
+  background: color-mix(in srgb, #d4ab4d 12%, transparent);
+}
+.star-toggle__icon { font-size: 1.05rem; }
+
+/* ============================================================
    教材メモ
    ============================================================ */
 .lesson-notes {

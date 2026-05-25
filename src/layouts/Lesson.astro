@@ -169,6 +169,16 @@ const guidelineDoc = d.school_stage === 'kotoko'
           <a href={`/worksheet/${lesson.collection}/${lesson.id}`} class="lesson-header__action-link" title="A4 印刷用のワークシート">
             ⎙ ワークシート印刷
           </a>
+          <button
+            type="button"
+            class="lesson-header__action-link star-toggle"
+            data-star-toggle
+            aria-pressed="false"
+            title="お気に入りに追加 / 解除"
+          >
+            <span class="star-toggle__icon" aria-hidden="true">☆</span>
+            <span class="star-toggle__label">お気に入り</span>
+          </button>
         </div>
       </div>
       {d.cover_image && (
@@ -1056,6 +1066,57 @@ const guidelineDoc = d.school_stage === 'kotoko'
       } else {
         window.addEventListener('load', () => setTimeout(showResumeChip, 400));
       }
+    })();
+  </script>
+
+  <script is:inline>
+    // ─── お気に入り (スター) トグル ───
+    (function () {
+      const btn = document.querySelector('[data-star-toggle]');
+      const article = document.querySelector('article[data-lesson-collection]');
+      if (!btn || !article) return;
+      const collection = article.dataset.lessonCollection;
+      const id = article.dataset.lessonId;
+      const title = article.dataset.lessonTitle;
+      const author = article.dataset.lessonAuthor;
+      const STORAGE_KEY = 'hiraku.stars.v1';
+      const key = collection + '/' + id;
+
+      function load() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch (_) { return {}; }
+      }
+      function save(data) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
+        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
+      }
+      function isStarred() { return !!load()[key]; }
+      function applyState() {
+        const on = isStarred();
+        btn.setAttribute('aria-pressed', String(on));
+        const icon = btn.querySelector('.star-toggle__icon');
+        const label = btn.querySelector('.star-toggle__label');
+        if (icon) icon.textContent = on ? '★' : '☆';
+        if (label) label.textContent = on ? 'お気に入り済' : 'お気に入り';
+      }
+      btn.addEventListener('click', () => {
+        const data = load();
+        if (data[key]) {
+          delete data[key];
+        } else {
+          data[key] = {
+            collection, id, title, author,
+            path: '/library/' + collection + '/' + id,
+            ts: Date.now(),
+          };
+        }
+        save(data);
+        applyState();
+      });
+      applyState();
+      // 別タブで変化したら追従
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY) applyState();
+      });
     })();
   </script>
 
