@@ -135,6 +135,10 @@ const guidelineDoc = d.school_stage === 'kotoko'
     data-pagefind-filter={`段階:${stage}, 教科:${d.subject}, 学年:${stage} 第${d.grade}学年${d.classical ? ', 種別:古典' : ''}`}
     data-pagefind-meta={`作者:${d.author}, 段階:${stage}`}
     data-lesson-subject={d.subject}
+    data-lesson-collection={lesson.collection}
+    data-lesson-id={lesson.id}
+    data-lesson-title={d.title}
+    data-lesson-author={d.author}
   >
     <div class="pagefind-aux" data-pagefind-body aria-hidden="true" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
       {/* 検索補助：keywords / glossary の term を非表示で展開 */}
@@ -889,6 +893,147 @@ const guidelineDoc = d.school_stage === 'kotoko'
         });
       }
       renderHistoryPanel();
+    })();
+  </script>
+
+  <script is:inline>
+    // ─── ブックマーク・続きから読む機能 ───
+    // 教材本文のスクロール位置を localStorage に記録し、再訪時に
+    // 「前回ここまで読みました」チップを画面右下に出して、ワンクリックで
+    // その位置に復帰できるようにする。最大 20 件まで保持し、古いものから捨てる。
+    // 同じデータをホームページの「続きを読む」ウィジェットでも読む。
+    (function () {
+      const article = document.querySelector('article[data-lesson-collection]');
+      if (!article) return;
+      const collection = article.dataset.lessonCollection;
+      const id = article.dataset.lessonId;
+      const title = article.dataset.lessonTitle || document.title;
+      const author = article.dataset.lessonAuthor || '';
+      const path = '/library/' + collection + '/' + id;
+      const STORAGE_KEY = 'hiraku.bookmarks.v1';
+      const MAX_BOOKMARKS = 20;
+      const SAVE_THRESHOLD = 240; // 240px 以上スクロールしないと保存しない（ヘッダーだけ見て離脱した場合を除外）
+      const COMPLETE_RATIO = 0.92; // 92% 以上スクロールしたら「読了」として削除
+
+      function readBookmarks() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { lessons: {} };
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object' || !parsed.lessons) return { lessons: {} };
+          return parsed;
+        } catch (_) { return { lessons: {} }; }
+      }
+
+      function writeBookmarks(data) {
+        try {
+          // MAX 件数を超えたら最古の ts のものから削除
+          const entries = Object.entries(data.lessons);
+          if (entries.length > MAX_BOOKMARKS) {
+            entries.sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+            const keep = entries.slice(0, MAX_BOOKMARKS);
+            data.lessons = Object.fromEntries(keep);
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (_) {}
+      }
+
+      function deleteBookmark() {
+        const data = readBookmarks();
+        if (data.lessons[path]) {
+          delete data.lessons[path];
+          writeBookmarks(data);
+        }
+      }
+
+      function saveBookmark() {
+        const scrollY = window.scrollY;
+        const docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const progress = Math.min(1, scrollY / docH);
+        // 読了 or ヘッダーのみは削除
+        if (progress >= COMPLETE_RATIO || scrollY < SAVE_THRESHOLD) {
+          deleteBookmark();
+          return;
+        }
+        const data = readBookmarks();
+        data.lessons[path] = {
+          collection: collection,
+          id: id,
+          title: title,
+          author: author,
+          path: path,
+          scrollY: scrollY,
+          progress: progress,
+          ts: Date.now(),
+        };
+        writeBookmarks(data);
+      }
+
+      // ─── スクロール停止 1.2 秒後に保存 ───
+      let saveTimer = null;
+      function scheduleSave() {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveBookmark, 1200);
+      }
+      window.addEventListener('scroll', scheduleSave, { passive: true });
+      window.addEventListener('beforeunload', saveBookmark);
+      // Page Visibility 変化時にも保存（モバイルブラウザ・タブ切替対応）
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') saveBookmark();
+      });
+
+      // ─── 再訪時に復帰チップを表示 ───
+      function showResumeChip() {
+        const data = readBookmarks();
+        const bookmark = data.lessons[path];
+        if (!bookmark || typeof bookmark.scrollY !== 'number') return;
+        // 既に該当位置付近にいる、または手動でその位置を超えている場合は出さない
+        if (Math.abs(window.scrollY - bookmark.scrollY) < 200) return;
+
+        const chip = document.createElement('div');
+        chip.className = 'resume-chip no-print';
+        chip.setAttribute('role', 'dialog');
+        chip.setAttribute('aria-label', '前回の続きから読む');
+        const pct = Math.round((bookmark.progress || 0) * 100);
+        chip.innerHTML =
+          '<div class="resume-chip__label">前回ここまで読みました</div>' +
+          '<div class="resume-chip__progress"><span class="resume-chip__bar" style="width:' + pct + '%"></span><span class="resume-chip__pct">' + pct + '%</span></div>' +
+          '<div class="resume-chip__actions">' +
+            '<button type="button" class="resume-chip__resume" data-resume>続きから読む →</button>' +
+            '<button type="button" class="resume-chip__dismiss" data-dismiss aria-label="閉じる">×</button>' +
+          '</div>';
+        document.body.appendChild(chip);
+        // 0.3 秒後にアニメーション in
+        requestAnimationFrame(() => chip.classList.add('is-visible'));
+
+        chip.querySelector('[data-resume]').addEventListener('click', () => {
+          // smooth スクロールで該当位置へ
+          window.scrollTo({ top: bookmark.scrollY, behavior: 'smooth' });
+          chip.classList.remove('is-visible');
+          setTimeout(() => chip.remove(), 300);
+        });
+        chip.querySelector('[data-dismiss]').addEventListener('click', () => {
+          chip.classList.remove('is-visible');
+          setTimeout(() => chip.remove(), 300);
+        });
+        // ユーザーがスクロールし始めたら自動で閉じる
+        const onScroll = () => {
+          if (Math.abs(window.scrollY - 0) > 100) {
+            chip.classList.remove('is-visible');
+            setTimeout(() => chip.remove(), 300);
+            window.removeEventListener('scroll', onScroll);
+          }
+        };
+        // 既にスクロール済みの場合は表示しない（早期return済みなので、ここでは初回のみ）
+        if (window.scrollY < 100) window.addEventListener('scroll', onScroll, { passive: true });
+      }
+
+      // ロード直後に表示判定（少し遅延：他のスクリプトの初期スクロール後に判断）
+      if (document.readyState === 'complete') {
+        setTimeout(showResumeChip, 400);
+      } else {
+        window.addEventListener('load', () => setTimeout(showResumeChip, 400));
+      }
     })();
   </script>
 </Base>

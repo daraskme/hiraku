@@ -41,6 +41,17 @@ const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, 
     </div>
   </section>
 
+  {/* 続きから読むウィジェット（クライアントサイドで localStorage を読んで表示） */}
+  <section class="section no-print" data-resume-widget-root hidden>
+    <aside class="resume-widget" aria-labelledby="resume-widget-title">
+      <div class="resume-widget__header">
+        <h2 class="resume-widget__title" id="resume-widget-title">続きから読む</h2>
+        <button type="button" class="resume-widget__clear" data-resume-widget-clear aria-label="ブックマークをすべて消去">すべて消去</button>
+      </div>
+      <ul class="resume-widget__list" data-resume-widget-list></ul>
+    </aside>
+  </section>
+
   <section class="section">
     <div class="section__heading">
       <h2>新しい教材</h2>
@@ -80,6 +91,85 @@ const featured = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, 
       </div>
     )}
   </section>
+
+  <script is:inline>
+    // ─── 「続きから読む」ウィジェット ───
+    (function () {
+      const root = document.querySelector('[data-resume-widget-root]');
+      if (!root) return;
+      const list = root.querySelector('[data-resume-widget-list]');
+      const clearBtn = root.querySelector('[data-resume-widget-clear]');
+      const STORAGE_KEY = 'hiraku.bookmarks.v1';
+
+      function readBookmarks() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { lessons: {} };
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.lessons) return { lessons: {} };
+          return parsed;
+        } catch (_) { return { lessons: {} }; }
+      }
+
+      function render() {
+        const data = readBookmarks();
+        const items = Object.values(data.lessons || {})
+          .filter((b) => b && b.path && b.title)
+          .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+          .slice(0, 4);
+
+        if (items.length === 0) {
+          root.hidden = true;
+          return;
+        }
+        root.hidden = false;
+        list.innerHTML = '';
+        for (const b of items) {
+          const li = document.createElement('li');
+          li.className = 'resume-widget__item';
+          const pct = Math.round((b.progress || 0) * 100);
+          const author = b.author ? ' ・ ' + b.author : '';
+          const a = document.createElement('a');
+          a.href = b.path;
+          a.innerHTML =
+            '<span class="resume-widget__item-progress" aria-hidden="true">' +
+              '<span class="resume-widget__item-bar" style="width:' + pct + '%"></span>' +
+            '</span>' +
+            '<span class="resume-widget__item-body">' +
+              '<span class="resume-widget__item-title">' + escapeHtml(b.title) + '</span>' +
+              '<span class="resume-widget__item-meta">' + escapeHtml(author) + '</span>' +
+            '</span>' +
+            '<span class="resume-widget__item-pct">' + pct + '%</span>';
+          li.appendChild(a);
+          list.appendChild(li);
+        }
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          if (!confirm('保存されたすべてのブックマークを消去しますか？')) return;
+          try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+          render();
+        });
+      }
+
+      render();
+      // 他タブで更新された場合の同期
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY) render();
+      });
+    })();
+  </script>
 
   <section class="section">
     <div class="section__heading">
