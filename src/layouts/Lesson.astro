@@ -583,6 +583,29 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </div>
     </section>
 
+    {/* ─── AI チューター (Cloudflare Workers AI) ─── */}
+    <section class="no-print ai-tutor-section" aria-label="AI に質問する">
+      <h2>AI 先生に聞く</h2>
+      <p class="ai-tutor__note">
+        教材の内容について、AI に質問できます。実験的な機能です。
+        AI は時に誤った内容を答えることがあります。最終的には自分で考え、
+        本文を確認してください。
+      </p>
+      <form data-ai-tutor-form class="ai-tutor__form">
+        <textarea
+          name="question"
+          maxlength="300"
+          rows="2"
+          placeholder="例: 「無常」とはどういう意味ですか？"
+          required
+        ></textarea>
+        <button type="submit" class="btn btn--ghost ai-tutor__submit">
+          先生に聞く →
+        </button>
+      </form>
+      <div class="ai-tutor__answer" data-ai-tutor-answer hidden></div>
+    </section>
+
     {/* ─── この教材を改訂提案 / 誤字報告 (GitHub Issue 直行) ─── */}
     <section class="no-print lesson-report" aria-label="この教材へのフィードバック">
       <h2>この教材を改善する</h2>
@@ -1112,6 +1135,144 @@ const guidelineDoc = d.school_stage === 'kotoko'
         });
       }
       renderHistoryPanel();
+    })();
+  </script>
+
+  <script is:inline>
+    // ─── AI チューター (Cloudflare Workers AI 経由) ───
+    (function () {
+      const form = document.querySelector('[data-ai-tutor-form]');
+      const answerEl = document.querySelector('[data-ai-tutor-answer]');
+      const article = document.querySelector('article[data-lesson-collection]');
+      if (!form || !answerEl || !article) return;
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function extractContext() {
+        const body = document.querySelector('[data-tts-body]') || article;
+        const clone = body.cloneNode(true);
+        clone.querySelectorAll('rt, rp, script, style').forEach((el) => el.remove());
+        return (article.dataset.lessonTitle || '') + '\n\n' + clone.textContent.replace(/\s+/g, ' ').trim();
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const question = String(fd.get('question') || '').trim();
+        if (!question) return;
+        answerEl.hidden = false;
+        answerEl.innerHTML = '<p class="ai-tutor__status">考えています…</p>';
+        try {
+          const resp = await fetch('/api/ai-tutor', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lessonContext: extractContext(),
+              question,
+            }),
+          });
+          if (resp.status === 503) {
+            answerEl.innerHTML = '<p class="ai-tutor__error">AI 機能はまだ設定されていません (管理者が Cloudflare Workers AI を有効化する必要があります)。</p>';
+            return;
+          }
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          if (data.answer) {
+            answerEl.innerHTML =
+              '<div class="ai-tutor__bubble">' +
+                '<p class="ai-tutor__bubble-head">AI 先生の回答 <small>(参考として)</small></p>' +
+                '<p class="ai-tutor__bubble-body">' + escapeHtml(data.answer) + '</p>' +
+              '</div>';
+          } else {
+            answerEl.innerHTML = '<p class="ai-tutor__error">回答が得られませんでした。質問を変えて試してみてください。</p>';
+          }
+        } catch (_) {
+          answerEl.innerHTML = '<p class="ai-tutor__error">通信に失敗しました。しばらくしてからお試しください。</p>';
+        }
+      });
+    })();
+  </script>
+
+  <script is:inline>
+    // ─── 引用カード共有 (テキスト選択 → ポップアップ → 共有 URL) ───
+    (function () {
+      const article = document.querySelector('article[data-lesson-collection]');
+      if (!article) return;
+      const title = article.dataset.lessonTitle || '';
+      const author = article.dataset.lessonAuthor || '';
+      let popup = null;
+
+      function getSelectionText() {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed) return '';
+        const text = sel.toString().trim();
+        if (text.length < 5 || text.length > 200) return '';
+        // 選択が article の中か確認
+        const range = sel.getRangeAt(0);
+        if (!article.contains(range.commonAncestorContainer)) return '';
+        return text;
+      }
+
+      function showPopup(text) {
+        hidePopup();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        popup = document.createElement('div');
+        popup.className = 'cite-popup no-print';
+        popup.innerHTML = '<button type="button" class="cite-popup__btn" data-cite-share>✦ この一節を共有カードに</button>';
+        popup.style.left = Math.max(8, Math.min(window.innerWidth - 240, rect.left)) + 'px';
+        popup.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+        document.body.appendChild(popup);
+        popup.querySelector('[data-cite-share]').addEventListener('click', () => openShareDialog(text));
+      }
+      function hidePopup() {
+        if (popup) { popup.remove(); popup = null; }
+      }
+      function openShareDialog(text) {
+        const url = '/api/cite?' +
+          'text=' + encodeURIComponent(text) +
+          '&title=' + encodeURIComponent(title) +
+          '&author=' + encodeURIComponent(author);
+        const lessonUrl = location.origin + '/library/' + article.dataset.lessonCollection + '/' + article.dataset.lessonId;
+        const tweetText = encodeURIComponent('「' + text + '」 — ' + author + '「' + title + '」 ' + lessonUrl);
+        const dialog = document.createElement('div');
+        dialog.className = 'cite-dialog no-print';
+        dialog.innerHTML =
+          '<div class="cite-dialog__body" role="dialog" aria-label="引用カード">' +
+            '<h3>引用カード</h3>' +
+            '<img class="cite-dialog__preview" src="' + url + '" alt="引用カードプレビュー" />' +
+            '<div class="cite-dialog__actions">' +
+              '<a class="cite-dialog__btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + tweetText + '">𝕏 (Twitter) でシェア</a>' +
+              '<a class="cite-dialog__btn" download="hiraku-quote.svg" href="' + url + '">⬇ SVG をダウンロード</a>' +
+              '<button type="button" class="cite-dialog__btn" data-cite-copy>📋 URL をコピー</button>' +
+            '</div>' +
+            '<button type="button" class="cite-dialog__close" data-cite-close aria-label="閉じる">×</button>' +
+          '</div>';
+        document.body.appendChild(dialog);
+        requestAnimationFrame(() => dialog.classList.add('is-visible'));
+        dialog.querySelector('[data-cite-close]').addEventListener('click', () => dialog.remove());
+        dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.remove(); });
+        dialog.querySelector('[data-cite-copy]').addEventListener('click', () => {
+          navigator.clipboard.writeText(location.origin + url)
+            .then(() => alert('URL をコピーしました'))
+            .catch(() => alert('コピーに失敗しました'));
+        });
+        hidePopup();
+      }
+
+      document.addEventListener('selectionchange', () => {
+        const text = getSelectionText();
+        if (text) showPopup(text);
+        else hidePopup();
+      });
+      // クリックで外側を触ったら閉じる
+      document.addEventListener('mousedown', (e) => {
+        if (popup && !popup.contains(e.target)) hidePopup();
+      });
     })();
   </script>
 

@@ -1,0 +1,160 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="プロジェクトを応援する"
+  description="ひらくはオープンソース・オープンコンテンツの教育プロジェクトです。広告ゼロで運営するための応援方法をご紹介します。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>プロジェクトを応援する</h1>
+      <span class="section__subtitle">SUPPORT</span>
+    </div>
+    <p>
+      ひらくは <strong>広告ゼロ・トラッキングゼロ・無償公開</strong> の方針で
+      運営される、独立した教育プロジェクトです。サーバ費用・ドメイン費用・
+      編集にかかる時間は、すべて編集者の自己負担で賄われています。
+    </p>
+    <p>
+      持続的に運営していくため、また新しい教材・新しい機能の開発を加速するため、
+      下記のいずれかの方法でご支援いただければ幸いです。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>応援の方法</h2>
+    </div>
+    <div class="support-grid">
+      <article class="support-card">
+        <h3>★ GitHub で Star</h3>
+        <p>もっとも気軽な応援。GitHub リポジトリに ★ を付けていただくだけで、プロジェクトの認知度が大きく上がります。</p>
+        <p>
+          <a class="btn btn--ghost" href="https://github.com/daraskme/hiraku" target="_blank" rel="noopener">
+            GitHub リポジトリへ →
+          </a>
+        </p>
+      </article>
+
+      <article class="support-card">
+        <h3>📨 GitHub Sponsors</h3>
+        <p>月額 ($3〜) で継続的なご支援が可能です。サーバ費用・運営費に直接充てられます。</p>
+        <p>
+          <a class="btn btn--ghost" href="https://github.com/sponsors/daraskme" target="_blank" rel="noopener">
+            GitHub Sponsors を開く →
+          </a>
+        </p>
+        <p class="support-card__note">※ Sponsors の設定がまだ完了していない場合があります</p>
+      </article>
+
+      <article class="support-card">
+        <h3>✎ コンテンツに貢献</h3>
+        <p>新教材の追加、誤字訂正、新機能の提案など、コードでもコンテンツでも貢献を歓迎します。</p>
+        <p>
+          <a class="btn btn--ghost" href="/community">コミュニティへ →</a>
+        </p>
+      </article>
+
+      <article class="support-card">
+        <h3>📣 共有・口コミ</h3>
+        <p>SNS で教材を共有したり、教育関係者に紹介したりすると、新しい読者が集まります。</p>
+        <p>
+          <a class="btn btn--ghost" href="/library">教材を見て共有 →</a>
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>運営コスト (透明性のために)</h2>
+    </div>
+    <p>
+      参考までに、現状のプロジェクトの月額運営コストは以下のとおりです：
+    </p>
+    <table class="support-cost">
+      <thead>
+        <tr><th>項目</th><th>サービス</th><th>月額</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ホスティング</td><td>Cloudflare Pages (Free tier)</td><td>$0</td></tr>
+        <tr><td>KV ストレージ</td><td>Cloudflare KV (Free tier: 100k reads/day)</td><td>$0</td></tr>
+        <tr><td>Functions</td><td>Cloudflare Pages Functions (Free tier: 100k req/day)</td><td>$0</td></tr>
+        <tr><td>OG 画像生成</td><td>self-hosted (Satori + Resvg)</td><td>$0</td></tr>
+        <tr><td>ドメイン (将来)</td><td>独自ドメイン取得時</td><td>〜$10/年</td></tr>
+      </tbody>
+    </table>
+    <p>
+      現在は Cloudflare の無料枠で完全に賄えています。アクセス数が伸びた場合、
+      ドメイン費用・有料プラン費用が発生する見込みです。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>お金以外の貢献</h2>
+    </div>
+    <p>金銭以外でも、以下のような貢献を歓迎します：</p>
+    <ul style="line-height: 1.8;">
+      <li>誤字・誤訳・事実誤認の報告</li>
+      <li>「この教材を扱ってほしい」というリクエスト</li>
+      <li>教室で使ってみた感想・改善提案</li>
+      <li>挿絵やデザインへの貢献</li>
+      <li>多言語版への翻訳協力 (英語・中国語など)</li>
+      <li>SNS での共有</li>
+    </ul>
+    <p>
+      すべて <a href="https://github.com/daraskme/hiraku/issues" target="_blank" rel="noopener">GitHub Issues</a>
+      で受け付けています。
+    </p>
+  </section>
+
+  <p class="cross-links">
+    <a href="/privacy">プライバシーポリシー</a> ・
+    <a href="/terms">利用規約</a> ・
+    <a href="/editorial-policy">編集ポリシー</a>
+  </p>
+
+  <style>
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .support-card {
+      padding: 1.2rem;
+      background: var(--bg-soft);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+    }
+    .support-card h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+    .support-card p { margin: 0 0 0.7rem; font-size: 0.92rem; line-height: 1.5; }
+    .support-card__note { font-size: 0.78rem; color: var(--text-soft); }
+    .support-cost {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .support-cost th, .support-cost td {
+      padding: 0.45rem 0.7rem;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+    .support-cost th { background: var(--bg-soft); }
+    .support-cost td:last-child { font-variant-numeric: tabular-nums; text-align: right; }
+    .cross-links {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
+</Base>

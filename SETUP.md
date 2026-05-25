@@ -94,7 +94,11 @@ SESSION_TTL_DAYS=30
 2. **Settings → Functions → KV namespace bindings** で
    - Variable name: `HIRAKU_KV`
    - KV namespace: 上で作成した hiraku-prod / hiraku-preview
-3. **再デプロイ** すると反映される
+3. **Settings → Functions → Workers AI bindings** (任意 — AI チューターを有効化する場合) で
+   - Variable name: `AI`
+   - Cloudflare Workers AI に結ぶ (無料枠あり、@cf/meta/llama-3.1-8b-instruct を使用)
+   - 設定しない場合は `/api/ai-tutor` が 503 を返し、教材ページの AI 機能は無効になる
+4. **再デプロイ** すると反映される
 
 ## 5. 動作確認
 
