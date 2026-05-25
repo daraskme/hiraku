@@ -107,7 +107,17 @@ teaching_notes:
     - 平清盛を主人公にしたNHK大河ドラマ等の関連映像を見て、平家滅亡の物語を史実として追う。
     - 同じく軍記物語の『太平記』（南北朝期、14世紀）と本教材を比較し、軍記物語の変遷を学ぶ。
     - 沙羅双樹（Shorea robusta）の植物としての特徴を調べ、なぜ仏教文学で「無常」の象徴とされたかを考察する。
-illustrations: []
+illustrations:
+  - src: /illustrations/kotoko1/heike-monogatari-gion/scene1.webp
+    caption: 祇園精舎の鐘の声、諸行無常の響あり。
+    alt: 夜明け近い古い仏寺の鐘楼、大きな金色の鐘がつるされているところに鐘の音が広がる挿絵。
+  - src: /illustrations/kotoko1/heike-monogatari-gion/scene2.webp
+    caption: 沙羅双樹の花の色、盛者必衰のことわりをあらはす。
+    alt: 夕暮れの寺園に立つ沙羅双樹、淡黄色の花が地に散る挿絵。
+  - src: /illustrations/kotoko1/heike-monogatari-gion/scene3.webp
+    caption: ただ春の夜の夢のごとし。猛き者も遂にはほろびぬ、偏に風の前の塵におなじ。
+    alt: 春の夜、月と薄雲の下、平家の落人たちの後ろ姿と風に流れる塵の挿絵。
+cover_image: /illustrations/kotoko1/heike-monogatari-gion/scene1.webp
 ---
 
 <h3>原文（冒頭）</h3>
