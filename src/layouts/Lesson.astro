@@ -299,12 +299,15 @@ const guidelineDoc = d.school_stage === 'kotoko'
             </button>
           )}
           <div class="tts-controls" data-tts-controls hidden>
+            <button type="button" class="tts-btn tts-btn--small" data-tts-prev title="前の文" aria-label="前の文" hidden>«</button>
             <button type="button" class="tts-btn" data-tts-play title="本文を読み上げる" aria-label="読み上げ">
               <span data-tts-icon-play aria-hidden="true">♪</span>
               <span data-tts-icon-pause aria-hidden="true" hidden>❚❚</span>
               <span class="tts-btn__label" data-tts-label>読み上げ</span>
             </button>
+            <button type="button" class="tts-btn tts-btn--small" data-tts-next title="次の文" aria-label="次の文" hidden>»</button>
             <button type="button" class="tts-btn tts-btn--small" data-tts-stop title="停止" aria-label="停止" hidden>■</button>
+            <span class="tts-progress" data-tts-progress aria-live="polite" hidden></span>
             <select class="tts-select" data-tts-rate aria-label="読み上げ速度">
               <option value="0.8">ゆっくり</option>
               <option value="1" selected>標準</option>
@@ -538,6 +541,40 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </div>
     </section>
 
+    {/* ─── この教材を改訂提案 / 誤字報告 (GitHub Issue 直行) ─── */}
+    <section class="no-print lesson-report" aria-label="この教材へのフィードバック">
+      <h2>この教材を改善する</h2>
+      <p class="lesson-report__lead">
+        誤字・誤訳・事実誤認の報告、語注や発問への提案など、現場での気づきを直接 GitHub Issue に投稿できます。GitHub アカウントがあれば誰でも参加できます。
+      </p>
+      <div class="lesson-report__buttons">
+        <a
+          class="btn btn--ghost lesson-report__btn"
+          href={`https://github.com/daraskme/hiraku/issues/new?labels=correction&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 修正提案: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku-5cb.pages.dev/library/${lesson.collection}/${lesson.id}\n\n## 該当箇所\n（引用してください）\n\n## 提案内容\n\n## その他\n`)}`}
+          target="_blank"
+          rel="noopener"
+        >
+          ⚑ 誤字・誤訳を報告
+        </a>
+        <a
+          class="btn btn--ghost lesson-report__btn"
+          href={`https://github.com/daraskme/hiraku/issues/new?labels=lesson-improvement&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 改善提案: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku-5cb.pages.dev/library/${lesson.collection}/${lesson.id}\n\n## 提案内容\n（語注追加 / 発問追加 / 解説改善 など）\n\n## 背景・理由\n`)}`}
+          target="_blank"
+          rel="noopener"
+        >
+          ✎ 改善提案を出す
+        </a>
+        <a
+          class="btn btn--ghost lesson-report__btn"
+          href={`https://github.com/daraskme/hiraku/issues/new?labels=teacher-feedback&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 現場フィードバック: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku-5cb.pages.dev/library/${lesson.collection}/${lesson.id}\n\n## 使用した場面\n（小5の国語の授業で / 高3の古典補助として / 等）\n\n## 生徒の反応\n\n## 改善のヒント\n`)}`}
+          target="_blank"
+          rel="noopener"
+        >
+          ◌ 現場フィードバック
+        </a>
+      </div>
+    </section>
+
     <section aria-label="出典・ライセンス" class="no-print">
       <h2>出典・ライセンス</h2>
       <ul>
@@ -741,10 +778,19 @@ const guidelineDoc = d.school_stage === 'kotoko'
 
       const playBtn = controls.querySelector('[data-tts-play]');
       const stopBtn = controls.querySelector('[data-tts-stop]');
+      const prevBtn = controls.querySelector('[data-tts-prev]');
+      const nextBtn = controls.querySelector('[data-tts-next]');
       const iconPlay = controls.querySelector('[data-tts-icon-play]');
       const iconPause = controls.querySelector('[data-tts-icon-pause]');
       const labelEl = controls.querySelector('[data-tts-label]');
       const rateSelect = controls.querySelector('[data-tts-rate]');
+      const progressEl = controls.querySelector('[data-tts-progress]');
+      function updateProgress() {
+        if (!progressEl) return;
+        if (sentences.length === 0) { progressEl.hidden = true; return; }
+        progressEl.hidden = false;
+        progressEl.textContent = (Math.min(idx + 1, sentences.length)) + ' / ' + sentences.length + ' 文';
+      }
 
       // 本文を ruby 抜きの素文字列で取得し、句読点や改行で文単位に分割する
       function extractText() {
@@ -796,6 +842,9 @@ const guidelineDoc = d.school_stage === 'kotoko'
         iconPause.hidden = !playing;
         labelEl.textContent = playing ? '一時停止' : (idx > 0 && idx < sentences.length ? '続きから再生' : '読み上げ');
         stopBtn.hidden = !playing && idx === 0;
+        if (prevBtn) prevBtn.hidden = !playing && idx === 0;
+        if (nextBtn) nextBtn.hidden = !playing && idx === 0;
+        updateProgress();
       }
       function reset() {
         speechSynthesis.cancel();
@@ -830,6 +879,16 @@ const guidelineDoc = d.school_stage === 'kotoko'
           // rate 変更時は現在の文から speak し直し
           speakFrom(idx);
         }
+      });
+      prevBtn && prevBtn.addEventListener('click', () => {
+        const target = Math.max(0, idx - 1);
+        if (isPlaying || isPaused) speakFrom(target);
+        else { idx = target; updateProgress(); }
+      });
+      nextBtn && nextBtn.addEventListener('click', () => {
+        const target = Math.min(sentences.length - 1, idx + 1);
+        if (isPlaying || isPaused) speakFrom(target);
+        else { idx = target; updateProgress(); }
       });
 
       // ページを離れたら停止

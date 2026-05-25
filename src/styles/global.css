@@ -1492,6 +1492,36 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
 .star-toggle__icon { font-size: 1.05rem; }
 
 /* ============================================================
+   教材改訂提案・フィードバック
+   ============================================================ */
+.lesson-report {
+  margin-top: 2rem;
+  padding: 1rem 1.2rem;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  border-left: 3px solid var(--text-soft);
+}
+.lesson-report h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.4rem;
+}
+.lesson-report__lead {
+  margin: 0 0 0.8rem;
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+.lesson-report__buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.lesson-report__btn {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+/* ============================================================
    教材メモ
    ============================================================ */
 .lesson-notes {
@@ -1819,6 +1849,13 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
   cursor: pointer;
 }
 .tts-select:hover { border-color: var(--text-soft); }
+.tts-progress {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  padding: 0 0.3rem;
+  white-space: nowrap;
+}
 
 /* ─── 挿絵ギャラリー ─────────────────────────────── */
 .illustrations-section {

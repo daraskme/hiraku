@@ -332,14 +332,33 @@ const glossary = d.glossary || [];
         let pos = 0;
         let flipped = false;
 
+        // 旧形式 (string) と新形式 (object) どちらにも対応するヘルパ
+        function labelOf(s) {
+          if (typeof s === 'string') return s;
+          if (s && typeof s === 'object') return s.label;
+          return null;
+        }
+        function dueOf(s) {
+          if (s && typeof s === 'object' && typeof s.due === 'number') return s.due;
+          return 0;
+        }
+        function isDueNow(s) {
+          const due = dueOf(s);
+          return !due || due <= Date.now();
+        }
+
         function buildQueue(filterAgainOnly = false) {
           const indices = glossary.map((_, i) => i);
           let filtered = indices;
           if (filterAgainOnly) {
-            filtered = indices.filter((i) => state[i] === 'again');
+            filtered = indices.filter((i) => labelOf(state[i]) === 'again');
           } else {
-            // 既に「覚えた」になっているものはスキップ
-            filtered = indices.filter((i) => state[i] !== 'known');
+            // SRS: known でかつ due がまだなら表示しない (覚えてしばらく経ったら再出題)
+            filtered = indices.filter((i) => {
+              const lbl = labelOf(state[i]);
+              if (lbl === 'known' && !isDueNow(state[i])) return false;
+              return lbl !== 'known';
+            });
           }
           if (filtered.length === 0) filtered = indices; // 全部スキップだったら全件
           if (shuffle) {
@@ -379,8 +398,9 @@ const glossary = d.glossary || [];
           controls.style.display = 'none';
           let known = 0, again = 0;
           for (let i = 0; i < glossary.length; i++) {
-            if (state[i] === 'known') known++;
-            else if (state[i] === 'again') again++;
+            const lbl = labelOf(state[i]);
+            if (lbl === 'known') known++;
+            else if (lbl === 'again') again++;
           }
           document.querySelector('[data-fc-stat-known]').textContent = known;
           document.querySelector('[data-fc-stat-again]').textContent = again;
@@ -398,9 +418,35 @@ const glossary = d.glossary || [];
           card.classList.toggle('is-flipped', flipped);
         }
 
+        // SRS: 各カードに { label, due, interval } を持たせる
+        //   label: 'known' | 'again'
+        //   interval: 次回出題までの日数 (known を続けるたびに 1→3→7→14→30→90 と倍々)
+        //   due: 次回出題時刻 (ms)
+        const SRS_INTERVALS = [1, 3, 7, 14, 30, 90]; // days
+        function srsNext(prev) {
+          // prev: { interval } 既存 (なければ初期)
+          const prevIdx = prev && typeof prev.interval === 'number'
+            ? SRS_INTERVALS.indexOf(prev.interval)
+            : -1;
+          const nextIdx = Math.min(prevIdx + 1, SRS_INTERVALS.length - 1);
+          const nextInterval = SRS_INTERVALS[Math.max(0, nextIdx)];
+          return {
+            interval: nextInterval,
+            due: Date.now() + nextInterval * 24 * 60 * 60 * 1000,
+          };
+        }
+
         function mark(label) {
           const idx = queue[pos];
-          state[idx] = label;
+          const prev = state[idx] && typeof state[idx] === 'object' ? state[idx] : null;
+          if (label === 'known') {
+            // SRS: 次回出題時刻を伸ばす
+            const next = srsNext(prev);
+            state[idx] = { label: 'known', interval: next.interval, due: next.due };
+          } else {
+            // again: 当日中に再出題 (due は now)
+            state[idx] = { label: 'again', interval: 0, due: Date.now() };
+          }
           saveState();
           pos++;
           showCard();
