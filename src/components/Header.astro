@@ -367,10 +367,51 @@ const authEnabled = !!googleClientId;
   const userToggle = document.querySelector<HTMLButtonElement>('[data-user-toggle]');
   const userPanel = document.querySelector<HTMLElement>('[data-user-panel]');
   if (userToggle && userPanel) {
+    // GSI のサインインボタンは display:none の親要素では自動描画されないため、
+    // パネルを開いたタイミングで明示的に renderButton を呼ぶ。
+    // GSI スクリプトの非同期読み込みに備えて、未到達ならポーリングでリトライ。
+    let gsiRenderAttempts = 0;
+    function ensureGoogleButtonRendered() {
+      const target = document.getElementById('g_id_signin');
+      const fallback = userPanel!.querySelector<HTMLElement>('[data-user-fallback]');
+      if (!target) return;
+      // 既に描画済み (GSI は内部に iframe/div を挿入する) ならスキップ
+      if (target.querySelector('div, iframe')) {
+        if (fallback) fallback.hidden = true;
+        return;
+      }
+      const gid = (window as any).google?.accounts?.id;
+      if (gid && typeof gid.renderButton === 'function') {
+        try {
+          gid.renderButton(target, {
+            type: 'standard',
+            shape: 'rectangular',
+            theme: 'outline',
+            text: 'signin_with',
+            size: 'large',
+            locale: 'ja',
+          });
+          if (fallback) fallback.hidden = true;
+        } catch (_) {
+          if (fallback) fallback.hidden = false;
+        }
+        return;
+      }
+      // GSI スクリプト未到達。最大 4 秒間ポーリング
+      if (gsiRenderAttempts < 20) {
+        gsiRenderAttempts++;
+        window.setTimeout(ensureGoogleButtonRendered, 200);
+      } else if (fallback) {
+        // 諦めて再読み込みボタンを表示
+        fallback.hidden = false;
+      }
+    }
+
     userToggle.addEventListener('click', (e) => {
       e.stopPropagation();
       const open = userPanel.classList.toggle('is-open');
       userToggle.setAttribute('aria-expanded', String(open));
+      if (open) ensureGoogleButtonRendered();
     });
     document.addEventListener('click', (e) => {
       if (!userPanel.contains(e.target as Node) && e.target !== userToggle) {
@@ -455,14 +496,10 @@ const authEnabled = !!googleClientId;
     // ボタンが出ない場合の再読み込み (GIS スクリプトの後追い登録が必要なケース)
     const retryBtn = userPanel.querySelector<HTMLButtonElement>('[data-user-retry]');
     retryBtn?.addEventListener('click', () => {
-      const gid = (window as any).google?.accounts?.id;
-      if (gid && typeof gid.renderButton === 'function') {
-        const target = document.getElementById('g_id_signin');
-        if (target) {
-          target.innerHTML = '';
-          gid.renderButton(target, { type: 'standard', shape: 'rectangular', theme: 'outline', text: 'signin_with', size: 'large', locale: 'ja' });
-        }
-      }
+      const target = document.getElementById('g_id_signin');
+      if (target) target.innerHTML = '';
+      gsiRenderAttempts = 0;
+      ensureGoogleButtonRendered();
     });
   }
 </script>

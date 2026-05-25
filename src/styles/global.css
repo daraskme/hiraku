@@ -1821,6 +1821,9 @@ rt {
   display: block;
   object-fit: cover;
 }
+/* hidden 属性を尊重 (display: block の方が詳細度が高いので明示) */
+.user-toggle__avatar[hidden] { display: none; }
+.user-panel__avatar[hidden] { display: none; }
 .user-toggle__icon-default {
   font-size: 1.05rem;
   line-height: 1;
