@@ -38,6 +38,39 @@
 
   const USER_CACHE_KEY = 'hiraku.user.v1';
   const LAST_SYNC_KEY = 'hiraku.lastSync.v1';
+  // 「ローカルが最後に変更された時刻」を別キーで永続化する。
+  // 以前は readLocalState() が clientUpdatedAt = Date.now() を毎回返していたため、
+  // マージ時に常にローカルが勝ち、別端末からのデータが受け取れない / 別端末の
+  // データを上書きする原因になっていた。
+  const LOCAL_MODIFIED_KEY = 'hiraku.localModified.v1';
+  // 直近にサインインしたユーザの sub。別アカウントに切り替わったら local を
+  // クリアして、前ユーザのデータが新ユーザの KV に流れ込むのを防ぐ。
+  const LAST_USER_SUB_KEY = 'hiraku.lastUserSub.v1';
+
+  function readLocalModified() {
+    try {
+      const v = Number(localStorage.getItem(LOCAL_MODIFIED_KEY));
+      return Number.isFinite(v) ? v : 0;
+    } catch (_) { return 0; }
+  }
+  function writeLocalModified(ts) {
+    try { localStorage.setItem(LOCAL_MODIFIED_KEY, String(ts)); } catch (_) {}
+  }
+  function markLocalModified() {
+    writeLocalModified(Date.now());
+  }
+
+  function clearLocalSyncState() {
+    try {
+      localStorage.removeItem(SYNC_FIELDS.progress);
+      localStorage.removeItem(SYNC_FIELDS.bookmarks);
+      localStorage.removeItem(SYNC_FIELDS.words);
+      localStorage.removeItem(SYNC_FIELDS.sceneBg);
+      PREF_KEYS.forEach((k) => localStorage.removeItem(k));
+      localStorage.removeItem(LOCAL_MODIFIED_KEY);
+      localStorage.removeItem(LAST_SYNC_KEY);
+    } catch (_) {}
+  }
 
   // ─── ユーザー情報のキャッシュ (起動時にちらつき防止) ───
   function readCachedUser() {
@@ -73,6 +106,10 @@
         return null;
       }
     }
+    const progress = tryParse(SYNC_FIELDS.progress) || {};
+    const bookmarks = tryParse(SYNC_FIELDS.bookmarks) || {};
+    const words = tryParse(SYNC_FIELDS.words) || [];
+
     const prefs = {};
     PREF_KEYS.forEach((k) => {
       const v = localStorage.getItem(k);
@@ -81,12 +118,28 @@
     const sceneBg = localStorage.getItem(SYNC_FIELDS.sceneBg);
     if (sceneBg != null) prefs.sceneBg = sceneBg;
 
+    // ローカルが最後に「ユーザー操作で」変更された時刻。
+    // 初回ログイン時など lastModified が未設定 でも、実データがあれば
+    // 「now」とみなして bootstrap し、空のリモート (or 別端末の古い状態) に
+    // 上書きされてオフラインで貯めた学習データが消えるのを防ぐ。
+    let clientUpdatedAt = readLocalModified();
+    if (!clientUpdatedAt) {
+      const hasData =
+        (progress && progress.reads && Object.keys(progress.reads).length > 0) ||
+        (bookmarks && bookmarks.lessons && Object.keys(bookmarks.lessons).length > 0) ||
+        (Array.isArray(words) && words.length > 0);
+      if (hasData) {
+        clientUpdatedAt = Date.now();
+        writeLocalModified(clientUpdatedAt);
+      }
+    }
+
     return {
-      progress: tryParse(SYNC_FIELDS.progress) || {},
-      bookmarks: tryParse(SYNC_FIELDS.bookmarks) || {},
-      words: tryParse(SYNC_FIELDS.words) || [],
+      progress,
+      bookmarks,
+      words,
       prefs,
-      clientUpdatedAt: Date.now(),
+      clientUpdatedAt,
     };
   }
 
@@ -174,7 +227,14 @@
 
   // ─── 同期：localStorage 変更時の debounced push ───
   let scheduleTimer = null;
-  function scheduleSync() {
+  // markModified:
+  //   true  (default) — ユーザー操作起点の変更。lastModified を Date.now() に更新する
+  //   false           — 別タブの storage event 起点。タイムスタンプは触らない
+  //                     (リモート由来の変更が "新しいローカル変更" と誤認されるのを防ぐ)
+  function scheduleSync(opts) {
+    if (opts !== false && (!opts || opts.markModified !== false)) {
+      markLocalModified();
+    }
     if (!currentUser) return;
     if (scheduleTimer) clearTimeout(scheduleTimer);
     scheduleTimer = setTimeout(async () => {
@@ -183,8 +243,10 @@
         const state = readLocalState();
         const r = await apiPut('/api/sync', state);
         try { localStorage.setItem(LAST_SYNC_KEY, String(r.serverUpdatedAt || Date.now())); } catch (_) {}
-      } catch (_) {
+        try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: true } })); } catch (_) {}
+      } catch (e) {
         // 失敗時は次回試行に任せる
+        try { window.dispatchEvent(new CustomEvent('hiraku:sync', { detail: { ok: false, error: String(e) } })); } catch (_) {}
       }
     }, 2500);
   }
@@ -192,7 +254,20 @@
   // ─── 認証API ───
   async function handleGoogleCredential(credential) {
     const r = await apiPost('/api/auth/google', { credential });
-    currentUser = r.user || null;
+    const newUser = r.user || null;
+    // 別アカウントに切り替わった場合、ローカル同期データをクリアしてから
+    // クラウドから取り直す。前ユーザの未同期データが新ユーザの KV に
+    // 流れ込むのを防ぐため。
+    const prevSub = (() => {
+      try { return localStorage.getItem(LAST_USER_SUB_KEY); } catch (_) { return null; }
+    })();
+    if (newUser && prevSub && prevSub !== newUser.sub) {
+      clearLocalSyncState();
+    }
+    try {
+      if (newUser) localStorage.setItem(LAST_USER_SUB_KEY, newUser.sub);
+    } catch (_) {}
+    currentUser = newUser;
     writeCachedUser(currentUser);
     dispatchAuthChange();
     await forceSync();
@@ -237,7 +312,9 @@
   // 各タブの localStorage 変更を捕捉して自動同期
   window.addEventListener('storage', (e) => {
     if (!e.key) return;
-    // 同期対象キーが変化したらサーバへ反映
+    // 同期対象キーが変化したらサーバへ反映。
+    // ただし lastModified は他タブ起点なのでここでは触らない (既に他タブが
+    // markLocalModified 済み or リモート由来の applyRemoteState 済み)。
     if (
       e.key === SYNC_FIELDS.progress ||
       e.key === SYNC_FIELDS.bookmarks ||
@@ -245,7 +322,7 @@
       e.key === SYNC_FIELDS.sceneBg ||
       PREF_KEYS.indexOf(e.key) >= 0
     ) {
-      scheduleSync();
+      scheduleSync({ markModified: false });
     }
   });
 
