@@ -80,8 +80,28 @@ const lessonSchema = z.object({
     .optional(),
 });
 
+const kokugo1 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kokugo1' }),
+  schema: lessonSchema,
+});
+
+const kokugo2 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kokugo2' }),
+  schema: lessonSchema,
+});
+
 const kokugo3 = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/kokugo3' }),
+  schema: lessonSchema,
+});
+
+const kotoko3 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kotoko3' }),
+  schema: lessonSchema,
+});
+
+const koteoyaku1 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/koteoyaku1' }),
   schema: lessonSchema,
 });
 
@@ -170,4 +190,4 @@ const kotosekaishi1 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1 };
+export const collections = { kokugo1, kokugo2, kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kotoko3, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, koteoyaku1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1 };

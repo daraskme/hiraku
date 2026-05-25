@@ -3,6 +3,8 @@ import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
 const COLLECTIONS = [
+  { name: 'kokugo1', label: '小1 国語' },
+  { name: 'kokugo2', label: '小2 国語' },
   { name: 'kokugo3', label: '小3 国語' },
   { name: 'kokugo4', label: '小4 国語' },
   { name: 'kokugo6', label: '小6 国語' },
@@ -17,7 +19,9 @@ const COLLECTIONS = [
   { name: 'chugakukomin3', label: '中3 公民' },
   { name: 'kotoko1', label: '高1 国語' },
   { name: 'kotoko2', label: '高2 国語' },
+  { name: 'kotoko3', label: '高3 国語' },
   { name: 'kotokoeigo1', label: '高1 英語' },
+  { name: 'koteoyaku1', label: '高1 西洋翻訳' },
   { name: 'kotorekishi1', label: '高1 日本史' },
   { name: 'kotokokanbun1', label: '高1 漢文' },
   { name: 'kotosekaishi1', label: '高1 世界史' },
@@ -34,12 +38,12 @@ allLessons.sort((a, b) => (a.label === b.label ? a.lesson.data.order - b.lesson.
 
 // Featured: classical works + short reads, hand-picked
 const featuredSlugs = [
-  ['kokugo3', 'tebukuro-wo-kaini'],
-  ['kokugo3', 'gongitsune'],
+  ['kokugo1', 'kokugo2', 'kokugo3', 'tebukuro-wo-kaini'],
+  ['kokugo1', 'kokugo2', 'kokugo3', 'gongitsune'],
   ['chugaku1', 'yume-juya-dai-ichi-ya'],
   ['kotoko1', 'rashomon'],
   ['kotoko1', 'sangetsuki'],
-  ['kotokoeigo1', 'yuki-onna'],
+  ['kotokoeigo1', 'koteoyaku1', 'yuki-onna'],
 ];
 const featured = featuredSlugs
   .map(([c, s]) => allLessons.find((l) => l.collection === c && l.lesson.id === s))

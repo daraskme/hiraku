@@ -1,0 +1,196 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const COLLECTION_NAMES = [
+  'kokugo1', 'kokugo2', 'kokugo3', 'kokugo4', 'kokugo6',
+  'chugaku1', 'chugaku2', 'chugaku3',
+  'kotoko1', 'kotoko2', 'kotoko3',
+  'kateika5', 'chugakurika1', 'chugakurika2',
+  'chugakurekishi1', 'kotokoeigo1', 'koteoyaku1',
+  'sansu5', 'chugakukomin3',
+  'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
+];
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo1: '小1 国語', kokugo2: '小2 国語', kokugo3: '小3 国語', kokugo4: '小4 国語', kokugo6: '小6 国語',
+  chugaku1: '中1 国語', chugaku2: '中2 国語', chugaku3: '中3 国語',
+  kotoko1: '高1 国語', kotoko2: '高2 国語', kotoko3: '高3 評論',
+  kateika5: '小5 家庭科',
+  chugakurika1: '中1 理科', chugakurika2: '中2 理科',
+  chugakurekishi1: '中1 歴史',
+  kotokoeigo1: '高1 英語', koteoyaku1: '高1 西洋翻訳',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
+  kotokokanbun1: '高1 漢文',
+  kotosekaishi1: '高1 世界史',
+};
+
+interface LessonRef {
+  collection: string;
+  id: string;
+  title: string;
+  author: string;
+}
+const all: LessonRef[] = [];
+for (const name of COLLECTION_NAMES) {
+  const lessons = await getCollection(name as any);
+  for (const l of lessons) all.push({ collection: name, id: l.id, title: l.data.title, author: l.data.author });
+}
+all.sort((a, b) => a.title.localeCompare(b.title, 'ja'));
+
+// 提案された対比読みの組合せ
+const SUGGESTIONS = [
+  {
+    a: { collection: 'kotoko1', id: 'makura-no-soshi-dai-ichi' },
+    b: { collection: 'kotoko1', id: 'tsurezuregusa-jodan-92' },
+    title: '随筆の二大家 — 枕草子 vs 徒然草',
+    reason: '平安貴族の感性 (清少納言) と鎌倉末期の批評精神 (兼好法師) の対比。',
+  },
+  {
+    a: { collection: 'kotoko1', id: 'heike-monogatari-gion' },
+    b: { collection: 'kotoko1', id: 'hojoki-bouto' },
+    title: '無常観の系譜 — 平家物語 vs 方丈記',
+    reason: '同じ鎌倉時代初期の「無常」を、軍記と随筆で表現した二つの極。',
+  },
+  {
+    a: { collection: 'kotoko1', id: 'rashomon' },
+    b: { collection: 'kotoko1', id: 'sangetsuki' },
+    title: '近代日本短編 — 羅生門 vs 山月記',
+    reason: '芥川と中島敦、それぞれの「人間の暗部」への問い方。',
+  },
+  {
+    a: { collection: 'chugakukomin3', id: 'kenpo-zenbun' },
+    b: { collection: 'kotorekishi1', id: 'teikoku-kenpo' },
+    title: '二つの憲法 — 日本国憲法 vs 大日本帝国憲法',
+    reason: '同じ「日本国の憲法」が、戦前と戦後で何を「主権」「権利」とするかの根本的転換。',
+  },
+];
+---
+
+<Base
+  title="比較読みモード"
+  description="2 つの教材を並べて読む。同主題・同時代・対比的な作品を相互に照らし出す。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>比較読みモード</h1>
+      <span class="section__subtitle">COMPARE</span>
+    </div>
+    <p>
+      2 つの教材を左右に並べて読むモードです。同じ時代の異なる作家、同じ主題の
+      異なる表現、対比的な思想 ―― 並べて読むことで、それぞれが照らし出す側面が
+      見えてきます。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>おすすめの組み合わせ</h2>
+    </div>
+    <div class="compare-suggest">
+      {SUGGESTIONS.map((sg) => (
+        <article class="compare-suggest__card">
+          <h3 class="compare-suggest__title">{sg.title}</h3>
+          <p class="compare-suggest__reason">{sg.reason}</p>
+          <a
+            href={`/compare/view?a=${sg.a.collection}/${sg.a.id}&b=${sg.b.collection}/${sg.b.id}`}
+            class="compare-suggest__cta"
+          >比較を開く →</a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>自分で選ぶ</h2>
+    </div>
+    <form class="compare-form" data-compare-form>
+      <label class="compare-form__field">
+        <span>左の教材</span>
+        <select name="a" required>
+          <option value="">教材を選択…</option>
+          {all.map((l) => (
+            <option value={`${l.collection}/${l.id}`}>
+              {COLLECTION_LABEL[l.collection]} ・ {l.title} ({l.author.split('（')[0]})
+            </option>
+          ))}
+        </select>
+      </label>
+      <label class="compare-form__field">
+        <span>右の教材</span>
+        <select name="b" required>
+          <option value="">教材を選択…</option>
+          {all.map((l) => (
+            <option value={`${l.collection}/${l.id}`}>
+              {COLLECTION_LABEL[l.collection]} ・ {l.title} ({l.author.split('（')[0]})
+            </option>
+          ))}
+        </select>
+      </label>
+      <button type="submit" class="btn btn--primary">比較を開く</button>
+    </form>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const form = document.querySelector('[data-compare-form]');
+      form && form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const a = fd.get('a'), b = fd.get('b');
+        if (!a || !b) return;
+        location.href = '/compare/view?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b);
+      });
+    })();
+  </script>
+
+  <style>
+    .compare-suggest {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.8rem;
+    }
+    .compare-suggest__card {
+      padding: 1rem 1.1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .compare-suggest__title { font-size: 1rem; margin: 0 0 0.4rem; }
+    .compare-suggest__reason { font-size: 0.88rem; color: var(--text-soft); line-height: 1.5; margin: 0 0 0.7rem; }
+    .compare-suggest__cta {
+      font-size: 0.88rem;
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      font-weight: 500;
+    }
+    .compare-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      padding: 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+    }
+    .compare-form__field { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; }
+    .compare-form select {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .compare-form button { grid-column: span 2; justify-self: start; }
+    @media (max-width: 640px) {
+      .compare-form { grid-template-columns: 1fr; }
+      .compare-form button { grid-column: span 1; }
+    }
+  </style>
+</Base>

@@ -1,0 +1,142 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+const COLLECTION_NAMES = [
+  'kokugo1', 'kokugo2', 'kokugo3', 'kokugo4', 'kokugo6',
+  'chugaku1', 'chugaku2', 'chugaku3',
+  'kotoko1', 'kotoko2', 'kotoko3',
+  'kateika5', 'chugakurika1', 'chugakurika2',
+  'chugakurekishi1', 'kotokoeigo1', 'koteoyaku1',
+  'sansu5', 'chugakukomin3',
+  'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
+];
+
+const url = Astro.url;
+const aParam = url.searchParams.get('a') || '';
+const bParam = url.searchParams.get('b') || '';
+
+interface Picked {
+  collection: string;
+  id: string;
+  lesson: any;
+  Content: any;
+}
+async function pick(param: string): Promise<Picked | null> {
+  const [c, ...rest] = param.split('/');
+  const id = rest.join('/');
+  if (!c || !id || !COLLECTION_NAMES.includes(c)) return null;
+  const lessons = await getCollection(c as any);
+  const lesson = (lessons as any[]).find((l) => l.id === id);
+  if (!lesson) return null;
+  const { Content } = await render(lesson);
+  return { collection: c, id, lesson, Content };
+}
+
+const a = aParam ? await pick(aParam) : null;
+const b = bParam ? await pick(bParam) : null;
+---
+
+<Base
+  title="比較読み"
+  description="2 教材の対比閲覧"
+  wide
+>
+  <section class="section no-print">
+    <p class="cross-links">
+      <a href="/compare">← 比較画面を選び直す</a>
+    </p>
+  </section>
+
+  {(!a || !b) && (
+    <section class="section">
+      <div class="empty-state">
+        <h3>比較する教材が指定されていません</h3>
+        <p>URL に <code>?a=collection/id&amp;b=collection/id</code> の形式で 2 教材を指定してください。</p>
+        <p><a href="/compare">← 比較画面を選び直す</a></p>
+      </div>
+    </section>
+  )}
+
+  {a && b && (
+    <section class="compare-view">
+      <article class="compare-view__col">
+        <header class="compare-view__header">
+          <p class="compare-view__crumb">
+            <a href={`/library/${a.collection}/${a.id}`}>{a.lesson.data.author}</a>
+            {a.lesson.data.original_year ? `（${a.lesson.data.original_year}）` : a.lesson.data.era ? `（${a.lesson.data.era}）` : ''}
+          </p>
+          <h2 class="compare-view__title">
+            <a href={`/library/${a.collection}/${a.id}`}>{a.lesson.data.title}</a>
+          </h2>
+        </header>
+        <div class="compare-view__body story-body">
+          <a.Content />
+        </div>
+      </article>
+
+      <article class="compare-view__col">
+        <header class="compare-view__header">
+          <p class="compare-view__crumb">
+            <a href={`/library/${b.collection}/${b.id}`}>{b.lesson.data.author}</a>
+            {b.lesson.data.original_year ? `（${b.lesson.data.original_year}）` : b.lesson.data.era ? `（${b.lesson.data.era}）` : ''}
+          </p>
+          <h2 class="compare-view__title">
+            <a href={`/library/${b.collection}/${b.id}`}>{b.lesson.data.title}</a>
+          </h2>
+        </header>
+        <div class="compare-view__body story-body">
+          <b.Content />
+        </div>
+      </article>
+    </section>
+  )}
+
+  <style>
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .compare-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .compare-view__col {
+      background: var(--bg-soft);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      border-left: 3px solid var(--accent);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .compare-view__header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.6rem;
+      margin-bottom: 0.8rem;
+      position: sticky;
+      top: 0;
+      background: var(--bg-soft);
+      z-index: 1;
+    }
+    .compare-view__crumb { font-size: 0.78rem; color: var(--text-soft); margin: 0; }
+    .compare-view__crumb a { color: var(--text-soft); }
+    .compare-view__title { font-size: 1.1rem; margin: 0; }
+    .compare-view__title a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .compare-view__body :global(h3) { font-size: 1rem; margin-top: 1rem; }
+    .compare-view__body :global(blockquote) {
+      padding: 0.6rem 0.9rem;
+      background: var(--bg);
+      border-left: 2px solid var(--accent);
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+    @media (max-width: 800px) {
+      .compare-view { grid-template-columns: 1fr; }
+      .compare-view__col { max-height: none; }
+    }
+  </style>
+</Base>

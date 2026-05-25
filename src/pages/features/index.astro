@@ -1,0 +1,73 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const FEATURES = [
+  {
+    slug: 'mujou-no-keifu',
+    title: '無常の系譜',
+    subtitle: '平家物語・方丈記・徒然草を貫く一本の流れ',
+    desc: '日本古典文学の中核にある「無常」観を、12世紀から14世紀の三作品を通じて辿る特集。',
+    accent: '#a8485c',
+  },
+  {
+    slug: 'manabi-no-tetsugaku',
+    title: '学びの哲学',
+    subtitle: '論語・福沢諭吉・西田幾多郎',
+    desc: '「学ぶとは何か」を、儒家思想・近代啓蒙・西田哲学の三本柱で読み解く特集。',
+    accent: '#3e7ec9',
+  },
+];
+---
+
+<Base
+  title="特集記事"
+  description="同主題で複数の教材を横断する特集記事。「無常」「学び」「旅」などのテーマで、複数の作品を縫って読む。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>特集記事</h1>
+      <span class="section__subtitle">FEATURES</span>
+    </div>
+    <p>
+      テーマで教材を横断する特集記事。同じ主題が、時代と作家を超えてどう変奏されるかを、
+      編集部の視点でまとめます。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="features-grid">
+      {FEATURES.map((f) => (
+        <article class="feature-card" style={`--feat-accent: ${f.accent}`}>
+          <a href={`/features/${f.slug}`}>
+            <h2 class="feature-card__title">{f.title}</h2>
+            <p class="feature-card__subtitle">{f.subtitle}</p>
+            <p class="feature-card__desc">{f.desc}</p>
+            <p class="feature-card__cta">特集を読む →</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <style>
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+    .feature-card {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--feat-accent, var(--accent));
+      background: var(--bg-soft);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .feature-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); }
+    .feature-card a { display: block; padding: 1.2rem 1.4rem; color: inherit; text-decoration: none; }
+    .feature-card__title { font-size: 1.3rem; font-family: var(--font-serif); margin: 0 0 0.3rem; color: var(--feat-accent); }
+    .feature-card__subtitle { font-size: 0.92rem; color: var(--text-soft); margin: 0 0 0.6rem; }
+    .feature-card__desc { font-size: 0.95rem; line-height: 1.6; margin: 0 0 0.8rem; }
+    .feature-card__cta { font-size: 0.9rem; color: var(--feat-accent); font-weight: 500; margin: 0; }
+  </style>
+</Base>

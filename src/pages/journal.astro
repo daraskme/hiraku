@@ -1,0 +1,269 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="学習ジャーナル"
+  description="読了・バッジ・お気に入り・メモを時系列で見返せる、あなた自身の学習日誌。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>学習ジャーナル</h1>
+      <span class="section__subtitle">JOURNAL</span>
+    </div>
+    <p>
+      これまでの学習を時系列で見返せる、あなた自身の日誌です。
+      読了・バッジ獲得・お気に入り追加・学習メモが一つのタイムラインに並びます。
+      <strong>すべてあなたの端末・あなたのクラウドにのみ保存されます。</strong>
+    </p>
+    <p class="cross-links no-print">
+      <a href="/progress">進捗ダッシュボード</a> ・
+      <a href="/profile">プロフィール</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="journal-filters" data-journal-filters>
+      <span class="journal-filters__label">表示する種類：</span>
+      <label class="journal-filter"><input type="checkbox" data-filter="read" checked /> 読了</label>
+      <label class="journal-filter"><input type="checkbox" data-filter="badge" checked /> バッジ</label>
+      <label class="journal-filter"><input type="checkbox" data-filter="star" checked /> お気に入り</label>
+      <label class="journal-filter"><input type="checkbox" data-filter="note" checked /> メモ</label>
+    </div>
+    <div data-journal-root>
+      <p style="color:var(--text-soft);">読み込み中…</p>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const root = document.querySelector('[data-journal-root]');
+      const filterRoot = document.querySelector('[data-journal-filters]');
+      if (!root) return;
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      function fmtDate(ts) {
+        if (!ts) return '';
+        return new Date(ts).toLocaleString('ja-JP', { dateStyle: 'medium', timeStyle: 'short' });
+      }
+      function dayKey(ts) {
+        const d = new Date(ts);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+      function dayLabel(key) {
+        const d = new Date(key);
+        return d.toLocaleDateString('ja-JP', { dateStyle: 'long' }) + ' (' + ['日','月','火','水','木','金','土'][d.getDay()] + ')';
+      }
+      function tryParse(key) {
+        try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return null; }
+      }
+
+      const BADGE_LABELS = (window.HirakuBadges && window.HirakuBadges.LABELS) || {};
+      const filterState = { read: true, badge: true, star: true, note: true };
+
+      function collect() {
+        const events = [];
+
+        const progress = tryParse('hiraku.progress.v1') || { reads: {} };
+        Object.entries(progress.reads || {}).forEach(([key, info]) => {
+          if (!info) return;
+          const [collection, id] = key.split(':');
+          events.push({
+            type: 'read',
+            ts: new Date(info.lastRead || info.firstRead || 0).getTime(),
+            collection, id,
+            title: info.title || id,
+            extra: info.readCount > 1 ? `${info.readCount} 回目` : '初読',
+          });
+        });
+
+        const badges = tryParse('hiraku.badges.v1') || {};
+        Object.values(badges).forEach((b) => {
+          if (!b || !b.types) return;
+          events.push({
+            type: 'badge',
+            ts: b.earnedAt || 0,
+            collection: b.collection, id: b.id,
+            title: b.title || b.id,
+            extra: b.types.map((t) => BADGE_LABELS[t] || t).join(' ・ '),
+          });
+        });
+
+        const stars = tryParse('hiraku.stars.v1') || {};
+        Object.values(stars).forEach((s) => {
+          if (!s || !s.path) return;
+          events.push({
+            type: 'star',
+            ts: s.ts || 0,
+            collection: s.collection, id: s.id,
+            title: s.title || s.id,
+            extra: '★ お気に入り追加',
+          });
+        });
+
+        // メモは個別の API 取得 (ログイン中のみ)。インデックスは /api/notes (GET) から
+        return events;
+      }
+
+      async function loadNotes() {
+        try {
+          const resp = await fetch('/api/notes', { credentials: 'same-origin', cache: 'no-store' });
+          if (!resp.ok) return [];
+          const data = await resp.json();
+          if (!Array.isArray(data.items)) return [];
+          return data.items.map((n) => ({
+            type: 'note',
+            ts: n.updatedAt || 0,
+            collection: n.collection, id: n.id,
+            title: n.title || n.id,
+            extra: n.preview ? '「' + n.preview + '」' : 'メモを書いた',
+          }));
+        } catch (_) { return []; }
+      }
+
+      const ICON = { read: '◐', badge: '✦', star: '★', note: '✎' };
+      const TYPE_LABEL = { read: '読了', badge: 'バッジ', star: 'お気に入り', note: 'メモ' };
+
+      async function render() {
+        let events = collect();
+        if (filterState.note) {
+          const notes = await loadNotes();
+          events = events.concat(notes);
+        }
+        events = events.filter((e) => filterState[e.type]);
+        events.sort((a, b) => b.ts - a.ts);
+
+        if (events.length === 0) {
+          root.innerHTML = '<div class="empty-state"><h3>まだ記録がありません</h3><p>教材を読んだり、バッジを獲得したり、メモを書いたりすると、ここに時系列で記録されます。</p></div>';
+          return;
+        }
+
+        // 日付ごとにグルーピング
+        const groups = new Map();
+        events.forEach((e) => {
+          const key = dayKey(e.ts);
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(e);
+        });
+
+        const html = Array.from(groups.entries()).map(([day, items]) => {
+          const itemsHtml = items.map((e) => {
+            const path = '/library/' + e.collection + '/' + e.id;
+            return `
+              <li class="journal__item journal__item--${e.type}">
+                <span class="journal__icon" aria-hidden="true">${ICON[e.type]}</span>
+                <div class="journal__body">
+                  <div class="journal__head">
+                    <a href="${escapeHtml(path)}" class="journal__title">${escapeHtml(e.title)}</a>
+                    <span class="journal__time">${fmtDate(e.ts).split(' ')[1] || ''}</span>
+                  </div>
+                  <div class="journal__extra">
+                    <span class="journal__type-label">${TYPE_LABEL[e.type]}</span>
+                    ${escapeHtml(e.extra || '')}
+                  </div>
+                </div>
+              </li>`;
+          }).join('');
+          return `
+            <div class="journal__day">
+              <h3 class="journal__date">${dayLabel(day)}</h3>
+              <ul class="journal__list">${itemsHtml}</ul>
+            </div>`;
+        }).join('');
+        root.innerHTML = html;
+      }
+
+      filterRoot && filterRoot.addEventListener('change', (e) => {
+        const t = e.target;
+        if (t && t.matches('input[data-filter]')) {
+          filterState[t.dataset.filter] = t.checked;
+          render();
+        }
+      });
+
+      render();
+      // ジャーナルは sync 完了でも更新したい
+      window.addEventListener('hiraku:sync', render);
+    })();
+  </script>
+
+  <style>
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .journal-filters {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 0.5rem 0.8rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .journal-filters__label {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-weight: 500;
+    }
+    .journal-filter { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.88rem; cursor: pointer; }
+    .journal__day { margin-bottom: 1.5rem; }
+    .journal__date {
+      font-size: 0.92rem;
+      color: var(--text-soft);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+      margin: 0 0 0.6rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .journal__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .journal__item {
+      display: flex;
+      gap: 0.7rem;
+      padding: 0.6rem 0.8rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+      border-left: 3px solid var(--border);
+    }
+    .journal__item--read { border-left-color: #3eae8f; }
+    .journal__item--badge { border-left-color: #c97a3e; }
+    .journal__item--star { border-left-color: #d4ab4d; }
+    .journal__item--note { border-left-color: #3e7ec9; }
+    .journal__icon {
+      font-size: 1.2rem;
+      width: 1.6rem;
+      text-align: center;
+      flex-shrink: 0;
+      color: var(--text-soft);
+    }
+    .journal__body { flex: 1; min-width: 0; }
+    .journal__head { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
+    .journal__title {
+      font-size: 0.95rem;
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .journal__time {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+    .journal__extra { font-size: 0.82rem; color: var(--text-soft); margin-top: 0.15rem; }
+    .journal__type-label {
+      padding: 0.05rem 0.4rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      margin-right: 0.3em;
+    }
+  </style>
+</Base>

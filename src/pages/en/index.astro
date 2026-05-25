@@ -4,11 +4,11 @@ import { getCollection } from 'astro:content';
 
 // 全教材数を計算
 const COLLECTION_NAMES = [
-  'kokugo3', 'kokugo4', 'kokugo6',
+  'kokugo1', 'kokugo2', 'kokugo3', 'kokugo4', 'kokugo6',
   'chugaku1', 'chugaku2', 'chugaku3',
-  'kotoko1', 'kotoko2',
+  'kotoko1', 'kotoko2', 'kotoko3',
   'kateika5', 'chugakurika1', 'chugakurika2', 'chugakurekishi1',
-  'kotokoeigo1', 'sansu5', 'chugakukomin3',
+  'kotokoeigo1', 'koteoyaku1', 'sansu5', 'chugakukomin3',
   'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
 ];
 
@@ -21,7 +21,7 @@ for (const name of COLLECTION_NAMES) {
 }
 
 // 英語版が読みやすい教材（Lafcadio Hearn の原典など）
-const enLessons = await getCollection('kotokoeigo1');
+const enLessons = await getCollection('kotokoeigo1', 'koteoyaku1');
 
 // 古典の名作（英語圏読者にとっての関心ポイント）
 interface FeaturedWork {

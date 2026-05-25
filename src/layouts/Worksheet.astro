@@ -10,6 +10,8 @@ import type { CollectionEntry } from 'astro:content';
 import '../styles/global.css';
 
 type AnyLesson =
+  | CollectionEntry<'kokugo1'>
+  | CollectionEntry<'kokugo2'>
   | CollectionEntry<'kokugo3'>
   | CollectionEntry<'kokugo4'>
   | CollectionEntry<'kokugo6'>
@@ -18,11 +20,13 @@ type AnyLesson =
   | CollectionEntry<'chugaku3'>
   | CollectionEntry<'kotoko1'>
   | CollectionEntry<'kotoko2'>
+  | CollectionEntry<'kotoko3'>
   | CollectionEntry<'kateika5'>
   | CollectionEntry<'chugakurika1'>
   | CollectionEntry<'chugakurika2'>
   | CollectionEntry<'chugakurekishi1'>
   | CollectionEntry<'kotokoeigo1'>
+  | CollectionEntry<'koteoyaku1'>
   | CollectionEntry<'sansu5'>
   | CollectionEntry<'chugakukomin3'>
   | CollectionEntry<'kotorekishi1'>

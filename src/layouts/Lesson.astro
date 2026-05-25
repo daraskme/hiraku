@@ -6,6 +6,8 @@ import { findPathsForLesson } from '../data/paths';
 
 interface Props {
   lesson:
+    | CollectionEntry<'kokugo1'>
+    | CollectionEntry<'kokugo2'>
     | CollectionEntry<'kokugo3'>
     | CollectionEntry<'kokugo4'>
     | CollectionEntry<'kokugo6'>
@@ -14,6 +16,7 @@ interface Props {
     | CollectionEntry<'chugaku3'>
     | CollectionEntry<'kotoko1'>
     | CollectionEntry<'kotoko2'>
+    | CollectionEntry<'kotoko3'>
     | CollectionEntry<'kateika5'>
     | CollectionEntry<'chugakurika1'>
     | CollectionEntry<'chugakurika2'>
@@ -22,6 +25,7 @@ interface Props {
     | CollectionEntry<'kotokokanbun1'>
     | CollectionEntry<'kotosekaishi1'>
     | CollectionEntry<'kotokoeigo1'>
+    | CollectionEntry<'koteoyaku1'>
     | CollectionEntry<'sansu5'>
     | CollectionEntry<'chugakukomin3'>;
 }
@@ -31,6 +35,8 @@ const d = lesson.data;
 
 // ─── 関連教材の計算 ────────────────────────────────
 const COLLECTION_NAMES = [
+  'kokugo1',
+  'kokugo2',
   'kokugo3',
   'kokugo4',
   'kokugo6',
@@ -39,11 +45,13 @@ const COLLECTION_NAMES = [
   'chugaku3',
   'kotoko1',
   'kotoko2',
+  'kotoko3',
   'kateika5',
   'chugakurika1',
   'chugakurika2',
   'chugakurekishi1',
   'kotokoeigo1',
+  'koteoyaku1',
   'sansu5',
   'chugakukomin3',
   'kotorekishi1',
@@ -51,6 +59,8 @@ const COLLECTION_NAMES = [
   'kotosekaishi1',
 ] as const;
 const COLLECTION_LABEL: Record<string, string> = {
+  kokugo1: '小1 国語',
+  kokugo2: '小2 国語',
   kokugo3: '小3 国語',
   kokugo4: '小4 国語',
   kokugo6: '小6 国語',
@@ -59,6 +69,7 @@ const COLLECTION_LABEL: Record<string, string> = {
   chugaku3: '中3 国語',
   kotoko1: '高1 国語',
   kotoko2: '高2 国語',
+  kotoko3: '高3 国語',
   kateika5: '小5 家庭科',
   chugakurika1: '中1 理科',
   chugakurika2: '中2 理科',
@@ -349,13 +360,43 @@ const guidelineDoc = d.school_stage === 'kotoko'
     {d.glossary.length > 0 && (
       <section aria-label="語句の意味">
         <h2>語句の意味</h2>
+        <p class="glossary-hint no-print">
+          各見出し語をクリックすると、外部辞書で詳しい意味を調べられます。
+          <a
+            href="https://ja.wiktionary.org/wiki/Wiktionary:%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%9A%E3%83%BC%E3%82%B8"
+            target="_blank" rel="noopener"
+            style="font-size:0.85em"
+          >※ Wiktionary について</a>
+        </p>
         <ul class="glossary-list">
-          {d.glossary.map((g) => (
-            <li>
-              <span class="term">{g.term}</span>
-              <span>{g.meaning}</span>
-            </li>
-          ))}
+          {d.glossary.map((g) => {
+            // term から振り仮名（…）を除いた検索キー
+            const lookup = g.term.replace(/[（(].*?[)）]/g, '').trim();
+            const wikt = `https://ja.wiktionary.org/wiki/${encodeURIComponent(lookup)}`;
+            const kotoba = `https://kotobank.jp/word/${encodeURIComponent(lookup)}`;
+            return (
+              <li>
+                <span class="term">
+                  <a
+                    href={wikt}
+                    target="_blank"
+                    rel="noopener"
+                    class="term__link"
+                    title={`Wiktionary で「${lookup}」を調べる`}
+                  >{g.term}</a>
+                  <a
+                    href={kotoba}
+                    target="_blank"
+                    rel="noopener"
+                    class="term__alt-link no-print"
+                    title={`コトバンクで「${lookup}」を調べる`}
+                    aria-label={`コトバンクで「${lookup}」を調べる`}
+                  >K</a>
+                </span>
+                <span>{g.meaning}</span>
+              </li>
+            );
+          })}
         </ul>
       </section>
     )}

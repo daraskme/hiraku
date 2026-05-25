@@ -19,6 +19,7 @@ interface SyncPayload {
   words?: string[];
   stars?: unknown;
   badges?: unknown;
+  goals?: unknown[];
   prefs?: Record<string, unknown>;
   clientUpdatedAt?: number;
 }
@@ -93,6 +94,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ request, env }) => {
     words: safeArray(body.words, 200),
     stars: safeRecord(body.stars) || {},
     badges: safeRecord(body.badges) || {},
+    goals: Array.isArray(body.goals) ? body.goals.slice(0, 50) : [],
     prefs: safeRecord(body.prefs) || {},
     clientUpdatedAt: typeof body.clientUpdatedAt === 'number' ? body.clientUpdatedAt : Date.now(),
     serverUpdatedAt: Date.now(),

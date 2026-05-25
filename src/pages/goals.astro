@@ -1,0 +1,283 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="学習目標"
+  description="個人の学習目標を設定し、進捗を追跡する。"
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>学習目標</h1>
+      <span class="section__subtitle">GOALS</span>
+    </div>
+    <p>
+      自分の学習目標を設定して、進捗を追跡しましょう。<br />
+      目標はあなたの端末・あなたのクラウドにのみ保存されます。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/journal">ジャーナル</a> ・
+      <a href="/progress">進捗ダッシュボード</a> ・
+      <a href="/profile">プロフィール</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>今月の目標</h2>
+    </div>
+    <div data-goals-active>
+      <p style="color:var(--text-soft);">読み込み中…</p>
+    </div>
+    <details class="goals-add">
+      <summary>+ 新しい目標を追加</summary>
+      <form data-goals-add-form>
+        <label class="goals-add__field">
+          <span>目標の種類</span>
+          <select name="type" required>
+            <option value="reads_count">読了教材数</option>
+            <option value="reads_minutes">学習時間 (分)</option>
+            <option value="badges_count">バッジ獲得数</option>
+            <option value="custom">自由記述</option>
+          </select>
+        </label>
+        <label class="goals-add__field">
+          <span>期間</span>
+          <select name="period" required>
+            <option value="month">今月</option>
+            <option value="week">今週</option>
+            <option value="quarter">今四半期</option>
+          </select>
+        </label>
+        <label class="goals-add__field">
+          <span>目標値 (数値の場合)</span>
+          <input type="number" name="target" min="1" max="999" placeholder="5" />
+        </label>
+        <label class="goals-add__field goals-add__field--wide">
+          <span>説明 (自由記述の場合)</span>
+          <input type="text" name="note" maxlength="100" placeholder="例: 古典を読む / 月 30 分以上" />
+        </label>
+        <button type="submit" class="btn btn--primary">目標を追加</button>
+      </form>
+    </details>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const STORAGE_KEY = 'hiraku.goals.v1';
+      const root = document.querySelector('[data-goals-active]');
+      const form = document.querySelector('[data-goals-add-form]');
+      if (!root) return;
+
+      function load() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') || []; } catch (_) { return []; }
+      }
+      function save(arr) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch (_) {}
+        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      function periodWindow(period) {
+        const now = new Date();
+        if (period === 'week') {
+          // 直近 7 日
+          const start = new Date(now); start.setDate(now.getDate() - 7);
+          return { start: start.getTime(), end: now.getTime(), label: '直近 7 日' };
+        }
+        if (period === 'quarter') {
+          const start = new Date(now); start.setMonth(now.getMonth() - 3);
+          return { start: start.getTime(), end: now.getTime(), label: '直近 3 ヶ月' };
+        }
+        // month
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        return { start: start.getTime(), end: now.getTime(), label: now.getFullYear() + '年 ' + (now.getMonth() + 1) + '月' };
+      }
+
+      function computeProgress(goal) {
+        const w = periodWindow(goal.period);
+        if (goal.type === 'reads_count') {
+          let cnt = 0;
+          try {
+            const p = JSON.parse(localStorage.getItem('hiraku.progress.v1') || '{}');
+            Object.values(p.reads || {}).forEach((info) => {
+              const ts = info && info.lastRead ? new Date(info.lastRead).getTime() : 0;
+              if (ts >= w.start && ts <= w.end) cnt++;
+            });
+          } catch (_) {}
+          return { current: cnt, label: cnt + ' / ' + (goal.target || 0) + ' 教材', windowLabel: w.label };
+        }
+        if (goal.type === 'reads_minutes') {
+          let sec = 0;
+          try {
+            const p = JSON.parse(localStorage.getItem('hiraku.progress.v1') || '{}');
+            Object.entries(p.activity || {}).forEach(([dayKey, info]) => {
+              const ts = new Date(dayKey).getTime();
+              if (ts >= w.start && ts <= w.end) sec += (info && info.secondsActive) || 0;
+            });
+          } catch (_) {}
+          const min = Math.round(sec / 60);
+          return { current: min, label: min + ' / ' + (goal.target || 0) + ' 分', windowLabel: w.label };
+        }
+        if (goal.type === 'badges_count') {
+          let cnt = 0;
+          try {
+            const b = JSON.parse(localStorage.getItem('hiraku.badges.v1') || '{}');
+            Object.values(b).forEach((entry) => {
+              const ts = entry && entry.earnedAt ? entry.earnedAt : 0;
+              if (ts >= w.start && ts <= w.end) cnt++;
+            });
+          } catch (_) {}
+          return { current: cnt, label: cnt + ' / ' + (goal.target || 0) + ' バッジ', windowLabel: w.label };
+        }
+        return { current: 0, label: '—', windowLabel: w.label };
+      }
+
+      function render() {
+        const goals = load();
+        if (goals.length === 0) {
+          root.innerHTML = '<div class="empty-state"><h3>まだ目標がありません</h3><p>「+ 新しい目標を追加」から作成してみましょう。</p></div>';
+          return;
+        }
+        const items = goals.map((g, i) => {
+          if (g.type === 'custom') {
+            return `<li class="goals-item">
+              <div class="goals-item__head">
+                <span class="goals-item__type">自由記述</span>
+                <button type="button" class="goals-item__delete" data-goal-delete="${i}" aria-label="削除">×</button>
+              </div>
+              <p class="goals-item__note">${escapeHtml(g.note || '')}</p>
+              <p class="goals-item__period">${escapeHtml(periodWindow(g.period).label)}</p>
+            </li>`;
+          }
+          const p = computeProgress(g);
+          const pct = Math.min(100, Math.round((p.current / Math.max(1, g.target)) * 100));
+          const TYPE_LABEL = { reads_count: '読了教材数', reads_minutes: '学習時間', badges_count: 'バッジ獲得' };
+          return `<li class="goals-item">
+            <div class="goals-item__head">
+              <span class="goals-item__type">${TYPE_LABEL[g.type]} ${escapeHtml(p.windowLabel)}</span>
+              <button type="button" class="goals-item__delete" data-goal-delete="${i}" aria-label="削除">×</button>
+            </div>
+            <div class="goals-item__progress" aria-label="進捗 ${pct}%">
+              <span class="goals-item__bar" style="width:${pct}%"></span>
+            </div>
+            <p class="goals-item__label">${escapeHtml(p.label)} (${pct}%)</p>
+          </li>`;
+        }).join('');
+        root.innerHTML = '<ul class="goals-list">' + items + '</ul>';
+        root.querySelectorAll('[data-goal-delete]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const idx = Number(btn.dataset.goalDelete);
+            const arr = load();
+            arr.splice(idx, 1);
+            save(arr);
+            render();
+          });
+        });
+      }
+
+      form && form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const goal = {
+          type: fd.get('type'),
+          period: fd.get('period'),
+          target: Number(fd.get('target')) || null,
+          note: String(fd.get('note') || '').slice(0, 100),
+          createdAt: Date.now(),
+        };
+        const arr = load();
+        arr.unshift(goal);
+        save(arr);
+        render();
+        form.reset();
+      });
+
+      render();
+      window.addEventListener('hiraku:sync', render);
+    })();
+  </script>
+
+  <style>
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .goals-list { list-style: none; padding: 0; display: grid; gap: 0.8rem; }
+    .goals-item {
+      padding: 0.9rem 1.1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .goals-item__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.4rem;
+    }
+    .goals-item__type { font-size: 0.78rem; color: var(--text-soft); font-weight: 500; }
+    .goals-item__delete {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--text-soft);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+    .goals-item__delete:hover { background: var(--bg); color: #b84a4a; }
+    .goals-item__progress {
+      width: 100%;
+      height: 8px;
+      background: var(--bg);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 0.3rem 0;
+    }
+    .goals-item__bar {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 80%, white));
+      transition: width 0.5s ease;
+    }
+    .goals-item__label {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .goals-item__note { margin: 0.2rem 0; font-size: 0.95rem; color: var(--text); }
+    .goals-item__period { font-size: 0.78rem; color: var(--text-soft); margin: 0; }
+
+    .goals-add { margin-top: 1.2rem; }
+    .goals-add > summary { cursor: pointer; color: var(--accent); padding: 0.5rem 0; }
+    .goals-add form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      padding: 1rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+      margin-top: 0.5rem;
+    }
+    .goals-add__field { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; }
+    .goals-add__field--wide { grid-column: span 2; }
+    .goals-add select, .goals-add input {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .goals-add button { grid-column: span 2; justify-self: start; }
+    @media (max-width: 600px) {
+      .goals-add form { grid-template-columns: 1fr; }
+      .goals-add__field--wide { grid-column: span 1; }
+      .goals-add button { grid-column: span 1; }
+    }
+  </style>
+</Base>

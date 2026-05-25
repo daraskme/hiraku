@@ -27,6 +27,7 @@
     words: 'hiraku.englishWords.v1',
     stars: 'hiraku.stars.v1',
     badges: 'hiraku.badges.v1',
+    goals: 'hiraku.goals.v1',
     sceneBg: 'hiraku.sceneBg.v1',
     // 表示設定 (Header.astro が単独キーで保存している)
     prefThemeKey: 'theme',
@@ -115,6 +116,7 @@
     const words = tryParse(SYNC_FIELDS.words) || [];
     const stars = tryParse(SYNC_FIELDS.stars) || {};
     const badges = tryParse(SYNC_FIELDS.badges) || {};
+    const goals = tryParse(SYNC_FIELDS.goals) || [];
 
     const prefs = {};
     PREF_KEYS.forEach((k) => {
@@ -148,6 +150,7 @@
       words,
       stars,
       badges,
+      goals,
       prefs,
       clientUpdatedAt,
     };
@@ -162,6 +165,7 @@
       if (Array.isArray(state.words)) localStorage.setItem(SYNC_FIELDS.words, JSON.stringify(state.words));
       if (state.stars) localStorage.setItem(SYNC_FIELDS.stars, JSON.stringify(state.stars));
       if (state.badges) localStorage.setItem(SYNC_FIELDS.badges, JSON.stringify(state.badges));
+      if (state.goals) localStorage.setItem(SYNC_FIELDS.goals, JSON.stringify(state.goals));
       const prefs = state.prefs || {};
       PREF_KEYS.forEach((k) => {
         if (prefs[k] != null) localStorage.setItem(k, String(prefs[k]));

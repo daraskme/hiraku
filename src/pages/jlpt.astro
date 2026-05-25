@@ -3,23 +3,23 @@ import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 
 const COLLECTION_NAMES = [
-  'kokugo3', 'kokugo4', 'kokugo6',
+  'kokugo1', 'kokugo2', 'kokugo3', 'kokugo4', 'kokugo6',
   'chugaku1', 'chugaku2', 'chugaku3',
-  'kotoko1', 'kotoko2',
+  'kotoko1', 'kotoko2', 'kotoko3',
   'kateika5', 'chugakurika1', 'chugakurika2',
-  'chugakurekishi1', 'kotokoeigo1',
+  'chugakurekishi1', 'kotokoeigo1', 'koteoyaku1',
   'sansu5', 'chugakukomin3',
   'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
 ];
 
 const COLLECTION_LABEL: Record<string, string> = {
-  kokugo3: '小3 国語', kokugo4: '小4 国語', kokugo6: '小6 国語',
+  kokugo1: '小1 国語', kokugo2: '小2 国語', kokugo3: '小3 国語', kokugo4: '小4 国語', kokugo6: '小6 国語',
   chugaku1: '中1 国語', chugaku2: '中2 国語', chugaku3: '中3 国語',
-  kotoko1: '高1 国語', kotoko2: '高2 国語',
+  kotoko1: '高1 国語', kotoko2: '高2 国語', kotoko3: '高3 評論',
   kateika5: '小5 家庭科',
   chugakurika1: '中1 理科', chugakurika2: '中2 理科',
   chugakurekishi1: '中1 歴史',
-  kotokoeigo1: '高1 英語',
+  kotokoeigo1: '高1 英語', koteoyaku1: '高1 西洋翻訳',
   sansu5: '小5 算数',
   chugakukomin3: '中3 公民',
   kotorekishi1: '高1 日本史',
