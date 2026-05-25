@@ -422,6 +422,25 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </section>
     )}
 
+    {/* ─── 学習メモ（ログイン中ユーザーのみ表示・クラウド同期）─── */}
+    <section class="no-print lesson-notes" data-lesson-notes hidden>
+      <h2>学習メモ</h2>
+      <p class="lesson-notes__hint">
+        ログイン中のユーザーのみ利用できます。記入は自動でクラウドに保存され、別端末からも参照できます。
+      </p>
+      <textarea
+        class="lesson-notes__editor"
+        data-lesson-notes-editor
+        placeholder="この教材について気づいたこと、わからなかった語、自分の解釈、生徒の反応 …"
+        rows="6"
+        maxlength="8000"
+      ></textarea>
+      <div class="lesson-notes__footer">
+        <span class="lesson-notes__status" data-lesson-notes-status aria-live="polite"></span>
+        <span class="lesson-notes__count" data-lesson-notes-count>0 / 8000</span>
+      </div>
+    </section>
+
     <section aria-label="出典・ライセンス" class="no-print">
       <h2>出典・ライセンス</h2>
       <ul>
@@ -1037,6 +1056,99 @@ const guidelineDoc = d.school_stage === 'kotoko'
       } else {
         window.addEventListener('load', () => setTimeout(showResumeChip, 400));
       }
+    })();
+  </script>
+
+  <script is:inline>
+    // ─── 教材メモ (ログイン中のみ表示。/api/notes と連動) ───
+    (function () {
+      const section = document.querySelector('[data-lesson-notes]');
+      const editor = document.querySelector('[data-lesson-notes-editor]');
+      const status = document.querySelector('[data-lesson-notes-status]');
+      const counter = document.querySelector('[data-lesson-notes-count]');
+      const article = document.querySelector('article[data-lesson-collection]');
+      if (!section || !editor || !article) return;
+      const collection = article.dataset.lessonCollection;
+      const id = article.dataset.lessonId;
+      const title = article.dataset.lessonTitle;
+      if (!collection || !id) return;
+
+      let saveTimer = null;
+      let initialLoaded = false;
+
+      function applyVisibility() {
+        const u = (window.HirakuAuth && window.HirakuAuth.getUser && window.HirakuAuth.getUser()) || null;
+        section.hidden = !u;
+        if (u && !initialLoaded) loadFromServer();
+      }
+      function updateCounter() {
+        const n = (editor.value || '').length;
+        if (counter) counter.textContent = n + ' / 8000';
+      }
+
+      async function loadFromServer() {
+        try {
+          const url = '/api/notes?collection=' + encodeURIComponent(collection) +
+                      '&id=' + encodeURIComponent(id);
+          const resp = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          if (data.note && typeof data.note.text === 'string') {
+            editor.value = data.note.text;
+          }
+          updateCounter();
+          initialLoaded = true;
+        } catch (_) {
+          if (status) status.textContent = '読み込みに失敗 (オフライン?)';
+        }
+      }
+
+      async function saveNow() {
+        if (!window.HirakuAuth || !window.HirakuAuth.isSignedIn()) return;
+        try {
+          if (status) status.textContent = '保存中…';
+          const resp = await fetch('/api/notes', {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              collection,
+              id,
+              title,
+              text: editor.value || '',
+            }),
+          });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          if (status) status.textContent = '保存しました ' + new Date().toLocaleTimeString('ja-JP');
+        } catch (_) {
+          if (status) status.textContent = '保存に失敗 (オフライン?) — 後で自動再試行';
+        }
+      }
+
+      function scheduleSave() {
+        updateCounter();
+        if (saveTimer) clearTimeout(saveTimer);
+        if (status) status.textContent = '入力中…';
+        saveTimer = setTimeout(saveNow, 1500);
+      }
+
+      editor.addEventListener('input', scheduleSave);
+      editor.addEventListener('blur', () => {
+        if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+        saveNow();
+      });
+      window.addEventListener('beforeunload', () => {
+        if (saveTimer) { clearTimeout(saveTimer); saveNow(); }
+      });
+
+      window.addEventListener('hiraku:auth', applyVisibility);
+      // 初期化
+      const tryInit = () => {
+        if (window.HirakuAuth) applyVisibility();
+        else setTimeout(tryInit, 100);
+      };
+      tryInit();
+      updateCounter();
     })();
   </script>
 </Base>

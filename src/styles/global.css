@@ -1294,6 +1294,55 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
 .word-history-panel__clear:hover { background: var(--bg-elevated); }
 
 /* ============================================================
+   教材メモ
+   ============================================================ */
+.lesson-notes {
+  margin-top: 2.5rem;
+  padding: 1.2rem;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+.lesson-notes h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.4rem;
+}
+.lesson-notes__hint {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin: 0 0 0.8rem;
+  line-height: 1.5;
+}
+.lesson-notes__editor {
+  width: 100%;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+  min-height: 8rem;
+  box-sizing: border-box;
+}
+.lesson-notes__editor:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.lesson-notes__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+.lesson-notes__status:empty::before { content: '\00a0'; }
+
+/* ============================================================
    ブックマーク・続きから読むチップ
    ============================================================ */
 .resume-chip {
@@ -1936,6 +1985,17 @@ rt {
   color: var(--text);
 }
 .user-panel__signout:hover { background: var(--bg-soft); }
+.user-panel__profile-link {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+}
+.user-panel__profile-link:hover { text-decoration-style: solid; }
 
 .user-panel__danger {
   margin-top: 0.7rem;

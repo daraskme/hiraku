@@ -1,0 +1,280 @@
+---
+import Base from '../layouts/Base.astro';
+const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
+---
+
+<Base
+  title="プロフィール"
+  description="ログイン中のアカウント情報、学習データのエクスポート・削除など。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>プロフィール</h1>
+      <span class="section__subtitle">PROFILE</span>
+    </div>
+    <p>
+      Google アカウントでログインしているときの、アカウント情報と
+      学習データの管理を行うページです。
+    </p>
+  </section>
+
+  {/* 未ログイン時の案内 */}
+  <section class="section" data-profile-signed-out hidden>
+    <div class="empty-state">
+      <h3>ログインが必要です</h3>
+      <p>
+        プロフィール機能は Google ログイン後に利用できます。<br />
+        画面右上の <strong>○</strong> アイコンからログインしてください。
+      </p>
+      {!googleClientId && (
+        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-soft)">
+          (このサイトはまだ Google ログインが設定されていません。
+          管理者は <code>SETUP.md</code> を確認してください。)
+        </p>
+      )}
+    </div>
+  </section>
+
+  {/* ログイン時のメインビュー */}
+  <section class="section" data-profile-signed-in hidden>
+    <div class="profile-card">
+      <img class="profile-card__avatar" src="" alt="" data-profile-avatar />
+      <div class="profile-card__body">
+        <div class="profile-card__name" data-profile-name></div>
+        <div class="profile-card__email" data-profile-email></div>
+        <div class="profile-card__meta" data-profile-meta></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" data-profile-stats hidden>
+    <div class="section__heading">
+      <h2>クラウド同期の状態</h2>
+      <span class="section__subtitle">SYNC STATUS</span>
+    </div>
+    <dl class="profile-stats">
+      <div class="profile-stat">
+        <dt>最後にクラウドへ送信</dt>
+        <dd data-stat-last-push>—</dd>
+      </div>
+      <div class="profile-stat">
+        <dt>最後にローカル変更</dt>
+        <dd data-stat-last-modified>—</dd>
+      </div>
+      <div class="profile-stat">
+        <dt>サーバ保存サイズ (概算)</dt>
+        <dd data-stat-payload-size>—</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="section" data-profile-actions hidden>
+    <div class="section__heading">
+      <h2>データの管理</h2>
+      <span class="section__subtitle">ACTIONS</span>
+    </div>
+    <div class="profile-actions">
+      <button type="button" class="btn btn--ghost" data-action-export>
+        ⬇ 学習データを JSON でダウンロード
+      </button>
+      <button type="button" class="btn btn--ghost" data-action-force-sync>
+        ↺ 今すぐ同期
+      </button>
+      <button type="button" class="btn btn--danger" data-action-delete-cloud>
+        ⚠ クラウドの学習データを削除
+      </button>
+    </div>
+    <p class="profile-actions__note">
+      エクスポートでは現在ログイン中のクラウドデータ (進捗・ブックマーク・
+      英単語履歴・表示設定) を JSON ファイルでダウンロードします。<br />
+      削除を選ぶとサーバから完全に消えます (この端末のデータは残ります)。
+    </p>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const signedOut = document.querySelector('[data-profile-signed-out]');
+      const signedIn = document.querySelector('[data-profile-signed-in]');
+      const statsSection = document.querySelector('[data-profile-stats]');
+      const actionsSection = document.querySelector('[data-profile-actions]');
+      const avatarEl = document.querySelector('[data-profile-avatar]');
+      const nameEl = document.querySelector('[data-profile-name]');
+      const emailEl = document.querySelector('[data-profile-email]');
+      const metaEl = document.querySelector('[data-profile-meta]');
+      const lastPush = document.querySelector('[data-stat-last-push]');
+      const lastMod = document.querySelector('[data-stat-last-modified]');
+      const payloadSize = document.querySelector('[data-stat-payload-size]');
+
+      function formatTs(ts) {
+        if (!ts) return '—';
+        const n = Number(ts);
+        if (!n) return '—';
+        const d = new Date(n);
+        return d.toLocaleString('ja-JP', { dateStyle: 'medium', timeStyle: 'short' });
+      }
+      function formatBytes(n) {
+        if (!Number.isFinite(n) || n <= 0) return '—';
+        const units = ['B', 'KB', 'MB'];
+        let i = 0;
+        while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+        return n.toFixed(i === 0 ? 0 : 1) + ' ' + units[i];
+      }
+
+      function render() {
+        const w = window;
+        const u = (w.HirakuAuth && w.HirakuAuth.getUser && w.HirakuAuth.getUser()) || null;
+        const isIn = !!u;
+        signedOut.hidden = isIn;
+        signedIn.hidden = !isIn;
+        statsSection.hidden = !isIn;
+        actionsSection.hidden = !isIn;
+        if (!isIn) return;
+        if (avatarEl && u.picture) { avatarEl.src = u.picture; avatarEl.alt = u.name || ''; }
+        if (nameEl) nameEl.textContent = u.name || '匿名ユーザー';
+        if (emailEl) emailEl.textContent = u.email || '';
+        if (metaEl) metaEl.textContent = 'Google アカウント (sub: ' + (u.sub || '').slice(0, 8) + '…)';
+        // 同期統計
+        let pushAt = 0, modAt = 0;
+        try { pushAt = Number(localStorage.getItem('hiraku.lastSync.v1')) || 0; } catch (_) {}
+        try { modAt = Number(localStorage.getItem('hiraku.localModified.v1')) || 0; } catch (_) {}
+        if (lastPush) lastPush.textContent = formatTs(pushAt);
+        if (lastMod) lastMod.textContent = formatTs(modAt);
+        if (payloadSize && w.HirakuAuth && w.HirakuAuth._readLocalState) {
+          try {
+            const sz = JSON.stringify(w.HirakuAuth._readLocalState()).length;
+            payloadSize.textContent = formatBytes(sz);
+          } catch (_) { payloadSize.textContent = '—'; }
+        }
+      }
+
+      window.addEventListener('hiraku:auth', render);
+      window.addEventListener('hiraku:sync', render);
+      // 初期描画 (HirakuAuth がロード後でも安全)
+      const tryRender = () => { if (window.HirakuAuth) render(); else setTimeout(tryRender, 100); };
+      tryRender();
+
+      // ─── エクスポート ───
+      const exportBtn = document.querySelector('[data-action-export]');
+      exportBtn && exportBtn.addEventListener('click', () => {
+        const w = window;
+        if (!w.HirakuAuth || !w.HirakuAuth._readLocalState) return;
+        const state = w.HirakuAuth._readLocalState();
+        const user = w.HirakuAuth.getUser();
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          user: user ? { sub: user.sub, name: user.name, email: user.email } : null,
+          ...state,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dt = new Date().toISOString().slice(0, 10);
+        a.download = 'hiraku-export-' + dt + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // ─── 今すぐ同期 ───
+      const syncBtn = document.querySelector('[data-action-force-sync]');
+      syncBtn && syncBtn.addEventListener('click', async () => {
+        if (window.HirakuAuth && window.HirakuAuth.forceSync) {
+          await window.HirakuAuth.forceSync();
+          render();
+        }
+      });
+
+      // ─── クラウド削除 ───
+      const deleteBtn = document.querySelector('[data-action-delete-cloud]');
+      deleteBtn && deleteBtn.addEventListener('click', async () => {
+        if (!confirm('サーバ上の進捗・ブックマーク・履歴・設定をすべて削除します。\nこの端末のデータは残ります。\n\n本当に削除しますか？')) return;
+        if (window.HirakuAuth && window.HirakuAuth.deleteCloudData) {
+          try {
+            await window.HirakuAuth.deleteCloudData();
+            alert('クラウドのデータを削除しました。');
+            render();
+          } catch (_) { alert('削除に失敗しました。'); }
+        }
+      });
+    })();
+  </script>
+
+  <style>
+    .profile-card {
+      display: flex;
+      gap: 1rem;
+      padding: 1.2rem;
+      background: var(--bg-soft);
+      border-radius: 10px;
+      border-left: 4px solid var(--accent);
+    }
+    .profile-card__avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .profile-card__name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .profile-card__email {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      word-break: break-all;
+    }
+    .profile-card__meta {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-top: 0.3rem;
+      font-family: var(--font-mono);
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.8rem;
+      margin: 0;
+    }
+    .profile-stat {
+      padding: 0.8rem 1rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+    }
+    .profile-stat dt {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin: 0 0 0.2rem;
+    }
+    .profile-stat dd {
+      margin: 0;
+      font-size: 0.95rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .profile-actions__note {
+      margin-top: 0.8rem;
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+    .btn--danger {
+      border-color: #c97a7a;
+      color: #b84a4a;
+    }
+    .btn--danger:hover {
+      background: color-mix(in srgb, #c97a7a 12%, transparent);
+    }
+  </style>
+</Base>
