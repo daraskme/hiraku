@@ -1,9 +1,27 @@
-# Cloudflare Pages 設定（オプション）
+# Cloudflare Pages 設定
 #
 # Pages の GitHub 連携でビルドする場合、本ファイルは必須ではなく、
-# ダッシュボード上で同等の設定を行えばデプロイされます。
-# wrangler CLI から直接デプロイしたい場合に利用してください。
+# 同等の設定をダッシュボード上で行うこともできます。
+# wrangler CLI から直接デプロイしたい場合、または Functions の KV バインディングを
+# 明示的に管理したい場合に利用してください。
 
 name = "project-procopios"
 pages_build_output_dir = "dist"
 compatibility_date = "2025-01-01"
+
+# ─── Functions の環境変数 (公開可) ───
+# GOOGLE_CLIENT_ID は公開値 (クライアント JS でも使うため)。
+# 本番値は Cloudflare ダッシュボード「Settings → Environment variables」で
+# Production / Preview 別に設定する想定。ここはローカル wrangler dev 用のダミー。
+[vars]
+GOOGLE_CLIENT_ID = ""
+SESSION_TTL_DAYS = "30"
+
+# ─── KV バインディング ───
+# Cloudflare ダッシュボードで HIRAKU_KV という namespace を作成し、
+# その ID を id = "..." に貼り付ける。Preview 用は preview_id。
+# 初回セットアップ手順は SETUP.md を参照。
+[[kv_namespaces]]
+binding = "HIRAKU_KV"
+id = "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"

@@ -17,6 +17,8 @@
 
 - [Astro](https://astro.build/) — 静的サイトジェネレータ
 - [Cloudflare Pages](https://pages.cloudflare.com/) — 無料ホスティング
+- [Cloudflare Pages Functions](https://developers.cloudflare.com/pages/functions/) + KV — 認証 API と進捗の永続化（任意機能）
+- [Google Identity Services](https://developers.google.com/identity/gsi/web) — Google ログイン（任意機能）
 - Markdown + HTML5 ruby — 教材本文（フリガナを含む）
 
 ## ローカル開発
@@ -27,6 +29,14 @@ npm run dev     # http://localhost:4321
 npm run build   # dist/ を生成
 npm run preview # dist/ をローカルでプレビュー
 ```
+
+## クラウド同期（Google ログイン）
+
+任意機能として、Google でログインすると進捗・ブックマーク・英単語履歴・
+表示設定がすべての端末で同期されます。ログインしなくても、すべての機能は
+端末内でそのまま使えます。
+
+セットアップ手順は [SETUP.md](./SETUP.md) を参照してください。
 
 ## ディレクトリ構成
 

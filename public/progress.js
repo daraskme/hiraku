@@ -26,6 +26,12 @@
     } catch (e) {
       /* quota exceeded; ignore */
     }
+    // ログイン中ならクラウドへ同期
+    try {
+      if (window.HirakuAuth && typeof window.HirakuAuth.scheduleSync === 'function') {
+        window.HirakuAuth.scheduleSync();
+      }
+    } catch (_) {}
   }
 
   function ensure(data) {

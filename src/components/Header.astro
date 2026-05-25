@@ -14,6 +14,9 @@ const navItems = [
   { href: '/progress', label: '進捗', icon: '◐' },
   { href: '/community', label: '対話', icon: '◌' },
 ];
+
+const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
+const authEnabled = !!googleClientId;
 ---
 
 <header class="site-header">
@@ -42,6 +45,81 @@ const navItems = [
       >
         <span aria-hidden="true">⌕</span>
       </a>
+
+      {authEnabled && (
+        <div
+          id="g_id_onload"
+          data-client_id={googleClientId}
+          data-callback="handleGoogleCredentialResponse"
+          data-auto_prompt="false"
+          data-context="signin"
+        ></div>
+      )}
+
+      {authEnabled && (
+        <div class="user-toggle" data-user-toggle-root>
+          <button
+            type="button"
+            class="icon-btn user-toggle__btn"
+            aria-label="アカウント"
+            aria-expanded="false"
+            data-user-toggle
+            title="アカウント"
+          >
+            <span class="user-toggle__icon-default" aria-hidden="true">○</span>
+            <img
+              class="user-toggle__avatar"
+              src=""
+              alt=""
+              data-user-avatar
+              hidden
+            />
+          </button>
+          <div class="user-panel" data-user-panel role="dialog" aria-label="アカウント">
+            {/* 未ログイン時 */}
+            <div class="user-panel__signed-out" data-user-signed-out>
+              <h3>クラウド同期</h3>
+              <p class="user-panel__note">
+                Google でログインすると、進捗・ブックマーク・英単語履歴・表示設定が
+                すべての端末で同期されます。<br />
+                ログインしなくても、すべての機能が端末内でそのまま使えます。
+              </p>
+              {/* GIS が自動でボタンをレンダーする */}
+              <div
+                id="g_id_signin"
+                data-type="standard"
+                data-shape="rectangular"
+                data-theme="outline"
+                data-text="signin_with"
+                data-size="large"
+                data-locale="ja"
+              ></div>
+              <div class="user-panel__fallback" data-user-fallback hidden>
+                <button type="button" class="user-panel__retry" data-user-retry>
+                  ログインボタンを再読み込み
+                </button>
+              </div>
+            </div>
+
+            {/* ログイン中 */}
+            <div class="user-panel__signed-in" data-user-signed-in hidden>
+              <div class="user-panel__identity">
+                <img class="user-panel__avatar" src="" alt="" data-user-panel-avatar />
+                <div>
+                  <div class="user-panel__name" data-user-name></div>
+                  <div class="user-panel__email" data-user-email></div>
+                </div>
+              </div>
+              <div class="user-panel__sync-status" data-user-sync-status aria-live="polite">
+                同期済み
+              </div>
+              <button type="button" class="user-panel__signout" data-user-signout>
+                ログアウト
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div class="a11y-toggle">
         <button
           type="button"
@@ -236,11 +314,20 @@ const navItems = [
   applyContrast(ls.getItem('contrast') || 'normal');
   applyWriting(ls.getItem('writing') || 'horizontal');
 
+  // ローカル変更を HirakuAuth (auth.js) に伝えてクラウド同期をスケジュール
+  function notifySync() {
+    const w = window as any;
+    if (w.HirakuAuth && typeof w.HirakuAuth.scheduleSync === 'function') {
+      w.HirakuAuth.scheduleSync();
+    }
+  }
+
   document.querySelectorAll<HTMLButtonElement>('[data-theme-set]').forEach((b) => {
     b.addEventListener('click', () => {
       const v = b.dataset.themeSet!;
       ls.setItem('theme', v);
       applyTheme(v);
+      notifySync();
     });
   });
   document.querySelectorAll<HTMLButtonElement>('[data-fs-set]').forEach((b) => {
@@ -248,6 +335,7 @@ const navItems = [
       const v = b.dataset.fsSet!;
       ls.setItem('fontSize', v);
       applyFontSize(v);
+      notifySync();
     });
   });
   document.querySelectorAll<HTMLButtonElement>('[data-ruby-set]').forEach((b) => {
@@ -255,6 +343,7 @@ const navItems = [
       const v = b.dataset.rubySet!;
       ls.setItem('ruby', v);
       applyRuby(v);
+      notifySync();
     });
   });
   document.querySelectorAll<HTMLButtonElement>('[data-contrast-set]').forEach((b) => {
@@ -262,6 +351,7 @@ const navItems = [
       const v = b.dataset.contrastSet!;
       ls.setItem('contrast', v);
       applyContrast(v);
+      notifySync();
     });
   });
   document.querySelectorAll<HTMLButtonElement>('[data-writing-set]').forEach((b) => {
@@ -269,6 +359,110 @@ const navItems = [
       const v = b.dataset.writingSet!;
       ls.setItem('writing', v);
       applyWriting(v);
+      notifySync();
     });
   });
+
+  // ─── ユーザーパネル：トグルとログイン/ログアウト UI ───
+  const userToggle = document.querySelector<HTMLButtonElement>('[data-user-toggle]');
+  const userPanel = document.querySelector<HTMLElement>('[data-user-panel]');
+  if (userToggle && userPanel) {
+    userToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = userPanel.classList.toggle('is-open');
+      userToggle.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', (e) => {
+      if (!userPanel.contains(e.target as Node) && e.target !== userToggle) {
+        userPanel.classList.remove('is-open');
+        userToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Google Identity Services のコールバック：window 直下に登録される必要がある
+    (window as any).handleGoogleCredentialResponse = async (resp: { credential?: string }) => {
+      const w = window as any;
+      if (!resp || !resp.credential || !w.HirakuAuth) return;
+      try {
+        await w.HirakuAuth.handleGoogleCredential(resp.credential);
+      } catch (err) {
+        const status = userPanel.querySelector<HTMLElement>('[data-user-sync-status]');
+        if (status) status.textContent = 'ログインに失敗しました';
+      }
+    };
+
+    // 認証状態変化を UI に反映
+    const signedOut = userPanel.querySelector<HTMLElement>('[data-user-signed-out]');
+    const signedIn = userPanel.querySelector<HTMLElement>('[data-user-signed-in]');
+    const avatar = document.querySelector<HTMLImageElement>('[data-user-avatar]');
+    const panelAvatar = userPanel.querySelector<HTMLImageElement>('[data-user-panel-avatar]');
+    const nameEl = userPanel.querySelector<HTMLElement>('[data-user-name]');
+    const emailEl = userPanel.querySelector<HTMLElement>('[data-user-email]');
+    const iconDefault = userToggle.querySelector<HTMLElement>('.user-toggle__icon-default');
+
+    function applyAuthState(user: any) {
+      const isIn = !!user;
+      if (signedOut) signedOut.hidden = isIn;
+      if (signedIn) signedIn.hidden = !isIn;
+      if (avatar && iconDefault) {
+        if (isIn && user.picture) {
+          avatar.src = user.picture;
+          avatar.alt = user.name || 'ユーザー';
+          avatar.hidden = false;
+          iconDefault.style.display = 'none';
+        } else {
+          avatar.hidden = true;
+          avatar.removeAttribute('src');
+          iconDefault.style.display = '';
+        }
+      }
+      if (panelAvatar && isIn && user.picture) {
+        panelAvatar.src = user.picture;
+        panelAvatar.alt = user.name || 'ユーザー';
+      }
+      if (nameEl) nameEl.textContent = isIn ? (user.name || '匿名ユーザー') : '';
+      if (emailEl) emailEl.textContent = isIn ? (user.email || '') : '';
+    }
+
+    // 起動時にキャッシュからユーザーを描画
+    const w = window as any;
+    if (w.HirakuAuth) applyAuthState(w.HirakuAuth.getUser());
+    window.addEventListener('hiraku:auth', (e: any) => {
+      applyAuthState(e.detail && e.detail.user);
+    });
+
+    // 同期ステータス表示
+    const syncStatus = userPanel.querySelector<HTMLElement>('[data-user-sync-status]');
+    let syncTimer: number | null = null;
+    window.addEventListener('hiraku:sync', (e: any) => {
+      if (!syncStatus) return;
+      const ok = e.detail && e.detail.ok;
+      syncStatus.textContent = ok ? '同期しました' : '同期に失敗 — オフラインかも';
+      if (syncTimer) window.clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(() => {
+        if (syncStatus) syncStatus.textContent = '同期済み';
+        syncTimer = null;
+      }, 3000);
+    });
+
+    // ログアウト
+    const signOutBtn = userPanel.querySelector<HTMLButtonElement>('[data-user-signout]');
+    signOutBtn?.addEventListener('click', async () => {
+      const w = window as any;
+      if (w.HirakuAuth) await w.HirakuAuth.signOut();
+    });
+
+    // ボタンが出ない場合の再読み込み (GIS スクリプトの後追い登録が必要なケース)
+    const retryBtn = userPanel.querySelector<HTMLButtonElement>('[data-user-retry]');
+    retryBtn?.addEventListener('click', () => {
+      const gid = (window as any).google?.accounts?.id;
+      if (gid && typeof gid.renderButton === 'function') {
+        const target = document.getElementById('g_id_signin');
+        if (target) {
+          target.innerHTML = '';
+          gid.renderButton(target, { type: 'standard', shape: 'rectangular', theme: 'outline', text: 'signin_with', size: 'large', locale: 'ja' });
+        }
+      }
+    });
+  }
 </script>

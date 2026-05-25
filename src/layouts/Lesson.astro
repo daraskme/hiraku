@@ -598,6 +598,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
         const next = toggle.getAttribute('aria-pressed') !== 'true';
         try { localStorage.setItem(STORAGE_KEY, next ? '1' : '0'); } catch (_) {}
         applyState(next);
+        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       });
     })();
   </script>
@@ -740,6 +741,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
       }
       function saveHistory(arr) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 40))); } catch (_) {}
+        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       }
       function addToHistory(word) {
         const w = word.toLowerCase();
@@ -936,6 +938,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
           }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         } catch (_) {}
+        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       }
 
       function deleteBookmark() {
