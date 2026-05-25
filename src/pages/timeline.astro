@@ -1,0 +1,543 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+// ─── コレクション設定 ───
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語',
+  kokugo4: '小4 国語',
+  kokugo6: '小6 国語',
+  chugaku1: '中1 国語',
+  chugaku2: '中2 国語',
+  chugaku3: '中3 国語',
+  kotoko1: '高1 国語',
+  kotoko2: '高2 国語',
+  kateika5: '小5 家庭科',
+  chugakurika1: '中1 理科',
+  chugakurekishi1: '中1 歴史',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
+  kotosekaishi1: '高1 世界史',
+};
+
+const collectionNames = Object.keys(COLLECTION_LABEL);
+
+// 教材を track（列）に振り分け
+type Track = 'jpLit' | 'jpHist' | 'worldHist' | 'science' | 'civic' | 'other';
+const TRACK_FOR_COLLECTION: Record<string, Track> = {
+  kokugo3: 'jpLit', kokugo4: 'jpLit', kokugo6: 'jpLit',
+  chugaku1: 'jpLit', chugaku2: 'jpLit', chugaku3: 'jpLit',
+  kotoko1: 'jpLit', kotoko2: 'jpLit',
+  chugakurekishi1: 'jpHist',
+  kotorekishi1: 'jpHist',
+  kotosekaishi1: 'worldHist',
+  chugakurika1: 'science',
+  sansu5: 'science',
+  chugakukomin3: 'civic',
+  kateika5: 'other',
+  kotokoeigo1: 'other',
+};
+
+const TRACK_LABEL: Record<Track, string> = {
+  jpLit: '日本文学',
+  jpHist: '日本史',
+  worldHist: '世界史',
+  science: '理科・算数',
+  civic: '公民・思想',
+  other: 'その他',
+};
+const TRACK_COLOR: Record<Track, string> = {
+  jpLit: '#c77a3e',
+  jpHist: '#3e7ec9',
+  worldHist: '#7a5ec9',
+  science: '#3eae8f',
+  civic: '#a8485c',
+  other: '#7a8a98',
+};
+
+// ─── 年代推定 ───
+interface YearGuess {
+  year: number; // 中央値
+  earliest?: number;
+  latest?: number;
+  precise: boolean; // original_year が明示されているか
+  note?: string; // 表示用補足（e.g. "8世紀"）
+}
+
+function estimateYear(data: any): YearGuess | null {
+  // 1) original_year を最優先
+  if (typeof data.original_year === 'number') {
+    return { year: data.original_year, precise: true };
+  }
+  const e = (data.era || '') as string;
+  if (!e) return null;
+
+  // 紀元前
+  const bc = e.match(/紀元前\s*(\d+)/);
+  if (bc) return { year: -Number(bc[1]), precise: false, note: e };
+
+  // 世紀（n世紀）
+  const sec = e.match(/(\d+)\s*世紀/);
+  if (sec) {
+    const c = Number(sec[1]);
+    return { year: (c - 1) * 100 + 50, precise: false, note: e };
+  }
+
+  // 元号
+  const eraMap: { match: RegExp; mid: number }[] = [
+    { match: /奈良時代/, mid: 750 },
+    { match: /飛鳥時代/, mid: 620 },
+    { match: /平安時代前期/, mid: 850 },
+    { match: /平安時代中期/, mid: 1000 },
+    { match: /平安時代後期/, mid: 1130 },
+    { match: /平安時代末期/, mid: 1170 },
+    { match: /平安時代/, mid: 1000 },
+    { match: /鎌倉時代初期/, mid: 1200 },
+    { match: /鎌倉時代/, mid: 1270 },
+    { match: /室町時代/, mid: 1450 },
+    { match: /南北朝時代/, mid: 1370 },
+    { match: /安土桃山時代/, mid: 1585 },
+    { match: /江戸時代初期/, mid: 1620 },
+    { match: /江戸時代前期/, mid: 1680 },
+    { match: /江戸時代中期/, mid: 1750 },
+    { match: /江戸時代後期/, mid: 1810 },
+    { match: /江戸時代/, mid: 1720 },
+    { match: /明治/, mid: 1890 },
+    { match: /大正/, mid: 1920 },
+    { match: /昭和初期/, mid: 1930 },
+    { match: /昭和/, mid: 1955 },
+    { match: /平成/, mid: 2000 },
+  ];
+  for (const m of eraMap) {
+    if (m.match.test(e)) return { year: m.mid, precise: false, note: e };
+  }
+  return null;
+}
+
+// ─── 教材の収集 ───
+interface PlacedLesson {
+  collection: string;
+  id: string;
+  title: string;
+  author: string;
+  year: YearGuess;
+  track: Track;
+  classical?: boolean;
+}
+const placed: PlacedLesson[] = [];
+for (const name of collectionNames) {
+  const lessons = await getCollection(name as any);
+  for (const lesson of lessons) {
+    const y = estimateYear(lesson.data);
+    if (!y) continue;
+    placed.push({
+      collection: name,
+      id: lesson.id,
+      title: lesson.data.title,
+      author: lesson.data.author,
+      year: y,
+      track: TRACK_FOR_COLLECTION[name] || 'other',
+      classical: lesson.data.classical,
+    });
+  }
+}
+placed.sort((a, b) => a.year.year - b.year.year);
+
+// ─── 時代バケット（行）───
+interface EraBucket {
+  id: string;
+  label: string;
+  caption?: string;
+  start: number;
+  end: number;
+}
+const eraBuckets: EraBucket[] = [
+  { id: 'kodai-bc', label: '古代（紀元前）', caption: '〜紀元元年', start: -600, end: 0 },
+  { id: 'kodai-rome', label: '古代ローマ・古墳時代', caption: '1〜600 年頃', start: 1, end: 600 },
+  { id: 'asuka-nara', label: '飛鳥・奈良', caption: '600〜794 年', start: 600, end: 794 },
+  { id: 'heian', label: '平安時代', caption: '794〜1185 年', start: 794, end: 1185 },
+  { id: 'kamakura', label: '鎌倉時代', caption: '1185〜1333 年', start: 1185, end: 1333 },
+  { id: 'muromachi', label: '室町・安土桃山時代', caption: '1333〜1603 年', start: 1333, end: 1603 },
+  { id: 'edo', label: '江戸時代', caption: '1603〜1868 年', start: 1603, end: 1868 },
+  { id: 'meiji', label: '明治', caption: '1868〜1912 年', start: 1868, end: 1912 },
+  { id: 'taisho', label: '大正', caption: '1912〜1926 年', start: 1912, end: 1926 },
+  { id: 'showa', label: '昭和', caption: '1926〜1989 年', start: 1926, end: 1989 },
+  { id: 'heisei-reiwa', label: '平成・令和', caption: '1989 年〜', start: 1989, end: 2100 },
+];
+
+// 教材を era にマッピング
+type LessonsByEraTrack = Record<string, Record<Track, PlacedLesson[]>>;
+const matrix: LessonsByEraTrack = {};
+for (const era of eraBuckets) {
+  matrix[era.id] = { jpLit: [], jpHist: [], worldHist: [], science: [], civic: [], other: [] };
+}
+for (const l of placed) {
+  const era = eraBuckets.find((e) => l.year.year >= e.start && l.year.year < e.end);
+  if (!era) continue;
+  matrix[era.id][l.track].push(l);
+}
+// 各 era × track 内で年代昇順に
+for (const era of eraBuckets) {
+  for (const track of Object.keys(matrix[era.id]) as Track[]) {
+    matrix[era.id][track].sort((a, b) => a.year.year - b.year.year);
+  }
+}
+
+// 表示する era（教材が 1 件以上ある era だけ）
+const activeEras = eraBuckets.filter((e) =>
+  Object.values(matrix[e.id]).some((arr) => arr.length > 0)
+);
+
+const tracks: Track[] = ['jpLit', 'jpHist', 'worldHist', 'science', 'civic', 'other'];
+
+// ─── 歴史的アンカー（主要な世界・日本史の出来事を timeline に並置）───
+interface Anchor {
+  year: number;
+  label: string;
+  region: '日本' | '世界';
+}
+const ANCHORS: Anchor[] = [
+  { year: -431, label: 'ペロポネソス戦争開戦', region: '世界' },
+  { year: -221, label: '秦の中国統一', region: '世界' },
+  { year: -27, label: 'ローマ帝国成立', region: '世界' },
+  { year: 538, label: '仏教伝来', region: '日本' },
+  { year: 645, label: '大化改新', region: '日本' },
+  { year: 710, label: '平城京遷都', region: '日本' },
+  { year: 794, label: '平安京遷都', region: '日本' },
+  { year: 1192, label: '鎌倉幕府成立', region: '日本' },
+  { year: 1215, label: 'マグナ・カルタ', region: '世界' },
+  { year: 1467, label: '応仁の乱', region: '日本' },
+  { year: 1492, label: 'コロンブス、アメリカ到達', region: '世界' },
+  { year: 1603, label: '江戸幕府成立', region: '日本' },
+  { year: 1789, label: 'フランス革命', region: '世界' },
+  { year: 1853, label: 'ペリー来航', region: '日本' },
+  { year: 1868, label: '明治維新', region: '日本' },
+  { year: 1889, label: '大日本帝国憲法', region: '日本' },
+  { year: 1914, label: '第一次世界大戦勃発', region: '世界' },
+  { year: 1945, label: '第二次世界大戦終結', region: '日本' },
+  { year: 1947, label: '日本国憲法施行', region: '日本' },
+];
+const anchorsByEra: Record<string, Anchor[]> = {};
+for (const a of ANCHORS) {
+  const era = eraBuckets.find((e) => a.year >= e.start && a.year < e.end);
+  if (!era) continue;
+  if (!anchorsByEra[era.id]) anchorsByEra[era.id] = [];
+  anchorsByEra[era.id].push(a);
+}
+
+const totalLessons = placed.length;
+---
+
+<Base
+  title="時代年表"
+  description="ひらく収載教材を時代順に並べたインタラクティブ年表。日本文学・日本史・世界史を並置して、文学と歴史の呼吸を一望できる。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>時代年表</h1>
+      <span class="section__subtitle">TIMELINE</span>
+    </div>
+    <p>
+      ひらく収載の <strong>{totalLessons}</strong> 教材を、書かれた時代順に並べました。
+      <strong>日本文学・日本史・世界史</strong> を横並びにすると、平家物語が
+      マグナ・カルタとほぼ同時代に書かれていたこと、芥川龍之介が第一次世界大戦下に
+      創作していたこと、など歴史の呼吸が見えてきます。
+    </p>
+
+    <div class="callout">
+      <strong>使い方：</strong> 列で時代の縦軸、行で教科ジャンルの横並び。気になる教材をクリックすると本文へ。
+      右上のフィルタでジャンルを絞り込めます。
+    </div>
+
+    <p class="cross-links no-print">
+      別の切り口で探す：
+      <a href="/library">教科・学年別ライブラリ</a> ・
+      <a href="/authors">著者一覧</a> ・
+      <a href="/eras">時代別アーカイブ</a> ・
+      <a href="/curriculum">学習指導要領索引</a>
+    </p>
+  </section>
+
+  <section class="section no-print" aria-label="トラックフィルタ">
+    <div class="timeline-filters">
+      <span class="timeline-filters__label">ジャンル表示：</span>
+      {tracks.map((t) => (
+        <label class="timeline-filter">
+          <input type="checkbox" data-track-toggle={t} checked />
+          <span class="timeline-filter__swatch" style={`background:${TRACK_COLOR[t]}`}></span>
+          {TRACK_LABEL[t]}
+        </label>
+      ))}
+    </div>
+  </section>
+
+  <section class="section section--timeline">
+    <div class="timeline-table" role="table" aria-label="時代別教材年表">
+      <div class="timeline-row timeline-row--head" role="row">
+        <div class="timeline-cell timeline-cell--era-head" role="columnheader">時代</div>
+        {tracks.map((t) => (
+          <div
+            class="timeline-cell timeline-cell--head"
+            role="columnheader"
+            data-track-col={t}
+            style={`--track-color:${TRACK_COLOR[t]}`}
+          >
+            <span class="timeline-track-label">{TRACK_LABEL[t]}</span>
+          </div>
+        ))}
+      </div>
+      {activeEras.map((era) => (
+        <div class="timeline-row" role="row">
+          <div class="timeline-cell timeline-cell--era" role="rowheader">
+            <div class="timeline-era-name">{era.label}</div>
+            {era.caption && <div class="timeline-era-caption">{era.caption}</div>}
+            {anchorsByEra[era.id] && anchorsByEra[era.id].length > 0 && (
+              <ul class="timeline-anchors">
+                {anchorsByEra[era.id].map((a) => (
+                  <li class={`timeline-anchor timeline-anchor--${a.region === '日本' ? 'jp' : 'world'}`}>
+                    <span class="timeline-anchor__year">{a.year < 0 ? `BC ${-a.year}` : a.year}</span>
+                    <span class="timeline-anchor__label">{a.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {tracks.map((t) => {
+            const lessons = matrix[era.id][t];
+            return (
+              <div
+                class="timeline-cell timeline-cell--lessons"
+                role="cell"
+                data-track-col={t}
+                style={`--track-color:${TRACK_COLOR[t]}`}
+              >
+                {lessons.length === 0 ? (
+                  <span class="timeline-cell__empty" aria-hidden="true">—</span>
+                ) : (
+                  <ul class="timeline-chips">
+                    {lessons.map((l) => {
+                      const displayYear = l.year.precise
+                        ? l.year.year < 0 ? `BC ${-l.year.year}` : `${l.year.year} 年`
+                        : (l.year.note || (l.year.year < 0 ? `BC ${-l.year.year}頃` : `${l.year.year} 年頃`));
+                      return (
+                        <li class="timeline-chip">
+                          <a href={`/library/${l.collection}/${l.id}`}>
+                            <span class="timeline-chip__year">{displayYear}</span>
+                            <span class="timeline-chip__title">{l.title}</span>
+                            <span class="timeline-chip__author">{l.author.split('（')[0]}</span>
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <script is:inline>
+    // トラック表示フィルタ
+    (function () {
+      const toggles = document.querySelectorAll('[data-track-toggle]');
+      toggles.forEach((cb) => {
+        cb.addEventListener('change', () => {
+          const track = cb.getAttribute('data-track-toggle');
+          const enabled = cb.checked;
+          document.querySelectorAll('[data-track-col="' + track + '"]').forEach((cell) => {
+            cell.classList.toggle('is-hidden', !enabled);
+          });
+        });
+      });
+    })();
+  </script>
+
+  <style>
+    .section--timeline { overflow-x: auto; padding-bottom: 1rem; }
+
+    .timeline-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      align-items: center;
+      padding: 0.6rem 0.8rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+    }
+    .timeline-filters__label {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+    .timeline-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .timeline-filter input { margin: 0; cursor: pointer; }
+    .timeline-filter__swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .timeline-table {
+      display: grid;
+      grid-template-columns: 180px repeat(6, minmax(180px, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--border);
+      min-width: 1200px;
+    }
+    .timeline-row {
+      display: contents;
+    }
+    .timeline-row:not(.timeline-row--head) > .timeline-cell {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0.7rem;
+      min-height: 100px;
+    }
+    .timeline-cell--head {
+      padding: 0.6rem 0.7rem;
+      background: var(--bg-soft);
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-bottom: 2px solid var(--border);
+      border-left: 4px solid var(--track-color, var(--border));
+    }
+    .timeline-cell--era-head {
+      padding: 0.6rem 0.7rem;
+      background: var(--bg-soft);
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .timeline-cell--era {
+      background: var(--bg-soft);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    .timeline-cell--lessons {
+      border-left: 4px solid color-mix(in srgb, var(--track-color) 35%, transparent);
+    }
+    .timeline-cell.is-hidden { display: none; }
+
+    .timeline-track-label { color: var(--track-color, var(--text)); }
+
+    .timeline-era-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .timeline-era-caption {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-anchors {
+      list-style: none;
+      padding: 0;
+      margin: 0.6rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .timeline-anchor {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      display: flex;
+      gap: 0.3rem;
+      align-items: baseline;
+    }
+    .timeline-anchor__year {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      padding: 0.05rem 0.3rem;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .timeline-anchor--jp .timeline-anchor__year {
+      background: color-mix(in srgb, #3e7ec9 18%, transparent);
+      color: #3e7ec9;
+    }
+    .timeline-anchor--world .timeline-anchor__year {
+      background: color-mix(in srgb, #7a5ec9 18%, transparent);
+      color: #7a5ec9;
+    }
+
+    .timeline-cell__empty {
+      color: var(--text-soft);
+      opacity: 0.4;
+      font-size: 1.2rem;
+    }
+    .timeline-chips {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .timeline-chip a {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      padding: 0.5rem 0.6rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--track-color);
+      border-radius: 6px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .timeline-chip a:hover {
+      background: var(--bg-elevated);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .timeline-chip__year {
+      font-size: 0.72rem;
+      color: var(--track-color);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .timeline-chip__title {
+      font-size: 0.86rem;
+      color: var(--accent);
+      line-height: 1.35;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+    .timeline-chip__author {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    @media (max-width: 800px) {
+      .timeline-table { min-width: 900px; }
+    }
+    :root[data-theme="dark"] .timeline-anchor--jp .timeline-anchor__year {
+      background: color-mix(in srgb, #7aaedb 22%, transparent);
+      color: #7aaedb;
+    }
+    :root[data-theme="dark"] .timeline-anchor--world .timeline-anchor__year {
+      background: color-mix(in srgb, #ad94db 22%, transparent);
+      color: #ad94db;
+    }
+  </style>
+</Base>
