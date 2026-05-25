@@ -97,6 +97,19 @@ for (const name of collectionNames) {
 
   <section class="section">
     <div class="section__heading">
+      <h2>獲得バッジ</h2>
+      <span class="section__subtitle">BADGES</span>
+    </div>
+    <div data-progress-badges>
+      <div class="empty-state">
+        <h3>まだバッジがありません</h3>
+        <p>教材を読了したり、クイズを全問正解したり、お気に入りに追加すると獲得できます。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
       <h2>お気に入り教材</h2>
       <span class="section__subtitle">STARRED</span>
     </div>
@@ -292,6 +305,54 @@ for (const name of collectionNames) {
               <span style="color: #b85c4a">もう一度 ${fcAgain}</span>
             </div>
           </div>`;
+      }
+
+      // 獲得バッジ ───────────────
+      const badgesEl = document.querySelector('[data-progress-badges]');
+      const BADGE_ICONS = {
+        'reader-done': '◐',
+        'quiz-clear': '✓',
+        'quiz-tried': '?',
+        'flashcards-mastered': '▣',
+        'starred': '★',
+        'notes-written': '✎',
+      };
+      const BADGE_LABELS = (window.HirakuBadges && window.HirakuBadges.LABELS) || {
+        'reader-done': '読了',
+        'quiz-clear': 'クイズ全問正解',
+        'quiz-tried': 'クイズ挑戦',
+        'flashcards-mastered': '単語完全制覇',
+        'starred': 'お気に入り',
+        'notes-written': 'メモを書いた',
+      };
+      let badgesData = {};
+      try { badgesData = JSON.parse(localStorage.getItem('hiraku.badges.v1') || '{}') || {}; } catch (_) {}
+      const badgeItems = Object.values(badgesData)
+        .filter((x) => x && x.title && Array.isArray(x.types))
+        .sort((a, b) => (b.earnedAt || 0) - (a.earnedAt || 0));
+      if (badgeItems.length === 0) {
+        badgesEl.innerHTML = `<div class="empty-state"><h3>まだバッジがありません</h3><p>教材を読了したり、クイズを全問正解したり、お気に入りに追加すると獲得できます。</p></div>`;
+      } else {
+        const html = badgeItems.map((b) => {
+          const types = b.types.map((t) => {
+            const lbl = BADGE_LABELS[t] || t;
+            return `<span class="badges-list__type">${escapeHtml(lbl)}</span>`;
+          }).join('');
+          const path = '/library/' + b.collection + '/' + b.id;
+          const icon = BADGE_ICONS[b.lastEarnedType] || '✦';
+          return `<li class="badges-list__item">
+            <span class="badges-list__icon" aria-hidden="true">${icon}</span>
+            <div class="badges-list__body">
+              <a href="${escapeHtml(path)}" class="badges-list__title">${escapeHtml(b.title)}</a>
+              <div class="badges-list__types">${types}</div>
+            </div>
+          </li>`;
+        }).join('');
+        badgesEl.innerHTML = `<ul class="badges-list">${html}</ul>
+          <p style="font-size:0.82rem;color:var(--text-soft);margin-top:0.8rem;">
+            合計 ${badgeItems.length} 教材で
+            ${badgeItems.reduce((acc, b) => acc + (b.types ? b.types.length : 0), 0)} バッジ獲得
+          </p>`;
       }
 
       // お気に入り教材 ───────────────

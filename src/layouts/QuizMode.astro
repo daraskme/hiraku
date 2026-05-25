@@ -328,7 +328,7 @@ const questions = d.questions || [];
       )}
     </div>
 
-    <script is:inline define:vars={{ quizStorageKey, lessonUrl, questionCount: questions.length }}>
+    <script is:inline define:vars={{ quizStorageKey, lessonUrl, questionCount: questions.length, badgeCollection: collection, badgeId: lesson.id, badgeTitle: d.title }}>
       (function () {
         if (questionCount === 0) return;
         const steps = Array.from(document.querySelectorAll('[data-quiz-step]'));
@@ -417,6 +417,18 @@ const questions = d.questions || [];
             else if (e.r === 'no') counts.no++;
             else counts.none++;
             if (e.a && e.a.trim()) counts.answered++;
+          }
+
+          // ─── バッジ判定 ───
+          if (window.HirakuBadges) {
+            // 1 問でも回答すれば "quiz-tried"
+            if (counts.answered > 0) {
+              window.HirakuBadges.award(badgeCollection, badgeId, 'quiz-tried', badgeTitle);
+            }
+            // 全問「○ わかった」評価で "quiz-clear"
+            if (questionCount > 0 && counts.ok === questionCount) {
+              window.HirakuBadges.award(badgeCollection, badgeId, 'quiz-clear', badgeTitle);
+            }
           }
           summary.innerHTML = `
             <div class="quiz-final__card"><div class="quiz-final__card-num">${counts.answered}</div><div class="quiz-final__card-label">回答した</div></div>

@@ -301,7 +301,7 @@ const glossary = d.glossary || [];
       )}
     </div>
 
-    <script is:inline define:vars={{ storageKey, glossary }}>
+    <script is:inline define:vars={{ storageKey, glossary, badgeCollection: collection, badgeId: lesson.id, badgeTitle: d.title }}>
       (function () {
         if (!glossary || glossary.length === 0) return;
 
@@ -387,6 +387,10 @@ const glossary = d.glossary || [];
           document.querySelector('[data-fc-stat-total]').textContent = glossary.length;
           replayBtn.disabled = again === 0;
           replayBtn.style.opacity = again === 0 ? 0.4 : 1;
+          // 全カード「覚えた」評価でバッジ獲得
+          if (glossary.length > 0 && known === glossary.length && window.HirakuBadges) {
+            window.HirakuBadges.award(badgeCollection, badgeId, 'flashcards-mastered', badgeTitle);
+          }
         }
 
         function flip() {

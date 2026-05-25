@@ -1300,6 +1300,111 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
 .word-history-panel__clear:hover { background: var(--bg-elevated); }
 
 /* ============================================================
+   バッジトースト
+   ============================================================ */
+.badge-toast {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(120deg, #c97a3e, #a8485c);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  max-width: 320px;
+}
+.badge-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.badge-toast__icon {
+  font-size: 2rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+}
+.badge-toast__body { flex: 1; min-width: 0; }
+.badge-toast__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.badge-toast__name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0.05rem 0;
+}
+.badge-toast__lesson {
+  font-size: 0.78rem;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 600px) {
+  .badge-toast { left: 0.8rem; right: 0.8rem; bottom: 5rem; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .badge-toast { transition: opacity 0.2s; transform: none; }
+  .badge-toast.is-visible { transform: none; }
+}
+
+/* バッジカード (進捗 / プロフィールページ用) */
+.badges-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.6rem;
+}
+.badges-list__item {
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--accent);
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+}
+.badges-list__icon {
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+.badges-list__body { min-width: 0; flex: 1; }
+.badges-list__title {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.badges-list__types {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin-top: 0.2rem;
+}
+.badges-list__type {
+  padding: 0.1rem 0.4rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+/* ============================================================
    学習パス内の前後ナビゲーション (Lesson 末尾)
    ============================================================ */
 .path-nav-section {

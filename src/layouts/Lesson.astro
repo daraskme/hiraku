@@ -1066,6 +1066,9 @@ const guidelineDoc = d.school_stage === 'kotoko'
         const progress = Math.min(1, scrollY / docH);
         // 読了 or ヘッダーのみは削除
         if (progress >= COMPLETE_RATIO || scrollY < SAVE_THRESHOLD) {
+          if (progress >= COMPLETE_RATIO && window.HirakuBadges) {
+            window.HirakuBadges.award(collection, id, 'reader-done', title);
+          }
           deleteBookmark();
           return;
         }
@@ -1190,6 +1193,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
             path: '/library/' + collection + '/' + id,
             ts: Date.now(),
           };
+          if (window.HirakuBadges) window.HirakuBadges.award(collection, id, 'starred', title);
         }
         save(data);
         applyState();
@@ -1263,6 +1267,10 @@ const guidelineDoc = d.school_stage === 'kotoko'
           });
           if (!resp.ok) throw new Error('HTTP ' + resp.status);
           if (status) status.textContent = '保存しました ' + new Date().toLocaleTimeString('ja-JP');
+          // 20 文字以上書いたらバッジ
+          if ((editor.value || '').trim().length >= 20 && window.HirakuBadges) {
+            window.HirakuBadges.award(collection, id, 'notes-written', title);
+          }
         } catch (_) {
           if (status) status.textContent = '保存に失敗 (オフライン?) — 後で自動再試行';
         }
