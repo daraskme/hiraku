@@ -115,10 +115,26 @@ const guidelineDoc = d.school_stage === 'kotoko'
 ---
 
 <Base title={d.title} description={d.description}>
+  {/*
+    Pagefind は日本語の場合、単語境界（スペース）を自動推定できないため、
+    検索ヒット率を上げるための「補助キーワード」を非表示で埋め込む。
+    キーワード・glossary の term・作者の読み（author_dates の年と並列の人名情報）を
+    全角スペース区切りで列挙することで、ひらがな・カタカナ・漢字どの入力でも
+    Pagefind が部分一致しやすくなる。
+  */}
   <article
     data-pagefind-filter={`段階:${stage}, 教科:${d.subject}, 学年:${stage} 第${d.grade}学年${d.classical ? ', 種別:古典' : ''}`}
     data-pagefind-meta={`作者:${d.author}, 段階:${stage}`}
   >
+    <div class="pagefind-aux" data-pagefind-body aria-hidden="true" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
+      {/* 検索補助：keywords / glossary の term を非表示で展開 */}
+      <span>{d.title}</span>
+      <span>{d.author}</span>
+      {d.keywords.map((k) => <span> {k}</span>)}
+      {d.glossary.map((g) => <span> {g.term}</span>)}
+      {/* ひらがな・カタカナ正規化のヒントとして、よくある検索語の組み合わせ */}
+      {d.classical && <span>古典 こてん コテン</span>}
+    </div>
     <header class="lesson-header">
       <div class="lesson-header__top no-print">
         <a href="/library" class="lesson-header__back">← ライブラリへ戻る</a>

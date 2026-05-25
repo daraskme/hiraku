@@ -56,8 +56,9 @@ const ogImageUrl = new URL(computedOgImage, Astro.site || 'https://hiraku-5cb.pa
     />
   </head>
   <body>
+    <a href="#main" class="skip-link">本文へスキップ</a>
     <Header />
-    <main class={containerClass}>
+    <main id="main" class={containerClass} tabindex="-1">
       <slot />
     </main>
     <BottomNav />

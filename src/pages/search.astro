@@ -10,6 +10,17 @@ import Base from '../layouts/Base.astro';
     </div>
     <p>教材タイトル・作者・本文・語句・発問のすべてから検索できます。</p>
 
+    <details class="search-tips no-print">
+      <summary>検索のコツ</summary>
+      <ul>
+        <li><strong>作者名で探す</strong>：「宮沢賢治」「太宰治」など、漢字でも一部でも可。</li>
+        <li><strong>キーワードで探す</strong>：「狐」「冬」「友情」「無常」のような一語が広く効きます。</li>
+        <li><strong>古典・現代を絞る</strong>：「古典」と入れると、古文教材に絞れます。</li>
+        <li>「絞り込み」のチェックボックスで <strong>段階・教科・学年</strong> から限定できます。</li>
+        <li>日本語の単語境界は自動推定が苦手な場合があります。<strong>短めの語</strong>で試してみてください。</li>
+      </ul>
+    </details>
+
     <div id="search" class="pagefind-search"></div>
   </section>
 
@@ -66,5 +77,26 @@ import Base from '../layouts/Base.astro';
     .pagefind-ui__result-link {
       color: var(--accent) !important;
     }
+    .search-tips {
+      margin: 1rem 0 1.5rem;
+      padding: 0.7rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .search-tips summary {
+      cursor: pointer;
+      font-family: var(--font-sans);
+      color: var(--text-soft);
+      font-size: 0.85rem;
+    }
+    .search-tips summary:hover { color: var(--accent); }
+    .search-tips ul {
+      margin: 0.7rem 0 0.3rem 1.4rem;
+      padding: 0;
+      line-height: 1.7;
+    }
+    .search-tips strong { color: var(--accent); }
   </style>
 </Base>

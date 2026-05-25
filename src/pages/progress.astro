@@ -1,5 +1,31 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+// Build-time: collection ごとの教材数と全体総数を計算してクライアントに渡す
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語',
+  kokugo4: '小4 国語',
+  kokugo6: '小6 国語',
+  chugaku1: '中1 国語',
+  chugaku2: '中2 国語',
+  chugaku3: '中3 国語',
+  kotoko1: '高1 国語',
+  kotoko2: '高2 国語',
+  kateika5: '小5 家庭科',
+  chugakurika1: '中1 理科',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+};
+const collectionNames = Object.keys(COLLECTION_LABEL);
+const collectionStats: Record<string, { label: string; total: number }> = {};
+let totalLessons = 0;
+for (const name of collectionNames) {
+  const lessons = await getCollection(name as any);
+  collectionStats[name] = { label: COLLECTION_LABEL[name], total: lessons.length };
+  totalLessons += lessons.length;
+}
 ---
 
 <Base title="進捗" description="学習進捗ダッシュボード">
@@ -17,6 +43,7 @@ import Base from '../layouts/Base.astro';
       <div class="kpi-card">
         <div class="kpi-card__label">読了教材</div>
         <div class="kpi-card__value" data-progress-total>—</div>
+        <div class="kpi-card__sub" data-progress-total-pct>—</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-card__label">連続日数</div>
@@ -35,6 +62,36 @@ import Base from '../layouts/Base.astro';
 
   <section class="section">
     <div class="section__heading">
+      <h2>過去14日の学習</h2>
+      <span class="section__subtitle">DAILY</span>
+    </div>
+    <div class="weekchart" data-progress-weekchart>
+      <div class="empty-state"><h3>準備中</h3></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>教科別の到達</h2>
+      <span class="section__subtitle">BY COLLECTION</span>
+    </div>
+    <div data-progress-bysubject>
+      <div class="empty-state"><h3>準備中</h3></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>クイズ・単語カードの進捗</h2>
+      <span class="section__subtitle">PRACTICE</span>
+    </div>
+    <div class="practice-grid" data-progress-practice>
+      <div class="empty-state"><h3>準備中</h3></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
       <h2>最近読んだ教材</h2>
       <span class="section__subtitle">RECENT</span>
     </div>
@@ -48,18 +105,6 @@ import Base from '../layouts/Base.astro';
 
   <section class="section">
     <div class="section__heading">
-      <h2>教科別の到達</h2>
-      <span class="section__subtitle">BY SUBJECT</span>
-    </div>
-    <div data-progress-bysubject>
-      <div class="empty-state">
-        <h3>準備中</h3>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section__heading">
       <h2>データの管理</h2>
       <span class="section__subtitle">DATA</span>
     </div>
@@ -67,7 +112,7 @@ import Base from '../layouts/Base.astro';
     <button type="button" class="btn btn--ghost" data-progress-reset>進捗データをリセット</button>
   </section>
 
-  <script is:inline>
+  <script is:inline define:vars={{ collectionStats, totalLessons }}>
     function fmtMinutes(min) {
       if (min < 60) return `${min}分`;
       const h = Math.floor(min / 60);
@@ -87,76 +132,180 @@ import Base from '../layouts/Base.astro';
       if (diff < 7) return `${diff}日前`;
       return d.toLocaleDateString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' });
     }
-    const collectionLabel = {
-      kokugo3: '小3 国語',
-      kokugo4: '小4 国語',
-      kokugo6: '小6 国語',
-      chugaku1: '中1 国語',
-      chugaku2: '中2 国語',
-      chugaku3: '中3 国語',
-      kotoko1: '高1 国語',
-      kotoko2: '高2 国語',
-      kateika5: '小5 家庭科',
-      chugakurika1: '中1 理科',
-      kotokoeigo1: '高1 英語',
-      sansu5: '小5 算数',
-      chugakukomin3: '中3 公民',
-    };
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function loadAllKeys(prefix) {
+      // Returns Array<[key, parsedJsonValue]>
+      const out = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(prefix)) {
+          try { out.push([k, JSON.parse(localStorage.getItem(k))]); } catch (_) {}
+        }
+      }
+      return out;
+    }
 
     function render() {
       const p = window.HirakuProgress;
-      if (!p) {
-        setTimeout(render, 100);
-        return;
-      }
+      if (!p) { setTimeout(render, 100); return; }
       const s = p.summary();
 
-      // KPI
+      // KPI ────────────────────────────────
       document.querySelector('[data-progress-total]').textContent = `${s.totalRead}`;
+      document.querySelector('[data-progress-total-pct]').textContent =
+        `／全 ${totalLessons} 本（${Math.round((s.totalRead / totalLessons) * 100)}%）`;
       document.querySelector('[data-progress-streak]').textContent = `${s.streak}日`;
       document.querySelector('[data-progress-week]').textContent = fmtMinutes(s.weekMinutes);
       const last = s.recent[0];
       document.querySelector('[data-progress-last]').textContent = last ? fmtDate(last.lastRead) : '—';
 
-      // Recent
+      // 過去14日の棒グラフ ─────────────────
+      const wcEl = document.querySelector('[data-progress-weekchart]');
+      const days = [];
+      let maxSec = 0;
+      for (let i = 13; i >= 0; i--) {
+        const dt = new Date(Date.now() - i * 86400000);
+        const k = dt.toISOString().slice(0, 10);
+        const sec = (s.activity[k] && s.activity[k].secondsActive) || 0;
+        const lessons = (s.activity[k] && s.activity[k].lessonsRead) || 0;
+        if (sec > maxSec) maxSec = sec;
+        days.push({ date: dt, key: k, sec, lessons });
+      }
+      if (days.every((d) => d.sec === 0 && d.lessons === 0)) {
+        wcEl.innerHTML = '<div class="empty-state"><h3>まだ学習記録がありません</h3><p>教材を開くと、ここに毎日の活動が積み上がっていきます。</p></div>';
+      } else {
+        const bars = days.map((d) => {
+          const ratio = maxSec > 0 ? d.sec / maxSec : 0;
+          const heightPct = Math.max(d.sec > 0 ? 4 : 0, Math.round(ratio * 100));
+          const dayLabel = `${d.date.getMonth() + 1}/${d.date.getDate()}`;
+          const dow = ['日','月','火','水','木','金','土'][d.date.getDay()];
+          const tooltip = d.sec === 0
+            ? `${d.key}（${dow}）: 記録なし`
+            : `${d.key}（${dow}）: ${fmtMinutes(Math.round(d.sec / 60))}、${d.lessons}本`;
+          const isToday = d.date.toDateString() === new Date().toDateString();
+          return `
+            <div class="weekchart__bar" title="${tooltip}">
+              <div class="weekchart__bar-track">
+                <div class="weekchart__bar-fill${isToday ? ' is-today' : ''}" style="height: ${heightPct}%"></div>
+              </div>
+              <div class="weekchart__bar-label">${dayLabel}</div>
+              <div class="weekchart__bar-dow ${d.date.getDay() === 0 ? 'is-sun' : d.date.getDay() === 6 ? 'is-sat' : ''}">${dow}</div>
+            </div>`;
+        }).join('');
+        const totalSec = days.reduce((acc, x) => acc + x.sec, 0);
+        wcEl.innerHTML = `
+          <p class="weekchart__caption">合計 ${fmtMinutes(Math.round(totalSec / 60))}・読了 ${days.reduce((acc, x) => acc + x.lessons, 0)}本</p>
+          <div class="weekchart__bars">${bars}</div>
+        `;
+      }
+
+      // 教科別到達 ─────────────────────
+      const subEl = document.querySelector('[data-progress-bysubject]');
+      const readBySubject = s.bySubject;
+      const rows = Object.entries(collectionStats).map(([key, info]) => {
+        const read = readBySubject[key] || 0;
+        const pct = info.total > 0 ? Math.round((read / info.total) * 100) : 0;
+        return `
+          <div class="collection-progress">
+            <div class="collection-progress__head">
+              <span class="collection-progress__label">${escapeHtml(info.label)}</span>
+              <span class="collection-progress__count">${read} / ${info.total}</span>
+            </div>
+            <div class="collection-progress__bar">
+              <div class="collection-progress__fill" style="width: ${pct}%"></div>
+            </div>
+          </div>`;
+      }).join('');
+      subEl.innerHTML = `<div class="collection-progress-list">${rows}</div>`;
+
+      // クイズ・単語カード ────────────
+      const practiceEl = document.querySelector('[data-progress-practice]');
+      const quizes = loadAllKeys('hiraku.quiz.v1.');
+      const flashcards = loadAllKeys('hiraku.flashcards.v1.');
+
+      let quizAnsweredTotal = 0, quizLessonsTouched = 0;
+      let quizRateOk = 0, quizRateMeh = 0, quizRateNo = 0;
+      quizes.forEach(([_, val]) => {
+        if (!val || typeof val !== 'object') return;
+        quizLessonsTouched++;
+        Object.values(val).forEach((entry) => {
+          if (!entry) return;
+          if (entry.a && entry.a.trim()) quizAnsweredTotal++;
+          if (entry.r === 'ok') quizRateOk++;
+          else if (entry.r === 'meh') quizRateMeh++;
+          else if (entry.r === 'no') quizRateNo++;
+        });
+      });
+
+      let fcKnown = 0, fcAgain = 0, fcLessonsTouched = 0;
+      flashcards.forEach(([_, val]) => {
+        if (!val || typeof val !== 'object') return;
+        fcLessonsTouched++;
+        Object.values(val).forEach((mark) => {
+          if (mark === 'known') fcKnown++;
+          else if (mark === 'again') fcAgain++;
+        });
+      });
+
+      if (quizes.length === 0 && flashcards.length === 0) {
+        practiceEl.innerHTML = '<div class="empty-state"><h3>まだ練習データがありません</h3><p>教材の「? クイズで考える」や「▣ 単語カード」を開くと、ここに進捗が出ます。</p></div>';
+      } else {
+        practiceEl.innerHTML = `
+          <div class="practice-card">
+            <div class="practice-card__title">? クイズ</div>
+            <div class="practice-card__main">${quizLessonsTouched} 教材で挑戦中</div>
+            <div class="practice-card__stats">
+              <span>${quizAnsweredTotal} 件の回答</span>
+              <span style="color: #5b8c5a">○ ${quizRateOk}</span>
+              <span style="color: #b89a4f">△ ${quizRateMeh}</span>
+              <span style="color: #b85c4a">✗ ${quizRateNo}</span>
+            </div>
+          </div>
+          <div class="practice-card">
+            <div class="practice-card__title">▣ 単語カード</div>
+            <div class="practice-card__main">${fcLessonsTouched} 教材で挑戦中</div>
+            <div class="practice-card__stats">
+              <span style="color: #5b8c5a">覚えた ${fcKnown}</span>
+              <span style="color: #b85c4a">もう一度 ${fcAgain}</span>
+            </div>
+          </div>`;
+      }
+
+      // 最近読んだ教材 ───────────────
       const recentEl = document.querySelector('[data-progress-recent]');
       if (s.recent.length === 0) {
         recentEl.innerHTML = `<div class="empty-state"><h3>まだデータがありません</h3><p>教材を開くと、ここに表示されます。</p></div>`;
       } else {
         const html = s.recent.map(r => {
-          const label = collectionLabel[r.key.split(':')[0]] || r.key.split(':')[0];
+          const label = collectionStats[r.key.split(':')[0]]?.label || r.key.split(':')[0];
           const href = `/library/${r.key.split(':')[0]}/${r.key.split(':')[1]}`;
           return `<article class="lesson-card">
             <a href="${href}" class="lesson-card__link">
-              <p class="lesson-card__meta">${label} ・ ${fmtDate(r.lastRead)}</p>
-              <h3 class="lesson-card__title">${r.title || r.key.split(':')[1]}</h3>
+              <p class="lesson-card__meta">${escapeHtml(label)} ・ ${fmtDate(r.lastRead)}</p>
+              <h3 class="lesson-card__title">${escapeHtml(r.title || r.key.split(':')[1])}</h3>
               <p class="lesson-card__desc">読了回数：${r.readCount}回</p>
             </a>
           </article>`;
         }).join('');
         recentEl.innerHTML = `<div class="lesson-grid">${html}</div>`;
       }
-
-      // By subject
-      const subEl = document.querySelector('[data-progress-bysubject]');
-      const subjects = Object.entries(s.bySubject);
-      if (subjects.length === 0) {
-        subEl.innerHTML = `<div class="empty-state"><h3>準備中</h3></div>`;
-      } else {
-        const html = subjects.map(([key, count]) => {
-          const label = collectionLabel[key] || key;
-          return `<div class="kpi-card">
-            <div class="kpi-card__label">${label}</div>
-            <div class="kpi-card__value">${count}本</div>
-          </div>`;
-        }).join('');
-        subEl.innerHTML = `<div class="kpi-grid">${html}</div>`;
-      }
     }
 
     document.querySelector('[data-progress-reset]').addEventListener('click', () => {
-      if (confirm('進捗データをすべてリセットします。よろしいですか？')) {
+      if (confirm('進捗データ・クイズ回答・単語カード記録をすべてリセットします。よろしいですか？')) {
         window.HirakuProgress.reset();
+        // also clear quiz / flashcard keys
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('hiraku.quiz.v1.') || k.startsWith('hiraku.flashcards.v1.'))) toRemove.push(k);
+        }
+        toRemove.forEach((k) => localStorage.removeItem(k));
         render();
       }
     });
