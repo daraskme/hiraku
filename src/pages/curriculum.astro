@@ -1,0 +1,255 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語',
+  kokugo4: '小4 国語',
+  kokugo6: '小6 国語',
+  chugaku1: '中1 国語',
+  chugaku2: '中2 国語',
+  chugaku3: '中3 国語',
+  kotoko1: '高1 国語',
+  kotoko2: '高2 国語',
+  kateika5: '小5 家庭科',
+  chugakurika1: '中1 理科',
+  chugakurekishi1: '中1 歴史',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
+};
+
+const collectionNames = Object.keys(COLLECTION_LABEL);
+
+interface LessonRef {
+  collection: string;
+  id: string;
+  title: string;
+  data: any;
+}
+
+// 全教材を集約し、curriculum_items から逆引き索引を作る
+const allLessons: LessonRef[] = [];
+for (const name of collectionNames) {
+  const lessons = await getCollection(name as any);
+  for (const lesson of lessons) {
+    allLessons.push({ collection: name, id: lesson.id, title: lesson.data.title, data: lesson.data });
+  }
+}
+
+// 学校段階 → 教科 → 指導要領コード → 教材リスト の階層構造
+interface CurriculumEntry {
+  code: string;
+  label: string;
+  lessons: LessonRef[];
+}
+interface SubjectGroup {
+  subject: string;
+  entries: Map<string, CurriculumEntry>;
+}
+interface StageGroup {
+  stage: string;
+  subjects: Map<string, SubjectGroup>;
+}
+
+const STAGE_FOR_COLLECTION: Record<string, string> = {
+  kokugo3: '小学校', kokugo4: '小学校', kokugo6: '小学校',
+  kateika5: '小学校', sansu5: '小学校',
+  chugaku1: '中学校', chugaku2: '中学校', chugaku3: '中学校',
+  chugakurika1: '中学校', chugakurekishi1: '中学校', chugakukomin3: '中学校',
+  kotoko1: '高等学校', kotoko2: '高等学校',
+  kotokoeigo1: '高等学校', kotorekishi1: '高等学校',
+};
+const SUBJECT_FOR_COLLECTION: Record<string, string> = {
+  kokugo3: '国語', kokugo4: '国語', kokugo6: '国語',
+  chugaku1: '国語', chugaku2: '国語', chugaku3: '国語',
+  kotoko1: '国語', kotoko2: '国語',
+  kateika5: '家庭科',
+  chugakurika1: '理科',
+  chugakurekishi1: '社会（歴史）',
+  kotokoeigo1: '英語',
+  sansu5: '算数',
+  chugakukomin3: '社会（公民）',
+  kotorekishi1: '地理歴史（日本史）',
+};
+
+const stageMap: Map<string, StageGroup> = new Map();
+const stageOrder = ['小学校', '中学校', '高等学校'];
+
+for (const lesson of allLessons) {
+  const items = lesson.data.curriculum_items || [];
+  if (items.length === 0) continue;
+  const stage = STAGE_FOR_COLLECTION[lesson.collection] || 'その他';
+  const subject = SUBJECT_FOR_COLLECTION[lesson.collection] || lesson.data.subject || 'その他';
+
+  if (!stageMap.has(stage)) stageMap.set(stage, { stage, subjects: new Map() });
+  const stageGroup = stageMap.get(stage)!;
+
+  if (!stageGroup.subjects.has(subject)) stageGroup.subjects.set(subject, { subject, entries: new Map() });
+  const subjectGroup = stageGroup.subjects.get(subject)!;
+
+  for (const item of items) {
+    const key = item.code + ' ' + item.label;
+    if (!subjectGroup.entries.has(key)) {
+      subjectGroup.entries.set(key, { code: item.code, label: item.label, lessons: [] });
+    }
+    subjectGroup.entries.get(key)!.lessons.push(lesson);
+  }
+}
+
+// 各 stage を順序付け
+const orderedStages = stageOrder.filter((s) => stageMap.has(s));
+
+const totalEntries = Array.from(stageMap.values()).reduce((sum, sg) => {
+  return sum + Array.from(sg.subjects.values()).reduce((s2, sub) => s2 + sub.entries.size, 0);
+}, 0);
+
+const totalLessonsWithCurriculum = allLessons.filter((l) => (l.data.curriculum_items || []).length > 0).length;
+---
+
+<Base title="学習指導要領インデックス" description="現行学習指導要領（平成29年告示）の単元コードから、ひらく収載の教材を逆引きで探せるページ。教師の授業設計の入口として。" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>学習指導要領インデックス</h1>
+      <span class="section__subtitle">CURRICULUM INDEX</span>
+    </div>
+    <p>
+      現行学習指導要領（平成29年告示／2018〜実施）の単元コードと、対応する「ひらく」収載の教材を、
+      学校段階・教科ごとに整理しました。授業設計の入口として、または家庭での自学の道しるべとして
+      ご活用ください。<br>
+      現在 <strong>{totalEntries}</strong> の単元コードに、 <strong>{totalLessonsWithCurriculum}</strong> 教材が紐づいています。
+    </p>
+
+    <div class="callout">
+      <strong>使い方：</strong> 各単元コードの右側に、対応する教材タイトルが並んでいます。クリックすると教材本文へ。
+      授業の進度に合わせて、「この単元の補助教材として何が使えるか」を一望できます。
+    </div>
+
+    <p class="cross-links no-print">
+      別の切り口で探す：
+      <a href="/library">教科・学年別ライブラリ</a> ・
+      <a href="/authors">著者一覧</a> ・
+      <a href="/eras">時代別</a> ・
+      <a href="/search">本文検索</a>
+    </p>
+  </section>
+
+  {orderedStages.map((stageName) => {
+    const stageGroup = stageMap.get(stageName)!;
+    const subjects = Array.from(stageGroup.subjects.values());
+    return (
+      <section class="section">
+        <div class="section__heading">
+          <h2>{stageName}</h2>
+        </div>
+        {subjects.map((sub) => {
+          const entries = Array.from(sub.entries.values()).sort((a, b) => a.code.localeCompare(b.code));
+          return (
+            <div class="curriculum-subject">
+              <h3>{sub.subject}</h3>
+              <ul class="curriculum-list">
+                {entries.map((entry) => (
+                  <li class="curriculum-item">
+                    <div class="curriculum-item__head">
+                      <code class="curriculum-item__code">{entry.code}</code>
+                      <span class="curriculum-item__label">{entry.label}</span>
+                    </div>
+                    <ul class="curriculum-item__lessons">
+                      {entry.lessons.map((l) => (
+                        <li>
+                          <a href={`/library/${l.collection}/${l.id}`}>
+                            <span class="curriculum-item__lesson-collection">{COLLECTION_LABEL[l.collection]}</span>
+                            <span class="curriculum-item__lesson-title">{l.title}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </section>
+    );
+  })}
+
+  <style>
+    .curriculum-subject { margin: 1.5rem 0 2.5rem; }
+    .curriculum-subject h3 {
+      font-size: 1.15rem;
+      color: var(--text-soft);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+      margin-bottom: 1rem;
+    }
+    .curriculum-list { list-style: none; padding: 0; margin: 0; }
+    .curriculum-item {
+      margin: 0 0 1.2rem;
+      padding: 0.8rem 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .curriculum-item__head {
+      display: flex;
+      gap: 0.8rem;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .curriculum-item__code {
+      background: var(--bg-elevated);
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .curriculum-item__label {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .curriculum-item__lessons {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .curriculum-item__lessons li a {
+      display: inline-flex;
+      gap: 0.6rem;
+      align-items: baseline;
+      padding: 0.25rem 0;
+      color: inherit;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .curriculum-item__lessons li a:hover {
+      background: var(--bg-elevated);
+      padding-left: 0.4rem;
+    }
+    .curriculum-item__lesson-collection {
+      font-size: 0.78rem;
+      padding: 0.1rem 0.5rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text-soft);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .curriculum-item__lesson-title {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+  </style>
+</Base>

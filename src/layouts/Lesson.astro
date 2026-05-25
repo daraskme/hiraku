@@ -131,6 +131,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
   <article
     data-pagefind-filter={`段階:${stage}, 教科:${d.subject}, 学年:${stage} 第${d.grade}学年${d.classical ? ', 種別:古典' : ''}`}
     data-pagefind-meta={`作者:${d.author}, 段階:${stage}`}
+    data-lesson-subject={d.subject}
   >
     <div class="pagefind-aux" data-pagefind-body aria-hidden="true" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
       {/* 検索補助：keywords / glossary の term を非表示で展開 */}
@@ -709,6 +710,182 @@ const guidelineDoc = d.school_stage === 'kotoko'
 
       // ページを離れたら停止
       window.addEventListener('beforeunload', () => speechSynthesis.cancel());
+    })();
+
+    // ─── 英語単語クリック発音 ───────────
+    // kotokoeigo1 など subject === '英語' の教材でのみ有効化。
+    // 本文内の英単語（連続したアスキー英字）をクリックすると、
+    // Web Speech API で en-US 音声で読み上げる。
+    // また blockquote.song（例文ブロック）には「▶ 発音」ボタンを付与し
+    // 一文単位で読み上げる。クリックした単語は localStorage に保存され、
+    // 同ページ上に「最近の単語」リストとして表示される。
+    (function () {
+      if (!('speechSynthesis' in window)) return;
+      const article = document.querySelector('article[data-lesson-subject]');
+      const isEnglish = article && article.dataset.lessonSubject === '英語';
+      if (!isEnglish) return;
+      const host = document.querySelector('[data-tts-body]');
+      if (!host) return;
+
+      const STORAGE_KEY = 'hiraku.englishWords.v1';
+      function loadHistory() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (_) { return []; }
+      }
+      function saveHistory(arr) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 40))); } catch (_) {}
+      }
+      function addToHistory(word) {
+        const w = word.toLowerCase();
+        let arr = loadHistory();
+        arr = arr.filter((x) => x !== w);
+        arr.unshift(w);
+        saveHistory(arr);
+        renderHistoryPanel();
+      }
+
+      function pickEnglishVoice() {
+        const voices = speechSynthesis.getVoices();
+        // 優先: en-US の自然な声 (Google, Samantha, Alex, Daniel)
+        return (
+          voices.find((v) => v.lang === 'en-US' && /Samantha|Alex|Google US/i.test(v.name)) ||
+          voices.find((v) => v.lang === 'en-US') ||
+          voices.find((v) => v.lang.startsWith('en'))
+        );
+      }
+      function speakEnglish(text, rate) {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = rate || 0.92;
+        u.pitch = 1;
+        const v = pickEnglishVoice();
+        if (v) u.voice = v;
+        speechSynthesis.speak(u);
+      }
+
+      // ─── 本文のクリックで単語を発音 ───
+      host.addEventListener('click', (e) => {
+        // すでにボタン等のクリックを処理しているとき以外、選択範囲を確認
+        const sel = window.getSelection();
+        if (sel && sel.toString().trim().length > 0) {
+          // ハイライト選択された文字列をそのまま読む
+          const text = sel.toString().trim();
+          if (/[A-Za-z]/.test(text)) {
+            speakEnglish(text);
+            // 単語と判定できるものだけ履歴に保存
+            if (/^[A-Za-z][A-Za-z\-']*$/.test(text)) addToHistory(text);
+            highlightFlash(e.target);
+            return;
+          }
+        }
+        // ダブルクリックでなくとも、テキストノードの単語位置を特定して発音
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+        // ボタン・リンク・入力欄等は除外
+        if (target.closest('a, button, input, textarea, select, [data-tts-controls], [data-scene-bg-toggle]')) return;
+        // クリック位置から単語を抽出
+        const range = caretRangeFromPoint(e.clientX, e.clientY);
+        if (!range) return;
+        const node = range.startContainer;
+        if (node.nodeType !== Node.TEXT_NODE) return;
+        const offset = range.startOffset;
+        const text = node.textContent || '';
+        // 単語境界を探す
+        let start = offset;
+        let end = offset;
+        while (start > 0 && /[A-Za-z\-']/.test(text[start - 1])) start--;
+        while (end < text.length && /[A-Za-z\-']/.test(text[end])) end++;
+        const word = text.slice(start, end);
+        if (word.length < 2) return;
+        if (!/^[A-Za-z][A-Za-z\-']*$/.test(word)) return;
+        speakEnglish(word);
+        addToHistory(word);
+        highlightFlash(e.target);
+      });
+
+      function caretRangeFromPoint(x, y) {
+        if (document.caretRangeFromPoint) return document.caretRangeFromPoint(x, y);
+        if (document.caretPositionFromPoint) {
+          const p = document.caretPositionFromPoint(x, y);
+          if (!p) return null;
+          const r = document.createRange();
+          r.setStart(p.offsetNode, p.offset);
+          r.setEnd(p.offsetNode, p.offset);
+          return r;
+        }
+        return null;
+      }
+
+      function highlightFlash(el) {
+        if (!el || !el.classList) return;
+        el.classList.add('word-flash');
+        setTimeout(() => el.classList.remove('word-flash'), 600);
+      }
+
+      // ─── blockquote (例文) に「▶ 発音」ボタンを付与 ───
+      host.querySelectorAll('blockquote').forEach((bq) => {
+        // 既に追加済みならスキップ
+        if (bq.querySelector('.eng-play-btn')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'eng-play-btn no-print';
+        btn.setAttribute('aria-label', 'この例文を発音');
+        btn.title = 'この例文を発音';
+        btn.innerHTML = '<span aria-hidden="true">♪</span> 発音';
+        btn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          // <rt> や注釈などは除いてテキストを取得
+          const clone = bq.cloneNode(true);
+          clone.querySelectorAll('.eng-play-btn, rt, rp, .word-history-panel').forEach((el) => el.remove());
+          const text = clone.textContent.replace(/\s+/g, ' ').trim();
+          if (text) speakEnglish(text, 0.88);
+        });
+        bq.appendChild(btn);
+      });
+
+      // ─── 最近クリックした単語パネル ───
+      function renderHistoryPanel() {
+        let panel = document.querySelector('[data-eng-word-history]');
+        const arr = loadHistory();
+        if (arr.length === 0) {
+          if (panel) panel.hidden = true;
+          return;
+        }
+        if (!panel) {
+          panel = document.createElement('aside');
+          panel.className = 'word-history-panel no-print';
+          panel.setAttribute('data-eng-word-history', '');
+          panel.innerHTML =
+            '<h4>最近聞いた単語 <span class="word-history-panel__hint">クリックでもう一度発音</span></h4>' +
+            '<div class="word-history-panel__list" data-eng-history-list></div>' +
+            '<button type="button" class="word-history-panel__clear" data-eng-history-clear>すべて消去</button>';
+          host.parentNode.insertBefore(panel, host.nextSibling);
+          // クリックでもう一度発音
+          panel.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.matches('[data-eng-history-clear]')) {
+              try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+              renderHistoryPanel();
+              return;
+            }
+            if (target.matches('[data-eng-history-word]')) {
+              speakEnglish(target.textContent);
+            }
+          });
+        }
+        panel.hidden = false;
+        const list = panel.querySelector('[data-eng-history-list]');
+        list.innerHTML = '';
+        arr.forEach((w) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'word-history-chip';
+          chip.setAttribute('data-eng-history-word', '');
+          chip.textContent = w;
+          list.appendChild(chip);
+        });
+      }
+      renderHistoryPanel();
     })();
   </script>
 </Base>
