@@ -1300,6 +1300,77 @@ article[data-lesson-subject="英語"] [data-tts-body] td {
 .word-history-panel__clear:hover { background: var(--bg-elevated); }
 
 /* ============================================================
+   学習パス内の前後ナビゲーション (Lesson 末尾)
+   ============================================================ */
+.path-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.path-nav {
+  padding: 1rem 1.2rem;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  border-left: 3px solid var(--accent);
+}
+.path-nav__header {
+  margin: 0 0 0.7rem;
+  font-size: 0.92rem;
+  color: var(--text-soft);
+}
+.path-nav__path-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+.path-nav__buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.path-nav__btn {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.path-nav__btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+}
+.path-nav__btn--next { text-align: right; }
+.path-nav__btn--disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.path-nav__btn--disabled:hover {
+  background: var(--bg);
+  border-color: var(--border);
+}
+.path-nav__btn-label {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+.path-nav__btn-title {
+  font-size: 0.95rem;
+  color: var(--text);
+  font-weight: 500;
+}
+@media (max-width: 600px) {
+  .path-nav__buttons { grid-template-columns: 1fr; }
+  .path-nav__btn--next { text-align: left; }
+}
+
+/* ============================================================
    お気に入り (スター) トグル
    ============================================================ */
 .star-toggle {

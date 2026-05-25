@@ -2,6 +2,7 @@
 import Base from './Base.astro';
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
+import { findPathsForLesson } from '../data/paths';
 
 interface Props {
   lesson:
@@ -115,6 +116,38 @@ for (const entry of allLessons) {
 }
 related.sort((a, b) => b.score - a.score);
 const relatedTop = related.slice(0, 4);
+
+// この教材を含む学習パス (複数の可能性あり)
+const pathMembership = findPathsForLesson(lesson.collection, lesson.id);
+// パス内の前後の教材情報を解決
+async function resolveStep(s: { collection: string; id: string }) {
+  if (!s) return null;
+  const items = await getCollection(s.collection as any);
+  const target = (items as any[]).find((l) => l.id === s.id);
+  if (!target) return null;
+  return { collection: s.collection, id: s.id, title: target.data.title };
+}
+interface PathNav {
+  pathId: string;
+  pathTitle: string;
+  index: number;
+  total: number;
+  prev: { collection: string; id: string; title: string } | null;
+  next: { collection: string; id: string; title: string } | null;
+}
+const pathNav: PathNav[] = [];
+for (const m of pathMembership) {
+  const prevStep = m.index > 0 ? m.path.steps[m.index - 1] : null;
+  const nextStep = m.index < m.path.steps.length - 1 ? m.path.steps[m.index + 1] : null;
+  pathNav.push({
+    pathId: m.path.id,
+    pathTitle: m.path.title,
+    index: m.index,
+    total: m.path.steps.length,
+    prev: prevStep ? await resolveStep(prevStep) : null,
+    next: nextStep ? await resolveStep(nextStep) : null,
+  });
+}
 
 const stageLabel: Record<string, string> = {
   shogaku: '小学校',
@@ -421,6 +454,43 @@ const guidelineDoc = d.school_stage === 'kotoko'
           ※ ここに書かれている内容はあくまで参考例です。授業者の判断と学級の実態に合わせて、自由に組み替えてご活用ください。
         </p>
       </details>
+    )}
+
+    {pathNav.length > 0 && (
+      <section aria-label="学習パス内の位置" class="no-print path-nav-section">
+        {pathNav.map((nav) => (
+          <div class="path-nav">
+            <p class="path-nav__header">
+              <a href={`/paths/${nav.pathId}`} class="path-nav__path-link">
+                ⇒ 学習パス「{nav.pathTitle}」
+              </a>
+              の <strong>{nav.index + 1} / {nav.total}</strong>
+            </p>
+            <div class="path-nav__buttons">
+              {nav.prev ? (
+                <a class="path-nav__btn path-nav__btn--prev" href={`/library/${nav.prev.collection}/${nav.prev.id}`}>
+                  <span class="path-nav__btn-label">← 前の教材</span>
+                  <span class="path-nav__btn-title">{nav.prev.title}</span>
+                </a>
+              ) : (
+                <span class="path-nav__btn path-nav__btn--disabled">
+                  <span class="path-nav__btn-label">パスの最初の教材</span>
+                </span>
+              )}
+              {nav.next ? (
+                <a class="path-nav__btn path-nav__btn--next" href={`/library/${nav.next.collection}/${nav.next.id}`}>
+                  <span class="path-nav__btn-label">次の教材 →</span>
+                  <span class="path-nav__btn-title">{nav.next.title}</span>
+                </a>
+              ) : (
+                <span class="path-nav__btn path-nav__btn--disabled">
+                  <span class="path-nav__btn-label">パスの最後の教材</span>
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </section>
     )}
 
     {relatedTop.length > 0 && (

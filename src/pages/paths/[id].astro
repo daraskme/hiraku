@@ -1,0 +1,221 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { PATHS } from '../../data/paths';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  return PATHS.map((p) => ({
+    params: { id: p.id },
+    props: { path: p },
+  }));
+}) satisfies GetStaticPaths;
+
+const { path } = Astro.props;
+
+// 各 step の教材情報をロード
+async function loadStepLesson(collection: string, id: string) {
+  const lessons = await getCollection(collection as any);
+  return (lessons as any[]).find((l) => l.id === id);
+}
+
+const stepDetails = await Promise.all(
+  path.steps.map(async (s) => ({
+    ...s,
+    lesson: await loadStepLesson(s.collection, s.id),
+  }))
+);
+
+const ACCENT_COLOR: Record<string, string> = {
+  amber: '#c97a3e',
+  rose: '#a8485c',
+  indigo: '#3e7ec9',
+  teal: '#3eae8f',
+  lime: '#7ea83e',
+  violet: '#7a5ec9',
+};
+const accentColor = ACCENT_COLOR[path.accent];
+---
+
+<Base
+  title={path.title}
+  description={path.description}
+  wide
+>
+  <section class="section" style={`--path-accent: ${accentColor}`}>
+    <p class="cross-links no-print">
+      <a href="/paths">← 学習パス一覧へ戻る</a>
+    </p>
+    <div class="section__heading">
+      <h1>{path.title}</h1>
+      <span class="section__subtitle">PATH</span>
+    </div>
+    {path.subtitle && <p class="path-detail__subtitle">{path.subtitle}</p>}
+    <p>{path.description}</p>
+    <div class="path-detail__meta">
+      <div class="path-detail__meta-item">
+        <span class="path-detail__meta-label">学校段階</span>
+        <span class="path-detail__meta-value">{path.stage}</span>
+      </div>
+      <div class="path-detail__meta-item">
+        <span class="path-detail__meta-label">難易度</span>
+        <span class="path-detail__meta-value">{path.difficulty}</span>
+      </div>
+      <div class="path-detail__meta-item">
+        <span class="path-detail__meta-label">想定対象</span>
+        <span class="path-detail__meta-value">{path.audience}</span>
+      </div>
+      <div class="path-detail__meta-item">
+        <span class="path-detail__meta-label">合計所要</span>
+        <span class="path-detail__meta-value">約 {path.estimated_total_minutes} 分</span>
+      </div>
+      <div class="path-detail__meta-item">
+        <span class="path-detail__meta-label">教材数</span>
+        <span class="path-detail__meta-value">{path.steps.length} 教材</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style={`--path-accent: ${accentColor}`}>
+    <div class="section__heading">
+      <h2>このパスの教材</h2>
+      <span class="section__subtitle">STEPS</span>
+    </div>
+    <ol class="path-steps">
+      {stepDetails.map((s, i) => (
+        <li class="path-step">
+          <div class="path-step__num">{i + 1}</div>
+          <div class="path-step__body">
+            {s.lesson ? (
+              <>
+                <h3 class="path-step__title">
+                  <a href={`/library/${s.collection}/${s.id}`}>{s.lesson.data.title}</a>
+                </h3>
+                <p class="path-step__author">
+                  {s.lesson.data.author}
+                  {s.lesson.data.original_year ? `（${s.lesson.data.original_year}）` : s.lesson.data.era ? `（${s.lesson.data.era}）` : ''}
+                  {s.lesson.data.estimated_minutes && ` ・ 目安 ${s.lesson.data.estimated_minutes} 分`}
+                </p>
+                {s.note && <p class="path-step__note">{s.note}</p>}
+                <p class="path-step__desc">{s.lesson.data.description}</p>
+                <p class="path-step__cta">
+                  <a href={`/library/${s.collection}/${s.id}`}>教材を開く →</a>
+                </p>
+              </>
+            ) : (
+              <p style="color: var(--text-soft)">（教材が見つかりません: {s.collection}/{s.id}）</p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <style>
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .path-detail__subtitle {
+      font-size: 1.1rem;
+      color: var(--path-accent, var(--accent));
+      font-weight: 500;
+      margin-top: -0.5rem;
+    }
+    .path-detail__meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .path-detail__meta-item {
+      padding: 0.5rem 0.7rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+    }
+    .path-detail__meta-label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+    .path-detail__meta-value {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .path-steps {
+      list-style: none;
+      padding: 0;
+      counter-reset: pathstep;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .path-step {
+      display: flex;
+      gap: 1rem;
+      padding: 1.2rem;
+      background: var(--bg-soft);
+      border-radius: 10px;
+      border-left: 4px solid var(--path-accent, var(--accent));
+      position: relative;
+    }
+    .path-step__num {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--path-accent, var(--accent));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+    .path-step__body { flex: 1; }
+    .path-step__title {
+      margin: 0 0 0.2rem;
+      font-size: 1.1rem;
+    }
+    .path-step__title a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .path-step__author {
+      margin: 0 0 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      font-variant-numeric: tabular-nums;
+    }
+    .path-step__note {
+      margin: 0 0 0.5rem;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.88rem;
+      background: color-mix(in srgb, var(--path-accent) 8%, transparent);
+      border-radius: 4px;
+      color: var(--text);
+    }
+    .path-step__desc {
+      margin: 0 0 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .path-step__cta a {
+      color: var(--path-accent, var(--accent));
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+      font-weight: 500;
+      font-size: 0.92rem;
+    }
+  </style>
+</Base>

@@ -1,0 +1,196 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const COLLECTION_NAMES = [
+  'kokugo3', 'kokugo4', 'kokugo6',
+  'chugaku1', 'chugaku2', 'chugaku3',
+  'kotoko1', 'kotoko2',
+  'kateika5', 'chugakurika1', 'chugakurika2',
+  'chugakurekishi1', 'kotokoeigo1',
+  'sansu5', 'chugakukomin3',
+  'kotorekishi1', 'kotokokanbun1', 'kotosekaishi1',
+];
+
+const COLLECTION_LABEL: Record<string, string> = {
+  kokugo3: '小3 国語', kokugo4: '小4 国語', kokugo6: '小6 国語',
+  chugaku1: '中1 国語', chugaku2: '中2 国語', chugaku3: '中3 国語',
+  kotoko1: '高1 国語', kotoko2: '高2 国語',
+  kateika5: '小5 家庭科',
+  chugakurika1: '中1 理科', chugakurika2: '中2 理科',
+  chugakurekishi1: '中1 歴史',
+  kotokoeigo1: '高1 英語',
+  sansu5: '小5 算数',
+  chugakukomin3: '中3 公民',
+  kotorekishi1: '高1 日本史',
+  kotokokanbun1: '高1 漢文',
+  kotosekaishi1: '高1 世界史',
+};
+
+interface LessonRef {
+  collection: string;
+  id: string;
+  title: string;
+  author: string;
+  data: any;
+}
+const all: LessonRef[] = [];
+for (const name of COLLECTION_NAMES) {
+  const lessons = await getCollection(name as any);
+  for (const l of lessons) all.push({ collection: name, id: l.id, title: l.data.title, author: l.data.author, data: l.data });
+}
+
+const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1'] as const;
+type Level = typeof LEVELS[number];
+const LEVEL_INFO: Record<Level, { caption: string; cefr: string }> = {
+  N5: { caption: '基本的な日本語をある程度理解できる', cefr: 'A1〜A2' },
+  N4: { caption: '基本的な日本語を理解できる', cefr: 'A2' },
+  N3: { caption: '日常的な日本語をある程度理解できる', cefr: 'B1' },
+  N2: { caption: '日常的な日本語に加え、より幅広い場面で日本語を理解できる', cefr: 'B1〜B2' },
+  N1: { caption: '幅広い場面で使われる日本語を理解できる', cefr: 'B2〜C1' },
+};
+
+const byLevel: Record<Level, LessonRef[]> = { N5: [], N4: [], N3: [], N2: [], N1: [] };
+const unmarked: LessonRef[] = [];
+for (const l of all) {
+  const lv = l.data.jlpt;
+  if (lv && LEVELS.includes(lv)) byLevel[lv as Level].push(l);
+  else unmarked.push(l);
+}
+LEVELS.forEach((lv) => byLevel[lv].sort((a, b) => a.title.localeCompare(b.title, 'ja')));
+const markedCount = LEVELS.reduce((acc, lv) => acc + byLevel[lv].length, 0);
+---
+
+<Base
+  title="JLPT 別索引"
+  description="日本語能力試験 (JLPT) のレベル別に教材を整理した索引。N5 (初級) から N1 (最上級) まで。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>JLPT 別索引</h1>
+      <span class="section__subtitle">JLPT INDEX</span>
+    </div>
+    <p>
+      日本語能力試験 (Japanese-Language Proficiency Test / JLPT) のレベル別に、ひらく収載
+      教材を整理しました。N5 (初級) から N1 (最上級) まで、自分のレベルに合った教材を
+      見つけてください。
+    </p>
+    <p>
+      現在 <strong>{markedCount}</strong> 教材に JLPT レベルが付与されています
+      （未分類: {unmarked.length} 教材）。
+    </p>
+    <p class="cross-links no-print">
+      別の切り口で探す：
+      <a href="/library">教科・学年別ライブラリ</a> ・
+      <a href="/paths">学習パス</a> ・
+      <a href="/timeline">時代年表</a>
+    </p>
+  </section>
+
+  {LEVELS.map((lv) => {
+    const items = byLevel[lv];
+    if (items.length === 0) return null;
+    return (
+      <section class="section jlpt-section">
+        <div class="section__heading">
+          <h2 class="jlpt-section__heading">
+            <span class={`jlpt-badge jlpt-badge--${lv.toLowerCase()}`}>{lv}</span>
+            <span>{LEVEL_INFO[lv].caption}</span>
+          </h2>
+          <span class="section__subtitle">{items.length} 教材 ・ CEFR {LEVEL_INFO[lv].cefr}</span>
+        </div>
+        <div class="lesson-grid">
+          {items.map((l) => (
+            <article class="lesson-card">
+              <a href={`/library/${l.collection}/${l.id}`} class="lesson-card__link">
+                <p class="lesson-card__meta">{COLLECTION_LABEL[l.collection]}</p>
+                <h3 class="lesson-card__title">{l.title}</h3>
+                <p class="lesson-card__desc">{l.data.description}</p>
+                <p class="lesson-card__author">{l.author}</p>
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    );
+  })}
+
+  {unmarked.length > 0 && (
+    <section class="section">
+      <details class="jlpt-unmarked">
+        <summary>JLPT 未分類の教材 ({unmarked.length}) を表示</summary>
+        <p style="font-size: 0.85rem; color: var(--text-soft); margin-top: 0.5rem;">
+          frontmatter に <code>jlpt:</code> フィールドが未設定の教材。今後順次分類予定です。
+        </p>
+        <ul class="jlpt-unmarked__list">
+          {unmarked.slice(0, 50).map((l) => (
+            <li>
+              <a href={`/library/${l.collection}/${l.id}`}>
+                {COLLECTION_LABEL[l.collection]} ・ {l.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </section>
+  )}
+
+  <style>
+    .cross-links a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .jlpt-section__heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.2rem;
+    }
+    .jlpt-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.4rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: white;
+    }
+    .jlpt-badge--n5 { background: #5b8c5a; }
+    .jlpt-badge--n4 { background: #7ea83e; }
+    .jlpt-badge--n3 { background: #c9923e; }
+    .jlpt-badge--n2 { background: #c97a3e; }
+    .jlpt-badge--n1 { background: #a8485c; }
+
+    .jlpt-unmarked > summary {
+      cursor: pointer;
+      font-weight: 500;
+      padding: 0.5rem 0;
+    }
+    .jlpt-unmarked__list {
+      list-style: none;
+      padding: 0;
+      margin: 0.8rem 0 0;
+      columns: 2;
+      column-gap: 1.5rem;
+    }
+    .jlpt-unmarked__list li {
+      margin-bottom: 0.3rem;
+      font-size: 0.88rem;
+      break-inside: avoid;
+    }
+    .jlpt-unmarked__list a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+    @media (max-width: 700px) {
+      .jlpt-unmarked__list { columns: 1; }
+    }
+  </style>
+</Base>
