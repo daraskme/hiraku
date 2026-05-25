@@ -336,6 +336,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
                   src={ill.src}
                   alt={ill.alt ?? `${d.title} 挿絵 ${idx + 1}`}
                   loading="lazy"
+                  decoding="async"
                 />
                 {ill.caption && <figcaption>{ill.caption}</figcaption>}
               </figure>

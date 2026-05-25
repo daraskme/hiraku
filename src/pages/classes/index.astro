@@ -1,0 +1,219 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="クラス管理"
+  description="教師が「クラス」を作って生徒を招待、進捗を一覧できる機能。"
+  wide
+>
+  <section class="section">
+    <div class="section__heading">
+      <h1>クラス</h1>
+      <span class="section__subtitle">CLASSES</span>
+    </div>
+    <p>
+      教師が「クラス」を作って、招待コードを生徒に渡すと、参加した生徒の
+      学習進捗を一覧できます。生徒側はログインしてコードを入力するだけ。
+      <strong>すべての機能はログインが必要です。</strong>
+    </p>
+  </section>
+
+  <section class="section" data-classes-signed-out hidden>
+    <div class="empty-state">
+      <h3>ログインが必要です</h3>
+      <p>クラス機能は Google ログインの後に利用できます。<br />
+        画面右上の <strong>○</strong> アイコンからログインしてください。
+      </p>
+    </div>
+  </section>
+
+  <section class="section" data-classes-signed-in hidden>
+    <div class="section__heading">
+      <h2>あなたが所有するクラス</h2>
+      <span class="section__subtitle">OWNED</span>
+    </div>
+    <div data-classes-owned-list>
+      <div class="empty-state"><h3>まだクラスを作っていません</h3></div>
+    </div>
+    <details class="class-create">
+      <summary>+ 新しいクラスを作る</summary>
+      <form data-class-create-form>
+        <label>
+          クラス名:
+          <input type="text" name="name" maxlength="80" placeholder="例: 中学2年 国語 A 組" required />
+        </label>
+        <button type="submit" class="btn btn--primary">作成</button>
+      </form>
+    </details>
+  </section>
+
+  <section class="section" data-classes-signed-in hidden>
+    <div class="section__heading">
+      <h2>参加しているクラス</h2>
+      <span class="section__subtitle">JOINED</span>
+    </div>
+    <div data-classes-joined-list>
+      <div class="empty-state"><h3>まだクラスに参加していません</h3></div>
+    </div>
+    <details class="class-join">
+      <summary>+ 招待コードで参加する</summary>
+      <form data-class-join-form>
+        <label>
+          招待コード:
+          <input type="text" name="code" maxlength="12" placeholder="ABC123" pattern="[A-Z0-9]+" required style="text-transform:uppercase" />
+        </label>
+        <button type="submit" class="btn btn--primary">参加</button>
+      </form>
+    </details>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const signedOut = document.querySelector('[data-classes-signed-out]');
+      const signedInSections = document.querySelectorAll('[data-classes-signed-in]');
+      const ownedList = document.querySelector('[data-classes-owned-list]');
+      const joinedList = document.querySelector('[data-classes-joined-list]');
+      const createForm = document.querySelector('[data-class-create-form]');
+      const joinForm = document.querySelector('[data-class-join-form]');
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function apply(user) {
+        const isIn = !!user;
+        signedOut.hidden = isIn;
+        signedInSections.forEach((el) => { el.hidden = !isIn; });
+        if (isIn) load();
+      }
+
+      async function load() {
+        try {
+          const resp = await fetch('/api/classes', { credentials: 'same-origin' });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          renderOwned(data.owned || []);
+          renderJoined(data.joined || []);
+        } catch (_) {
+          ownedList.innerHTML = '<div class="empty-state"><p>読み込みに失敗しました</p></div>';
+        }
+      }
+
+      function renderOwned(items) {
+        if (items.length === 0) {
+          ownedList.innerHTML = '<div class="empty-state"><h3>まだクラスを作っていません</h3></div>';
+          return;
+        }
+        ownedList.innerHTML = '<ul class="class-list">' + items.map((c) => `
+          <li class="class-list__item">
+            <a href="/classes/view?id=${encodeURIComponent(c.id)}" class="class-list__name">${escapeHtml(c.name)}</a>
+            <div class="class-list__meta">
+              招待コード: <strong>${escapeHtml(c.joinCode || '—')}</strong>
+              ・ 作成 ${new Date(c.createdAt).toLocaleDateString('ja-JP')}
+            </div>
+          </li>`).join('') + '</ul>';
+      }
+      function renderJoined(items) {
+        if (items.length === 0) {
+          joinedList.innerHTML = '<div class="empty-state"><h3>まだクラスに参加していません</h3></div>';
+          return;
+        }
+        joinedList.innerHTML = '<ul class="class-list">' + items.map((c) => `
+          <li class="class-list__item">
+            <a href="/classes/view?id=${encodeURIComponent(c.id)}" class="class-list__name">${escapeHtml(c.name)}</a>
+            <div class="class-list__meta">参加日: ${new Date(c.createdAt).toLocaleDateString('ja-JP')}</div>
+          </li>`).join('') + '</ul>';
+      }
+
+      createForm && createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(createForm);
+        const name = fd.get('name');
+        if (!name) return;
+        try {
+          const resp = await fetch('/api/classes', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name }),
+          });
+          if (!resp.ok) throw new Error();
+          await load();
+          createForm.reset();
+        } catch (_) { alert('クラスの作成に失敗しました'); }
+      });
+      joinForm && joinForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(joinForm);
+        const code = String(fd.get('code') || '').trim().toUpperCase();
+        if (!code) return;
+        try {
+          const resp = await fetch('/api/classes?join=' + encodeURIComponent(code), {
+            method: 'POST',
+            credentials: 'same-origin',
+          });
+          if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error || 'fail');
+          }
+          await load();
+          joinForm.reset();
+        } catch (e) { alert('参加に失敗しました: ' + (e.message || '')); }
+      });
+
+      const tryInit = () => {
+        if (window.HirakuAuth) apply(window.HirakuAuth.getUser());
+        else setTimeout(tryInit, 100);
+      };
+      tryInit();
+      window.addEventListener('hiraku:auth', (e) => apply(e.detail && e.detail.user));
+    })();
+  </script>
+
+  <style>
+    .class-list { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
+    .class-list__item {
+      padding: 0.8rem 1rem;
+      background: var(--bg-soft);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    .class-list__name {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
+    }
+    .class-list__meta { font-size: 0.8rem; color: var(--text-soft); margin-top: 0.2rem; }
+    .class-create, .class-join { margin-top: 1rem; }
+    .class-create > summary, .class-join > summary {
+      cursor: pointer;
+      padding: 0.5rem 0;
+      color: var(--accent);
+    }
+    .class-create form, .class-join form {
+      display: flex;
+      gap: 0.6rem;
+      align-items: end;
+      margin-top: 0.5rem;
+      padding: 0.8rem;
+      background: var(--bg-soft);
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+    .class-create label, .class-join label { display: flex; flex-direction: column; flex: 1; gap: 0.2rem; font-size: 0.85rem; }
+    .class-create input, .class-join input {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+  </style>
+</Base>

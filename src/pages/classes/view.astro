@@ -1,0 +1,144 @@
+---
+import Base from '../../layouts/Base.astro';
+// クラス詳細はクライアントで ?id=<classId> を読んで API を叩く。
+---
+
+<Base
+  title="クラス詳細"
+  description="クラスの参加者と進捗の一覧。"
+  wide
+>
+  <section class="section">
+    <p class="cross-links no-print">
+      <a href="/classes">← クラス一覧</a>
+    </p>
+    <div data-class-detail-root>
+      <p>読み込み中…</p>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const root = document.querySelector('[data-class-detail-root]');
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      if (!id) {
+        root.innerHTML = '<div class="empty-state"><h3>クラス ID が指定されていません</h3><p><a href="/classes">クラス一覧へ戻る</a></p></div>';
+        return;
+      }
+      function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      function fmtTs(ts) {
+        if (!ts) return '—';
+        return new Date(ts).toLocaleString('ja-JP', { dateStyle: 'short', timeStyle: 'short' });
+      }
+      async function load() {
+        try {
+          const resp = await fetch('/api/classes/' + encodeURIComponent(id), {
+            credentials: 'same-origin',
+          });
+          if (resp.status === 401) { root.innerHTML = '<div class="empty-state"><h3>ログインが必要です</h3></div>'; return; }
+          if (resp.status === 403) { root.innerHTML = '<div class="empty-state"><h3>このクラスを見る権限がありません</h3></div>'; return; }
+          if (resp.status === 404) { root.innerHTML = '<div class="empty-state"><h3>クラスが見つかりません</h3></div>'; return; }
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          render(data);
+        } catch (_) {
+          root.innerHTML = '<div class="empty-state"><h3>読み込みに失敗しました</h3></div>';
+        }
+      }
+      function render(data) {
+        const cls = data.class || {};
+        const members = data.members || [];
+        const ownerBadge = cls.isOwner ? '<span class="badge badge--accent">所有者</span>' : '';
+        const joinCodeRow = cls.isOwner && cls.joinCode
+          ? `<p>招待コード: <strong style="font-family:var(--font-mono); font-size:1.2rem;">${escapeHtml(cls.joinCode)}</strong>
+             <button type="button" class="btn btn--ghost" data-copy-code>コピー</button>
+             <span class="class-detail__hint">このコードを生徒に渡してください</span></p>`
+          : '';
+        const memberRows = members.length === 0
+          ? '<p style="color:var(--text-soft);">まだ参加者がいません。招待コードを生徒に渡しましょう。</p>'
+          : '<table class="class-detail__table"><thead><tr>' +
+              '<th>生徒名</th><th>参加日</th><th>読了教材</th><th>バッジ</th><th>お気に入り</th><th>最終活動</th>' +
+            '</tr></thead><tbody>' +
+            members.map((m) => `<tr>
+              <td>${escapeHtml(m.name || '匿名')}</td>
+              <td>${fmtTs(m.joinedAt)}</td>
+              <td style="text-align:right">${m.totalReads}</td>
+              <td style="text-align:right">${m.badgesCount}</td>
+              <td style="text-align:right">${m.starsCount}</td>
+              <td>${fmtTs(m.lastActive)}</td>
+            </tr>`).join('') +
+            '</tbody></table>';
+        const deleteBtn = cls.isOwner
+          ? '<button type="button" class="btn btn--ghost" data-delete-class style="color:#b84a4a;border-color:#c97a7a">⚠ クラスを削除</button>'
+          : '';
+        root.innerHTML = `
+          <div class="section__heading">
+            <h1>${escapeHtml(cls.name || '名称未設定')}</h1>
+            <span class="section__subtitle">CLASS</span>
+          </div>
+          ${ownerBadge}
+          <p>参加者: <strong>${cls.memberCount || 0}</strong> 名</p>
+          ${joinCodeRow}
+          <h2 style="margin-top:1.5rem;">参加者の学習状況</h2>
+          ${memberRows}
+          <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid var(--border-soft);">
+            ${deleteBtn}
+          </div>
+        `;
+        const copyBtn = document.querySelector('[data-copy-code]');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(cls.joinCode).then(() => alert('コピーしました'));
+          });
+        }
+        const delBtn = document.querySelector('[data-delete-class]');
+        if (delBtn) {
+          delBtn.addEventListener('click', async () => {
+            if (!confirm('このクラスを削除します。参加者の学習データ自体は残りますが、クラスとしての結びつきは解消されます。本当に削除しますか？')) return;
+            try {
+              const r = await fetch('/api/classes/' + encodeURIComponent(id), {
+                method: 'DELETE',
+                credentials: 'same-origin',
+              });
+              if (!r.ok) throw new Error();
+              alert('削除しました');
+              location.href = '/classes';
+            } catch (_) { alert('削除に失敗しました'); }
+          });
+        }
+      }
+      const tryInit = () => {
+        if (window.HirakuAuth) load();
+        else setTimeout(tryInit, 100);
+      };
+      tryInit();
+    })();
+  </script>
+
+  <style>
+    .cross-links a { color: var(--accent); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .class-detail__hint { font-size: 0.78rem; color: var(--text-soft); margin-left: 0.5rem; }
+    .class-detail__table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .class-detail__table th {
+      text-align: left;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg-soft);
+      border-bottom: 2px solid var(--border);
+      font-weight: 500;
+    }
+    .class-detail__table td {
+      padding: 0.4rem 0.6rem;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .class-detail__table tr:hover td { background: var(--bg-soft); }
+  </style>
+</Base>

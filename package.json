@@ -10,7 +10,9 @@
     "build": "astro build && node scripts/generate-og.mjs && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "astro": "^5.14.0"

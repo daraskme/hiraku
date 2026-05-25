@@ -95,14 +95,25 @@ const ogLocaleAlt = lang === 'en' ? 'ja_JP' : 'en_US';
     <meta name="theme-color" content="#1d2a3d" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f3efe5" media="(prefers-color-scheme: light)" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
+    {/* mobile-web-app-capable は新仕様。apple-mobile-web-app-capable は互換用に併記 */}
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="ひらく" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    {/* Google Fonts を非ブロッキングで読み込み (FOUT 許容、render-blocking 排除) */}
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap"
+      />
+    </noscript>
   </head>
   <body>
     <a href="#main" class="skip-link">{lang === 'en' ? 'Skip to main content' : '本文へスキップ'}</a>
