@@ -211,22 +211,36 @@ const guidelineDoc = d.school_stage === 'kotoko'
     <section aria-label="本文">
       <div class="body-header no-print">
         <h2 style="margin: 0;">本文</h2>
-        <div class="tts-controls" data-tts-controls hidden>
-          <button type="button" class="tts-btn" data-tts-play title="本文を読み上げる" aria-label="読み上げ">
-            <span data-tts-icon-play aria-hidden="true">♪</span>
-            <span data-tts-icon-pause aria-hidden="true" hidden>❚❚</span>
-            <span class="tts-btn__label" data-tts-label>読み上げ</span>
-          </button>
-          <button type="button" class="tts-btn tts-btn--small" data-tts-stop title="停止" aria-label="停止" hidden>■</button>
-          <select class="tts-select" data-tts-rate aria-label="読み上げ速度">
-            <option value="0.8">ゆっくり</option>
-            <option value="1" selected>標準</option>
-            <option value="1.2">速め</option>
-            <option value="1.5">速い</option>
-          </select>
+        <div class="body-header__controls">
+          {d.illustrations && d.illustrations.length > 0 && (
+            <button
+              type="button"
+              class="scene-bg-toggle"
+              data-scene-bg-toggle
+              aria-pressed="true"
+              title="本文の背景に挿絵を敷くかどうか"
+            >
+              <span aria-hidden="true">✦</span>
+              <span class="scene-bg-toggle__label">背景挿絵</span>
+            </button>
+          )}
+          <div class="tts-controls" data-tts-controls hidden>
+            <button type="button" class="tts-btn" data-tts-play title="本文を読み上げる" aria-label="読み上げ">
+              <span data-tts-icon-play aria-hidden="true">♪</span>
+              <span data-tts-icon-pause aria-hidden="true" hidden>❚❚</span>
+              <span class="tts-btn__label" data-tts-label>読み上げ</span>
+            </button>
+            <button type="button" class="tts-btn tts-btn--small" data-tts-stop title="停止" aria-label="停止" hidden>■</button>
+            <select class="tts-select" data-tts-rate aria-label="読み上げ速度">
+              <option value="0.8">ゆっくり</option>
+              <option value="1" selected>標準</option>
+              <option value="1.2">速め</option>
+              <option value="1.5">速い</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div data-tts-body>
+      <div data-tts-body data-scene-bg-host data-illustrations={d.illustrations && d.illustrations.length > 0 ? JSON.stringify(d.illustrations.map((i) => ({ src: i.src, alt: i.alt, caption: i.caption }))) : ''}>
         <slot />
       </div>
     </section>
@@ -414,6 +428,81 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </ul>
     </section>
   </article>
+
+  <script is:inline>
+    // 本文の挿絵背景化：本文の <h3> セクション境界を見つけて、対応する挿絵を
+    // 各セクションの薄い背景として敷く。挿絵数 < h3 数なら冒頭から順、
+    // 挿絵数 > h3 数なら余りはギャラリーのみ。h3 が無ければ段落数で均等分割。
+    // 「背景挿絵」ボタンと localStorage で個別 ON/OFF できる。
+    (function () {
+      const STORAGE_KEY = 'hiraku.sceneBg.v1';
+      const host = document.querySelector('[data-scene-bg-host]');
+      const toggle = document.querySelector('[data-scene-bg-toggle]');
+      if (!host) return;
+      let illusts = [];
+      try { illusts = JSON.parse(host.dataset.illustrations || '[]'); } catch (_) {}
+      if (!illusts.length) return;
+
+      function wrap() {
+        if (host.dataset.sceneBgApplied === '1') return;
+        const children = Array.from(host.children);
+        const h3idx = [];
+        children.forEach((el, i) => {
+          if (el.tagName === 'H3') h3idx.push(i);
+        });
+        let groups = [];
+        if (h3idx.length > 0) {
+          for (let i = 0; i < h3idx.length; i++) {
+            const start = h3idx[i];
+            const end = h3idx[i + 1] ?? children.length;
+            groups.push(children.slice(start, end));
+          }
+        } else {
+          // h3 が無い場合：段落を illustrations 数で均等分割
+          const n = Math.min(illusts.length, Math.max(1, Math.ceil(children.length / 6)));
+          const per = Math.ceil(children.length / n);
+          for (let i = 0; i < n; i++) {
+            groups.push(children.slice(i * per, (i + 1) * per));
+          }
+        }
+        groups.forEach((group, idx) => {
+          if (group.length === 0) return;
+          const illust = illusts[idx];
+          if (!illust) return;
+          const section = document.createElement('div');
+          section.className = 'scene-section';
+          section.style.setProperty('--scene-bg', 'url("' + illust.src + '")');
+          section.dataset.scene = String(idx + 1);
+          if (illust.alt) section.setAttribute('aria-label', '挿絵背景: ' + illust.alt);
+          group[0].parentNode.insertBefore(section, group[0]);
+          group.forEach((el) => section.appendChild(el));
+        });
+        host.dataset.sceneBgApplied = '1';
+      }
+      function unwrap() {
+        const sections = host.querySelectorAll(':scope > .scene-section');
+        sections.forEach((sec) => {
+          const parent = sec.parentNode;
+          while (sec.firstChild) parent.insertBefore(sec.firstChild, sec);
+          parent.removeChild(sec);
+        });
+        host.dataset.sceneBgApplied = '0';
+      }
+      function applyState(on) {
+        if (on) wrap(); else unwrap();
+        if (toggle) toggle.setAttribute('aria-pressed', String(on));
+        host.classList.toggle('has-scene-bg', on);
+      }
+      const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; } })();
+      const initial = saved === null ? true : saved === '1';
+      applyState(initial);
+      toggle && toggle.addEventListener('click', () => {
+        const next = toggle.getAttribute('aria-pressed') !== 'true';
+        try { localStorage.setItem(STORAGE_KEY, next ? '1' : '0'); } catch (_) {}
+        applyState(next);
+      });
+    })();
+  </script>
 
   <script is:inline>
     // 本文読み上げ（Web Speech API）。日本語の SpeechSynthesis 音声があるブラウザのみで動作。
