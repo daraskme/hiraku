@@ -29,7 +29,11 @@ const seibutsu1 = (await getCollection('seibutsu1')).map((l) => ({ collection: '
 const kagaku1 = (await getCollection('kagaku1')).map((l) => ({ collection: 'kagaku1', ...l }));
 const butsuri1 = (await getCollection('butsuri1')).map((l) => ({ collection: 'butsuri1', ...l }));
 const chigaku1 = (await getCollection('chigaku1')).map((l) => ({ collection: 'chigaku1', ...l }));
-const allLessons = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...chugaku3, ...kotoko1, ...kotoko2, ...kateika5, ...chugakurika1, ...chugakurika2, ...chugakurekishi1, ...kotokoeigo1, ...sansu5, ...chugakukomin3, ...kotorekishi1, ...kotokokanbun1, ...kotosekaishi1, ...chugakusugaku1, ...sansu4, ...ongaku1, ...chugakusugaku2, ...chugakusugaku3, ...seibutsu1, ...kagaku1, ...butsuri1, ...chigaku1];
+const bijutsu1 = (await getCollection('bijutsu1')).map((l) => ({ collection: 'bijutsu1', ...l }));
+const taiiku1 = (await getCollection('taiiku1')).map((l) => ({ collection: 'taiiku1', ...l }));
+const doutoku1 = (await getCollection('doutoku1')).map((l) => ({ collection: 'doutoku1', ...l }));
+const jouhou1 = (await getCollection('jouhou1')).map((l) => ({ collection: 'jouhou1', ...l }));
+const allLessons = [...kokugo3, ...kokugo4, ...kokugo6, ...chugaku1, ...chugaku2, ...chugaku3, ...kotoko1, ...kotoko2, ...kateika5, ...chugakurika1, ...chugakurika2, ...chugakurekishi1, ...kotokoeigo1, ...sansu5, ...chugakukomin3, ...kotorekishi1, ...kotokokanbun1, ...kotosekaishi1, ...chugakusugaku1, ...sansu4, ...ongaku1, ...chugakusugaku2, ...chugakusugaku3, ...seibutsu1, ...kagaku1, ...butsuri1, ...chigaku1, ...bijutsu1, ...taiiku1, ...doutoku1, ...jouhou1];
 const featured = [...allLessons]
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
