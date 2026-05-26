@@ -27,6 +27,7 @@ keywords:
   - 近江聖人
   - 陽明学
   - 孝
+cover_image: /illustrations/doutoku1/nakae-toju/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

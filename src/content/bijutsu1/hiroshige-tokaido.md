@@ -27,6 +27,7 @@ keywords:
   - 浮世絵
   - 江戸美術
   - 風景画
+cover_image: /illustrations/bijutsu1/hiroshige-tokaido/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

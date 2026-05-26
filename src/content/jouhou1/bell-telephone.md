@@ -27,6 +27,7 @@ keywords:
   - 通信
   - 情報技術
   - 発明
+cover_image: /illustrations/jouhou1/bell-telephone/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

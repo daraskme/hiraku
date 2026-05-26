@@ -27,6 +27,7 @@ keywords:
   - 二天一流
   - 剣道
   - 武道哲学
+cover_image: /illustrations/taiiku1/miyamoto-musashi-gorin/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

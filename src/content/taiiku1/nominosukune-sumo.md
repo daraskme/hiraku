@@ -27,6 +27,7 @@ keywords:
   - 相撲
   - 日本書紀
   - 武道
+cover_image: /illustrations/taiiku1/nominosukune-sumo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

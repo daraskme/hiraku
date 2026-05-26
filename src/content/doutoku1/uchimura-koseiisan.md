@@ -27,6 +27,7 @@ keywords:
   - 高尚なる生涯
   - 明治思想
   - 道徳
+cover_image: /illustrations/doutoku1/uchimura-koseiisan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

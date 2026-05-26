@@ -27,6 +27,7 @@ keywords:
   - 写生
   - 江戸絵画
   - 日本美術
+cover_image: /illustrations/bijutsu1/maruyama-okyo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

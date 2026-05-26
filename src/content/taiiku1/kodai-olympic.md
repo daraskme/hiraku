@@ -27,6 +27,7 @@ keywords:
   - 古代ギリシャ
   - クベルタン
   - スポーツ史
+cover_image: /illustrations/taiiku1/kodai-olympic/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

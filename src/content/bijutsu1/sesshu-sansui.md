@@ -27,6 +27,7 @@ keywords:
   - 山水画
   - 室町美術
   - 国宝
+cover_image: /illustrations/bijutsu1/sesshu-sansui/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

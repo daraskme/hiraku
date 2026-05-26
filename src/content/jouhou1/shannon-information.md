@@ -27,6 +27,7 @@ keywords:
   - ビット
   - 情報量
   - エントロピー
+cover_image: /illustrations/jouhou1/shannon-information/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

@@ -27,6 +27,7 @@ keywords:
   - 報徳思想
   - 至誠勤労
   - 江戸思想
+cover_image: /illustrations/doutoku1/ninomiya-sontoku-hotoku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
