@@ -1,0 +1,22 @@
+---
+import Lesson from '../../../layouts/Lesson.astro';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async () => {
+  const lessons = await getCollection("ongaku1");
+  return lessons.map((lesson) => ({
+    params: { slug: lesson.id },
+    props: { lesson },
+  }));
+}) satisfies GetStaticPaths;
+
+const { lesson } = Astro.props;
+const { Content } = await render(lesson);
+---
+
+<Lesson lesson={lesson}>
+  <div class="story-body">
+    <Content />
+  </div>
+</Lesson>
