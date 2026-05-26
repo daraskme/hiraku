@@ -210,4 +210,14 @@ const ongaku1 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo1, kokugo2, kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kotoko3, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, koteoyaku1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1, chugakusugaku1, sansu4, ongaku1 };
+const chugakusugaku2 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/chugakusugaku2' }),
+  schema: lessonSchema,
+});
+
+const chugakusugaku3 = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/chugakusugaku3' }),
+  schema: lessonSchema,
+});
+
+export const collections = { kokugo1, kokugo2, kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kotoko3, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, koteoyaku1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1, chugakusugaku1, sansu4, ongaku1, chugakusugaku2, chugakusugaku3 };
