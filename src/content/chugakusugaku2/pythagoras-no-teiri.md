@@ -24,6 +24,7 @@ keywords:
   - 三平方の定理
   - 古代ギリシア
   - 数学史
+cover_image: /illustrations/chugakusugaku2/pythagoras-no-teiri/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

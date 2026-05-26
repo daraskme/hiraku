@@ -22,6 +22,7 @@ keywords:
   - ラジウム
   - 放射能
   - ノーベル賞
+cover_image: /illustrations/kagaku1/curies-radium/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

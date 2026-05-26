@@ -26,6 +26,7 @@ keywords:
   - 吉田光由
   - 江戸時代
   - 数学史
+cover_image: /illustrations/sansu4/yoshida-jinkoki-kuku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

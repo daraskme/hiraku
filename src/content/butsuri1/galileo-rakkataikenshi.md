@@ -22,6 +22,7 @@ keywords:
   - 落下の法則
   - 地動説
   - 望遠鏡
+cover_image: /illustrations/butsuri1/galileo-rakkataikenshi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

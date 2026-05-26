@@ -25,6 +25,7 @@ keywords:
   - 無理数
   - ピタゴラス学派
   - 数学史
+cover_image: /illustrations/chugakusugaku3/heihokon-no-rekishi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

@@ -27,6 +27,7 @@ keywords:
   - 江戸時代
   - 数学史
   - 代数
+cover_image: /illustrations/chugakusugaku1/seki-takakazu-tenzan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

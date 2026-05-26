@@ -30,6 +30,7 @@ keywords:
   - 明治
   - 唱歌
   - 西洋音楽
+cover_image: /illustrations/ongaku1/taki-rentaro-kojo-no-tsuki/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
