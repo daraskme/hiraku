@@ -25,6 +25,7 @@ keywords:
   - コンピュータ
   - アルゴリズム
   - 計算機科学
+cover_image: /illustrations/jouhou1/turing-machine-keisan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

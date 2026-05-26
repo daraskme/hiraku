@@ -27,6 +27,7 @@ keywords:
   - 講道館
   - 武道
   - オリンピック
+cover_image: /illustrations/taiiku1/kano-jigoro-judo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

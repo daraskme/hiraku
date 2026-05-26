@@ -27,6 +27,7 @@ keywords:
   - 浮世絵
   - ジャポニスム
   - 江戸美術
+cover_image: /illustrations/bijutsu1/hokusai-fugaku-sanjurokkei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

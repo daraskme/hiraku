@@ -26,6 +26,7 @@ keywords:
   - 武士道
   - 倫理
   - 国際文化
+cover_image: /illustrations/doutoku1/nitobe-bushido/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
