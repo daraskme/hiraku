@@ -27,6 +27,7 @@ keywords:
   - 幻想文学
   - ジョバンニ
   - カムパネルラ
+cover_image: /illustrations/chugaku1/miyazawa-ginga-tetsudou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
