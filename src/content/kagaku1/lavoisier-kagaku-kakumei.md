@@ -23,6 +23,7 @@ keywords:
   - 化学革命
   - 質量保存の法則
   - 元素
+cover_image: /illustrations/kagaku1/lavoisier-kagaku-kakumei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

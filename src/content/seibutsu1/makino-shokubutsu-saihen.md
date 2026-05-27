@@ -22,6 +22,7 @@ keywords:
   - 植物分類学
   - 二名法
   - 日本植物図鑑
+cover_image: /illustrations/seibutsu1/makino-shokubutsu-saihen/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

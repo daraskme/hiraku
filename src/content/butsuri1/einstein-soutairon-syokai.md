@@ -22,6 +22,7 @@ keywords:
   - 相対性理論
   - E=mc²
   - 物理学史
+cover_image: /illustrations/butsuri1/einstein-soutairon-syokai/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

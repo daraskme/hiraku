@@ -27,6 +27,7 @@ keywords:
   - 岡野貞一
   - 唱歌
   - 文部省唱歌
+cover_image: /illustrations/ongaku1/takano-haru-ga-kita/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

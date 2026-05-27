@@ -25,6 +25,7 @@ keywords:
   - 関東大震災
   - 防災
   - 地球物理学
+cover_image: /illustrations/chigaku1/terada-jishin-no-hanashi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

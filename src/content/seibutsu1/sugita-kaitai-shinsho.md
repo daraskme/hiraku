@@ -27,6 +27,7 @@ keywords:
   - 解体新書
   - 蘭学
   - 解剖学
+cover_image: /illustrations/seibutsu1/sugita-kaitai-shinsho/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
