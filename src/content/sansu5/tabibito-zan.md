@@ -30,6 +30,7 @@ keywords:
   - 旅人算
   - 速さ
   - 出会い算
+cover_image: /illustrations/sansu5/tabibito-zan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
