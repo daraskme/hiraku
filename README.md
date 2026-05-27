@@ -69,6 +69,16 @@ npm run preview # dist/ をローカルでプレビュー
 
 詳細は [`docs/editorial-policy.md`](docs/editorial-policy.md) を参照してください。
 
+## 挿絵について
+
+教材ページのカバー画像・本文背景に使う挿絵は、ChatGPT (DALL-E) で生成した画像を
+WebP に変換して `public/illustrations/<collection>/<slug>/sceneN.webp` に置いています。
+生成パイプライン・ファイル仕様・配置済みインベントリ・追加規約は
+[`public/illustrations/README.md`](public/illustrations/README.md) を参照してください。
+
+現時点で 117 枚 (68 教材) が配置済み。新設 13 collection (美術・体育・道徳・情報・
+理科 4 領域・新数学 3 collection・小4算数・音楽) は全教材カバー済みです。
+
 ## ライセンス
 
 - **サイトのソースコード**: MIT License（[LICENSE-CODE](LICENSE-CODE)）
