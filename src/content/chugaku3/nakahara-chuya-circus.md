@@ -28,6 +28,7 @@ keywords:
   - 山羊の歌
   - サーカス
   - 擬音語
+cover_image: /illustrations/chugaku3/nakahara-chuya-circus/scene1.webp
 jlpt: N1
 kanji_level: 8
 vocab_level: 中級
