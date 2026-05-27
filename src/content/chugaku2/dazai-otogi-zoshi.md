@@ -26,6 +26,7 @@ keywords:
   - 翻案文学
   - 戦時下
   - 昭和文学
+cover_image: /illustrations/chugaku2/dazai-otogi-zoshi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
