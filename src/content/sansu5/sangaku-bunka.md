@@ -29,6 +29,7 @@ keywords:
   - 神社
   - 関孝和
   - 数学パズル
+cover_image: /illustrations/sansu5/sangaku-bunka/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
