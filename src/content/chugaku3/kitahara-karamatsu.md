@@ -25,6 +25,7 @@ keywords:
   - 近代詩
   - 軽井沢
   - 大正
+cover_image: /illustrations/chugaku3/kitahara-karamatsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
