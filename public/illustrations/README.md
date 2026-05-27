@@ -69,8 +69,8 @@
 
 ### 数値サマリー
 
-- **総 WebP ファイル数**: 117
-- **`cover_image:` 設定済み教材数**: 75
+- **総 WebP ファイル数**: 131
+- **`cover_image:` 設定済み教材数**: 90
 - **未挿絵 collection**（要展開）: `chugaku3`, `kokugo6`, `kateika5`, `sansu5`, `kotoko2`, `kotoko3`, `kotokoeigo1`, `kotokokanbun1`, `kotorekishi1`, `kotosekaishi1`, `koteoyaku1`, `chugakurika1`, `chugakurika2`, `chugakurekishi1`, `chugakukomin3` ほか
 
 ## 追加するときの規約
