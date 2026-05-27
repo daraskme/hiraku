@@ -27,6 +27,7 @@ keywords:
   - children literature
   - nonsense
   - Victorian
+cover_image: /illustrations/kotokoeigo1/carroll-alice/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

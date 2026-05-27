@@ -1189,30 +1189,62 @@ blockquote {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 18%, rgba(0,0,0,0.65) 82%, transparent 100%);
           mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 18%, rgba(0,0,0,0.65) 82%, transparent 100%);
 }
-.scene-bg-canvas__layer.is-current { opacity: 0.42; }
-/* 読みやすさのための薄い色付きオーバーレイ — クリーム色を一段乗せる */
+.scene-bg-canvas__layer.is-current { opacity: 0.28; }
+/* 読みやすさのための色付きオーバーレイ — ほぼ不透明な紙色を乗せ、
+   イラストはニュアンスとしてうっすら透ける程度にする。
+   blur と saturate で細部のディテールを潰し、文字との競合を避ける */
 .scene-bg-canvas__overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--bg) 75%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 55%, transparent) 50%,
-    color-mix(in srgb, var(--bg) 75%, transparent) 100%);
+    color-mix(in srgb, var(--bg) 92%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 80%, transparent) 45%,
+    color-mix(in srgb, var(--bg) 80%, transparent) 55%,
+    color-mix(in srgb, var(--bg) 92%, transparent) 100%);
+  -webkit-backdrop-filter: blur(2px) saturate(0.85);
+          backdrop-filter: blur(2px) saturate(0.85);
   pointer-events: none;
 }
 /* ダークモード時は背景画像をやや抑える */
-:root[data-theme="dark"] .scene-bg-canvas__layer.is-current { opacity: 0.32; }
-:root[data-theme="dark"] .scene-bg-canvas__layer { filter: brightness(0.85); }
+:root[data-theme="dark"] .scene-bg-canvas__layer.is-current { opacity: 0.22; }
+:root[data-theme="dark"] .scene-bg-canvas__layer { filter: brightness(0.78); }
 :root[data-theme="dark"] .scene-bg-canvas__overlay {
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--bg) 80%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 65%, transparent) 50%,
-    color-mix(in srgb, var(--bg) 80%, transparent) 100%);
+    color-mix(in srgb, var(--bg) 94%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 84%, transparent) 50%,
+    color-mix(in srgb, var(--bg) 94%, transparent) 100%);
 }
 /* prefers-reduced-motion: トランジションを無効化、効果も控えめに */
 @media (prefers-reduced-motion: reduce) {
   .scene-bg-canvas, .scene-bg-canvas__layer { transition: none; }
-  .scene-bg-canvas__layer.is-current { opacity: 0.18; }
+  .scene-bg-canvas__layer.is-current { opacity: 0.14; }
+}
+
+/* ─── 背景挿絵が ON のときの文字読みやすさ補強 ───
+   背景イラストの細部が文字と競合しないよう、本文テキストには
+   bg 色の極薄シャドウを 4 方向に焼き付けてエッジを補強する */
+.has-scene-bg-canvas .story-body,
+.has-scene-bg .story-body {
+  text-shadow:
+    0 0 4px var(--bg),
+    0 0 4px var(--bg),
+    0 0 8px var(--bg);
+}
+/* ルビ・本文・引用すべてに color を強制し、背景に負けないようにする */
+.has-scene-bg-canvas .story-body,
+.has-scene-bg-canvas .story-body p,
+.has-scene-bg-canvas .story-body li,
+.has-scene-bg-canvas .story-body blockquote,
+.has-scene-bg .story-body,
+.has-scene-bg .story-body p,
+.has-scene-bg .story-body li,
+.has-scene-bg .story-body blockquote {
+  color: var(--text);
+}
+/* ルビは元々 --text-soft なので、bg ON 時にもう少し濃くする */
+.has-scene-bg-canvas .story-body rt,
+.has-scene-bg .story-body rt {
+  color: color-mix(in srgb, var(--text) 80%, var(--text-soft) 20%);
 }
 
 /* レガシー .scene-section（h3 でくるんでいた古い形式） — 互換性のため残す
