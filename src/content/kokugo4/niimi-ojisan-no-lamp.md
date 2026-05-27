@@ -27,6 +27,7 @@ keywords:
   - ランプ
   - 時代変化
   - 児童文学
+cover_image: /illustrations/kokugo4/niimi-ojisan-no-lamp/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

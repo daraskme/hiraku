@@ -26,6 +26,7 @@ keywords:
   - 近代小説
   - 古典翻案
   - 今昔物語集
+cover_image: /illustrations/chugaku3/akutagawa-hana/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
