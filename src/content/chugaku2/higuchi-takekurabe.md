@@ -24,6 +24,7 @@ keywords:
   - 明治
   - 雅文体
   - 吉原
+cover_image: /illustrations/chugaku2/higuchi-takekurabe/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
