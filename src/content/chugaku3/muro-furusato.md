@@ -25,6 +25,7 @@ keywords:
   - 近代詩
   - 金沢
   - 大正
+cover_image: /illustrations/chugaku3/muro-furusato/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
