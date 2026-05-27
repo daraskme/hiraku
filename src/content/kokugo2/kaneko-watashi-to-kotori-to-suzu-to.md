@@ -24,6 +24,7 @@ keywords:
   - 昭和
   - 自他
   - 共生
+cover_image: /illustrations/kokugo2/kaneko-watashi-to-kotori-to-suzu-to/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
