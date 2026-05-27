@@ -27,6 +27,7 @@ keywords:
   - 童謡
   - 詩
   - 命
+cover_image: /illustrations/kokugo1/kaneko-tairyou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
