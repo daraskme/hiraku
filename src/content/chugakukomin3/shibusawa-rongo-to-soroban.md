@@ -30,6 +30,7 @@ keywords:
   - 経済倫理
   - 大正
   - 一万円札
+cover_image: /illustrations/chugakukomin3/shibusawa-rongo-to-soroban/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
