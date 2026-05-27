@@ -22,6 +22,7 @@ keywords:
   - 遺伝法則
   - エンドウ豆
   - 生物学史
+cover_image: /illustrations/seibutsu1/mendel-iden-no-housoku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

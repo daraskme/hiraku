@@ -27,6 +27,7 @@ keywords:
   - 周期律
   - 元素
   - 化学
+cover_image: /illustrations/kagaku1/mendeleev-shukihyo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

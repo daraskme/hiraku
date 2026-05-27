@@ -27,6 +27,7 @@ keywords:
   - 微生物
   - 病原菌説
   - パスチャライゼーション
+cover_image: /illustrations/seibutsu1/pasteur-saikin/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

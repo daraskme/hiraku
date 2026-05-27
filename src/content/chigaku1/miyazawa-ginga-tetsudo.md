@@ -27,6 +27,7 @@ keywords:
   - 銀河系
   - 天の川
   - 文学と天文学
+cover_image: /illustrations/chigaku1/miyazawa-ginga-tetsudo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

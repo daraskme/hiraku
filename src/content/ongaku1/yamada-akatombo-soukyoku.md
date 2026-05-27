@@ -30,6 +30,7 @@ keywords:
   - 童謡
   - 大正
   - 童謡運動
+cover_image: /illustrations/ongaku1/yamada-akatombo-soukyoku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

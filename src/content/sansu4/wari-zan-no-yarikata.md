@@ -27,6 +27,7 @@ keywords:
   - 等分除
   - 包含除
   - 概念形成
+cover_image: /illustrations/sansu4/wari-zan-no-yarikata/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

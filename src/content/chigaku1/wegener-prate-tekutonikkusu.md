@@ -22,6 +22,7 @@ keywords:
   - 大陸移動説
   - プレートテクトニクス
   - パンゲア
+cover_image: /illustrations/chigaku1/wegener-prate-tekutonikkusu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

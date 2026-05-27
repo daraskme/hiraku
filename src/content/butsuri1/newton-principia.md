@@ -27,6 +27,7 @@ keywords:
   - 万有引力
   - 運動法則
   - 古典力学
+cover_image: /illustrations/butsuri1/newton-principia/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
