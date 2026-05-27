@@ -30,6 +30,7 @@ keywords:
   - 江戸時代
   - 数学パズル
   - 論理思考
+cover_image: /illustrations/sansu5/abura-wake-zan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
