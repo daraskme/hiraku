@@ -27,6 +27,7 @@ keywords:
   - 連立方程式
   - 和算
   - 江戸数学
+cover_image: /illustrations/chugakusugaku2/seki-takakazu-renritsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

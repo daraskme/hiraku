@@ -27,6 +27,7 @@ keywords:
   - 塵劫記
   - 数の単位
   - 江戸数学
+cover_image: /illustrations/sansu4/oki-na-kazu-tani/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

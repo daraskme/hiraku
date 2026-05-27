@@ -27,6 +27,7 @@ keywords:
   - 算額
   - 和算
   - 立体図形
+cover_image: /illustrations/chugakusugaku3/sanpeihou-ouyou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

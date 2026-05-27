@@ -27,6 +27,7 @@ keywords:
   - 代数
   - 中1数学
   - 数学史
+cover_image: /illustrations/chugakusugaku1/sansu-to-suugaku-no-hashiwatashi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

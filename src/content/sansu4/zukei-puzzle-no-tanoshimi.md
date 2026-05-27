@@ -21,6 +21,7 @@ keywords:
   - 七巧板
   - 図形パズル
   - 算数
+cover_image: /illustrations/sansu4/zukei-puzzle-no-tanoshimi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
