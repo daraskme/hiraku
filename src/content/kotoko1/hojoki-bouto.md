@@ -33,6 +33,7 @@ keywords:
   - 隠者文学
   - 鎌倉時代
   - 随筆
+cover_image: /illustrations/kotoko1/hojoki-bouto/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
