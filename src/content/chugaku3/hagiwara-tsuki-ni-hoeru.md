@@ -25,6 +25,7 @@ keywords:
   - 近代詩
   - 大正
   - 口語自由詩
+cover_image: /illustrations/chugaku3/hagiwara-tsuki-ni-hoeru/scene1.webp
 jlpt: N1
 kanji_level: 8
 vocab_level: 中級
