@@ -27,6 +27,7 @@ keywords:
   - 食文化
   - 和食
   - 大正期
+cover_image: /illustrations/kateika5/kinoshita-bimi-kyushin/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
