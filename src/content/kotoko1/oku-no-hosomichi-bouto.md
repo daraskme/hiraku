@@ -33,6 +33,7 @@ keywords:
   - 旅
   - わび・さび
   - 不易流行
+cover_image: /illustrations/kotoko1/oku-no-hosomichi-bouto/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
