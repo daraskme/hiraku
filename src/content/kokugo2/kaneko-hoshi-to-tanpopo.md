@@ -27,6 +27,7 @@ keywords:
   - 童謡
   - 自然
   - 見えない命
+cover_image: /illustrations/kokugo2/kaneko-hoshi-to-tanpopo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
