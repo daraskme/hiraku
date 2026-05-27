@@ -25,6 +25,7 @@ keywords:
   - 座標
   - 一次関数
   - 数学史
+cover_image: /illustrations/chugakusugaku2/descartes-zahyo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

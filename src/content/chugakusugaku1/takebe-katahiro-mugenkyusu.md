@@ -22,6 +22,7 @@ keywords:
   - 無限級数
   - 円周率
   - 和算
+cover_image: /illustrations/chugakusugaku1/takebe-katahiro-mugenkyusu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

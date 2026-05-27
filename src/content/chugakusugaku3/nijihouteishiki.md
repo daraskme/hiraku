@@ -24,6 +24,7 @@ keywords:
   - 解の公式
   - 数学史
   - アル・フワーリズミー
+cover_image: /illustrations/chugakusugaku3/nijihouteishiki/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

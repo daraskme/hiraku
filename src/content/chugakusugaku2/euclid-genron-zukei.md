@@ -27,6 +27,7 @@ keywords:
   - 幾何学
   - 証明
   - 公理
+cover_image: /illustrations/chugakusugaku2/euclid-genron-zukei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

@@ -27,6 +27,7 @@ keywords:
   - 和算
   - 庶民文化
   - 数学史
+cover_image: /illustrations/chugakusugaku1/sangaku-bunka/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

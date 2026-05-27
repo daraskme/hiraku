@@ -27,6 +27,7 @@ keywords:
   - 半円定理
   - 古代ギリシャ
   - 幾何学
+cover_image: /illustrations/chugakusugaku3/thales-enshukaku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
