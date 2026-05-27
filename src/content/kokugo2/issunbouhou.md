@@ -23,6 +23,7 @@ keywords:
   - 民話
   - 楠山正雄
   - 御伽草子
+cover_image: /illustrations/kokugo2/issunbouhou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

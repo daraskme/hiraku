@@ -25,6 +25,7 @@ keywords:
   - 赤い鳥
   - 仏教説話
   - 大正
+cover_image: /illustrations/chugaku2/akutagawa-kumo-no-ito/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

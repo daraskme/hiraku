@@ -23,6 +23,7 @@ keywords:
   - 47音
   - 平安
   - 手習い
+cover_image: /illustrations/kokugo1/iroha-uta/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
