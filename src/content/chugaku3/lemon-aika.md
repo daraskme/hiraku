@@ -26,6 +26,7 @@ keywords:
   - 妻
   - レモン
   - 昭和
+cover_image: /illustrations/chugaku3/lemon-aika/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
