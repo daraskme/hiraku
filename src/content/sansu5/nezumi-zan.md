@@ -30,6 +30,7 @@ keywords:
   - 鼠算
   - 指数
   - 倍々
+cover_image: /illustrations/sansu5/nezumi-zan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
