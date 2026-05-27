@@ -23,6 +23,7 @@ keywords:
   - 七つの子
   - 烏
   - 大正
+cover_image: /illustrations/kokugo1/noguchi-nanatsu-no-ko/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
