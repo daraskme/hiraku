@@ -25,6 +25,7 @@ keywords:
   - 戦後文学
   - 没落華族
   - 昭和22年
+cover_image: /illustrations/kotoko2/dazai-shayou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
