@@ -24,6 +24,7 @@ keywords:
   - 近代詩
   - ソネット
   - 昭和初期
+cover_image: /illustrations/chugaku3/tachihara-nochinoomoini/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

@@ -23,6 +23,7 @@ keywords:
   - 童謡
   - 雨
   - 大正
+cover_image: /illustrations/kokugo1/kitahara-amefuri/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
