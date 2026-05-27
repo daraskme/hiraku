@@ -27,6 +27,7 @@ keywords:
   - 日本昔話
   - 児童文学
   - 仇討ち
+cover_image: /illustrations/kokugo3/iwaya-sarukani-gassen/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

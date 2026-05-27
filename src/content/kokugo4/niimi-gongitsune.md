@@ -25,6 +25,7 @@ keywords:
   - 児童文学
   - 昭和
   - 赤い鳥
+cover_image: /illustrations/kokugo3/gongitsune/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
