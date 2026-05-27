@@ -26,6 +26,7 @@ keywords:
   - 倫理
   - 安楽死
   - 大正
+cover_image: /illustrations/chugaku2/mori-takase-bune/scene1.webp
 jlpt: N2
 kanji_level: 7
 vocab_level: 中級
