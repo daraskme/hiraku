@@ -29,6 +29,7 @@ keywords:
   - 約束
   - 走る
   - 昭和
+cover_image: /illustrations/chugaku2/hashire-merosu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

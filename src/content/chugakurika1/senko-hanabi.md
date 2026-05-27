@@ -30,6 +30,7 @@ keywords:
   - 観察
   - 科学と文学
   - 研究の動機
+cover_image: /illustrations/chugakurika1/senko-hanabi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

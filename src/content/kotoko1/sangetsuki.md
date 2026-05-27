@@ -29,6 +29,7 @@ keywords:
   - 自尊心
   - 変身
   - 漢文調
+cover_image: /illustrations/kotoko1/sangetsuki/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

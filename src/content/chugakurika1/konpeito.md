@@ -28,6 +28,7 @@ keywords:
   - 統計
   - 不安定
   - 物質と生命
+cover_image: /illustrations/chugakurika1/konpeito/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

@@ -30,6 +30,7 @@ keywords:
   - 鶴亀算
   - 論理
   - 江戸
+cover_image: /illustrations/sansu5/tsurukame-zan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
