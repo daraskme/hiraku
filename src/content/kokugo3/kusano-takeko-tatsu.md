@@ -23,6 +23,7 @@ keywords:
   - 月に吠える
   - 大正
   - 近代詩
+cover_image: /illustrations/kokugo3/kusano-takeko-tatsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
