@@ -30,6 +30,7 @@ keywords:
   - 日本哲学
   - 評論
   - 大学入試
+cover_image: /illustrations/kotoko3/nishida-zen-no-kenkyu/scene1.webp
 jlpt: N1
 kanji_level: 10
 vocab_level: 上級
