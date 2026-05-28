@@ -31,6 +31,7 @@ keywords:
   - 四面楚歌
   - 漢文
   - 故事成語
+cover_image: /illustrations/kotokokanbun1/shiki-shimen-soka/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
