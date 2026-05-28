@@ -31,6 +31,7 @@ keywords:
   - American poetry
   - 19th century
   - elegy
+cover_image: /illustrations/kotokoeigo1/whitman-o-captain/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
