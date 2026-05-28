@@ -34,6 +34,7 @@ keywords:
   - 皇紀
   - 紀元節
   - 八咫烏
+cover_image: /illustrations/chugakurekishi1/jinmu-tosei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
