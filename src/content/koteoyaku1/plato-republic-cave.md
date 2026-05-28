@@ -31,6 +31,7 @@ keywords:
   - 古代ギリシア
   - イデア
   - 教育
+cover_image: /illustrations/koteoyaku1/plato-republic-cave/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
