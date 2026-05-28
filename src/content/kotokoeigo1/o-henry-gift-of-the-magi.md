@@ -31,6 +31,7 @@ keywords:
   - Christmas
   - 20世紀初頭アメリカ
   - 英語短編
+cover_image: /illustrations/kotokoeigo1/o-henry-gift-of-the-magi/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
