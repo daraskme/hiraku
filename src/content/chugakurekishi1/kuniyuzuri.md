@@ -35,6 +35,7 @@ keywords:
   - 出雲大社
   - 天孫降臨
   - 国家神道
+cover_image: /illustrations/chugakurekishi1/kuniyuzuri/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
