@@ -25,6 +25,7 @@ keywords:
   - 新感覚派
   - 大正
   - 文藝春秋
+cover_image: /illustrations/chugaku2/yokomitsu-hae/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
