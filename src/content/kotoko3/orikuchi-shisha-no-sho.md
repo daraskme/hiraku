@@ -27,6 +27,7 @@ keywords:
   - 民俗学
   - 古代文学
   - 釈迢空
+cover_image: /illustrations/kotoko3/orikuchi-shisha-no-sho/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
