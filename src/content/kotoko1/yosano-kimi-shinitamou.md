@@ -30,6 +30,7 @@ keywords:
   - 明治
   - 明星
   - 旅順
+cover_image: /illustrations/kotoko1/yosano-kimi-shinitamou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
