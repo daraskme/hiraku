@@ -31,6 +31,7 @@ keywords:
   - Romanticism
   - 19th century
   - Nevermore
+cover_image: /illustrations/kotokoeigo1/poe-the-raven/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
