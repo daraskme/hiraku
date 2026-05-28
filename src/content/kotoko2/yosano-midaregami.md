@@ -27,6 +27,7 @@ keywords:
   - 短歌
   - 明治文学
   - 明星派
+cover_image: /illustrations/kotoko2/yosano-midaregami/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
