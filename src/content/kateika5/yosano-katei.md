@@ -30,6 +30,7 @@ keywords:
   - 家庭
   - 大正
   - 女性論
+cover_image: /illustrations/kateika5/yosano-katei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
