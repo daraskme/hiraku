@@ -29,6 +29,7 @@ keywords:
   - 和算
   - π
   - 江戸時代
+cover_image: /illustrations/sansu5/enseki-ritsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
