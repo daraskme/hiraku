@@ -30,6 +30,7 @@ keywords:
   - ローマ帝国
   - 哲学
   - 古代
+cover_image: /illustrations/koteoyaku1/marcus-aurelius-meditations/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
