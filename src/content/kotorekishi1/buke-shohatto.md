@@ -27,6 +27,7 @@ keywords:
   - 江戸幕府
   - 徳川家光
   - 幕藩体制
+cover_image: /illustrations/kotorekishi1/buke-shohatto/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
