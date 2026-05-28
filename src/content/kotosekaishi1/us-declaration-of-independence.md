@@ -30,6 +30,7 @@ keywords:
   - 自然権
   - 民主主義
   - 啓蒙思想
+cover_image: /illustrations/kotosekaishi1/us-declaration-of-independence/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
