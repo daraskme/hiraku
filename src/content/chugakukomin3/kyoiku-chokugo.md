@@ -34,6 +34,7 @@ keywords:
   - 1948年失効
   - 教育基本法
   - 批判的思考
+cover_image: /illustrations/chugakukomin3/kyoiku-chokugo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
