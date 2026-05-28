@@ -34,6 +34,7 @@ keywords:
   - 出雲
   - 蒲の穂
   - ヤガミヒメ
+cover_image: /illustrations/chugakurekishi1/inaba-no-shirousagi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
