@@ -25,6 +25,7 @@ keywords:
   - 観察
   - 自然科学
   - 高知
+cover_image: /illustrations/chugakurika1/makino-shokubutsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
