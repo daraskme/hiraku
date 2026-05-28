@@ -27,6 +27,7 @@ keywords:
   - 雪の結晶
   - 気象
   - 随筆
+cover_image: /illustrations/chugakurika2/nakaya-yuki-to-jinsei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
