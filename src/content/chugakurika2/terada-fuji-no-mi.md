@@ -26,6 +26,7 @@ keywords:
   - 観察
   - 物理学
   - 植物学
+cover_image: /illustrations/chugakurika2/terada-fuji-no-mi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
