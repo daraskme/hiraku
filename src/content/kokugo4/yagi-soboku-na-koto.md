@@ -23,6 +23,7 @@ keywords:
   - 秋
   - 詩
   - 大正
+cover_image: /illustrations/kokugo4/yagi-soboku-na-koto/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
