@@ -27,6 +27,7 @@ keywords:
   - 月見草
   - 旅
   - 昭和
+cover_image: /illustrations/kotoko2/fugaku-hyakkei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
