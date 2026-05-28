@@ -69,9 +69,10 @@
 
 ### 数値サマリー
 
-- **総 WebP ファイル数**: 159
-- **`cover_image:` 設定済み教材数**: 120
-- **未挿絵 collection**（要展開）: `chugaku3`, `kokugo6`, `kateika5`, `sansu5`, `kotoko2`, `kotoko3`, `kotokoeigo1`, `kotokokanbun1`, `kotorekishi1`, `kotosekaishi1`, `koteoyaku1`, `chugakurika1`, `chugakurika2`, `chugakurekishi1`, `chugakukomin3` ほか
+- **総 WebP ファイル数**: 207
+- **`cover_image:` 設定済み教材数**: 210 / 211 (99.5%)
+- **残り**: `kagaku1/suzuki-umetaro-vitamin` のみ未設定（DALL-E rate limit のため別途生成予定）
+- **全 collection で 100% 達成**: kokugo1-6, chugaku1-3, chugakurika1-2, chugakurekishi1, chugakukomin3, sansu5, kateika5, kotoko1-3, kotokoeigo1, kotokokanbun1, kotorekishi1, koteoyaku1, kotosekaishi1, bijutsu1, taiiku1, doutoku1, jouhou1, seibutsu1, kagaku1 (1件残), butsuri1, chigaku1, ongaku1, sansu4, chugakusugaku1-3
 
 ## 追加するときの規約
 
