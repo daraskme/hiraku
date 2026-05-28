@@ -30,6 +30,7 @@ keywords:
   - 怪談
   - 江戸
   - 英文学
+cover_image: /illustrations/kotokoeigo1/mujina/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
