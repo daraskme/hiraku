@@ -28,6 +28,7 @@ keywords:
   - 太陽
   - 共同体
   - 奈良時代
+cover_image: /illustrations/chugakurekishi1/ama-no-iwato/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
