@@ -32,6 +32,7 @@ keywords:
   - 歴史小説
   - 漢文翻案
   - 昭和文学
+cover_image: /illustrations/kotoko2/nakajima-deshi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
