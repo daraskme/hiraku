@@ -29,6 +29,7 @@ keywords:
   - 主権在民
   - 平和主義
   - 戦後
+cover_image: /illustrations/chugakukomin3/kenpo-zenbun/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
