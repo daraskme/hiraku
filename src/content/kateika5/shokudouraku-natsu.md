@@ -30,6 +30,7 @@ keywords:
   - 季節食
   - 家庭料理
   - 明治
+cover_image: /illustrations/kateika5/shokudouraku-natsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
