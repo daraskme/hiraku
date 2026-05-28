@@ -33,6 +33,7 @@ keywords:
   - 民主政
   - デモクラチア
   - ペロポネソス戦争
+cover_image: /illustrations/kotosekaishi1/pericles-funeral-oration/scene1.webp
 license_editorial: CC-BY-SA-4.0
 license_original: PublicDomain
 goals:
