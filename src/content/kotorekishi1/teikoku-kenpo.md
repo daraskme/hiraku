@@ -33,6 +33,7 @@ keywords:
   - 天皇主権
   - 統治権
   - プロイセン憲法
+cover_image: /illustrations/kotorekishi1/teikoku-kenpo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
