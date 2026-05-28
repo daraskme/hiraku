@@ -25,6 +25,7 @@ keywords:
   - 測量船
   - 近代詩
   - 短詩
+cover_image: /illustrations/chugaku1/miyoshi-tsuchi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
