@@ -26,6 +26,7 @@ keywords:
   - 北海道大学
   - 寺田寅彦
   - 観察
+cover_image: /illustrations/chugakurika1/nakaya-yuki-wo-tsukuru-hanashi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
