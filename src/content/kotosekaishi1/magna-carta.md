@@ -32,6 +32,7 @@ keywords:
   - 法の支配
   - 立憲主義
   - イギリス史
+cover_image: /illustrations/kotosekaishi1/magna-carta/scene1.webp
 license_editorial: CC-BY-SA-4.0
 license_original: PublicDomain
 goals:
