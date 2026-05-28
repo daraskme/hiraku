@@ -25,6 +25,7 @@ keywords:
   - 近代詩
   - 大正
   - 道程
+cover_image: /illustrations/kokugo6/takamura-fuyu-ga-kita/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
