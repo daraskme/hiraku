@@ -34,6 +34,7 @@ keywords:
   - 高千穂
   - 五伴緒
   - 皇祖神
+cover_image: /illustrations/chugakurekishi1/tenson-korin/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
