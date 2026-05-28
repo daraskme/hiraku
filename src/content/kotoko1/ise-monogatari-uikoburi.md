@@ -28,6 +28,7 @@ keywords:
   - みやび
   - 在原業平
   - 平安
+cover_image: /illustrations/kotoko1/ise-monogatari-uikoburi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
