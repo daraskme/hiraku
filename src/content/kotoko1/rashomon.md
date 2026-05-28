@@ -30,6 +30,7 @@ keywords:
   - 飢え
   - 悪
   - 下人
+cover_image: /illustrations/kotoko1/rashomon/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
