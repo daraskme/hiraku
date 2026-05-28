@@ -32,6 +32,7 @@ keywords:
   - 木戸孝允
   - 明治天皇
   - 公議政体
+cover_image: /illustrations/kotorekishi1/gokajo-no-goseimon/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
