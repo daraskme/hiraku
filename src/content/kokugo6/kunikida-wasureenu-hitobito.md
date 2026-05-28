@@ -24,6 +24,7 @@ keywords:
   - 忘れえぬ人々
   - 明治
   - 自然主義
+cover_image: /illustrations/kokugo6/kunikida-wasureenu-hitobito/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
