@@ -31,6 +31,7 @@ keywords:
   - 戦時下文学
   - 京都学派
   - 大学入試
+cover_image: /illustrations/kotoko3/miki-kiyoshi-jinseiron-note/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
