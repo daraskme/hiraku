@@ -27,6 +27,7 @@ keywords:
   - 唐詩
   - 五言絶句
   - 望郷
+cover_image: /illustrations/kotokokanbun1/libai-seiyashi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
