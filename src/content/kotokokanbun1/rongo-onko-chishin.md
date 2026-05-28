@@ -27,6 +27,7 @@ keywords:
   - 温故知新
   - 漢文
   - 為政篇
+cover_image: /illustrations/kotokokanbun1/rongo-onko-chishin/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
