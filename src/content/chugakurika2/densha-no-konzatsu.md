@@ -29,6 +29,7 @@ keywords:
   - 観察
   - 大正
   - 随筆
+cover_image: /illustrations/chugakurika2/densha-no-konzatsu/scene1.webp
 jlpt: N2
 kanji_level: 8
 vocab_level: 中級
