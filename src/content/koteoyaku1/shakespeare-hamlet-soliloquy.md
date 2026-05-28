@@ -26,6 +26,7 @@ keywords:
   - 独白
   - 西洋古典
   - 翻訳
+cover_image: /illustrations/koteoyaku1/shakespeare-hamlet-soliloquy/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
