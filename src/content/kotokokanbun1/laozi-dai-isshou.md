@@ -30,6 +30,7 @@ keywords:
   - 漢文
   - タオ
   - 春秋戦国
+cover_image: /illustrations/kotokokanbun1/laozi-dai-isshou/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
