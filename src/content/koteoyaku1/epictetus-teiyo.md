@@ -27,6 +27,7 @@ keywords:
   - ストア派
   - 古代哲学
   - 心の自由
+cover_image: /illustrations/koteoyaku1/epictetus-teiyo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
