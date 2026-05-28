@@ -30,6 +30,7 @@ keywords:
   - 古代末期
   - キリスト教神学
   - 自伝文学
+cover_image: /illustrations/koteoyaku1/augustinus-confessions/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
