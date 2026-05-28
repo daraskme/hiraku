@@ -30,6 +30,7 @@ keywords:
   - 1916年
   - 中央公論
   - 普通選挙
+cover_image: /illustrations/chugakukomin3/yoshino-minponshugi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
