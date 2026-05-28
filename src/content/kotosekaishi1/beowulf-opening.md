@@ -29,6 +29,7 @@ keywords:
   - 叙事詩
   - 中世
   - 英文学起源
+cover_image: /illustrations/kotosekaishi1/beowulf-opening/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
