@@ -26,6 +26,7 @@ keywords:
   - 故郷
   - 望郷
   - 大正
+cover_image: /illustrations/chugaku2/shoukei-ijou/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
