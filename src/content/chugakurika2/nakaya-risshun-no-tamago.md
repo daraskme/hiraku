@@ -26,6 +26,7 @@ keywords:
   - 科学リテラシー
   - 物理学
   - 疑似科学
+cover_image: /illustrations/chugakurika2/nakaya-risshun-no-tamago/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
