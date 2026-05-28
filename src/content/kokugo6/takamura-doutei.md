@@ -27,6 +27,7 @@ keywords:
   - 近代詩
   - 自立
   - 智恵子
+cover_image: /illustrations/kokugo6/takamura-doutei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:

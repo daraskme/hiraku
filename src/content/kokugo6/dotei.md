@@ -26,6 +26,7 @@ keywords:
   - 決意
   - 自然
   - 大正
+cover_image: /illustrations/kokugo6/takamura-doutei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
