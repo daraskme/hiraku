@@ -31,6 +31,7 @@ keywords:
   - 大正
   - 近代思想
   - 大学入試
+cover_image: /illustrations/kotoko3/soseki-watashi-no-kojinshugi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
