@@ -30,6 +30,7 @@ keywords:
   - 雪女
   - 民話
   - 約束
+cover_image: /illustrations/kotokoeigo1/yuki-onna/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
