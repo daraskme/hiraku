@@ -26,6 +26,7 @@ keywords:
   - 健康
   - 明治
   - 栄養
+cover_image: /illustrations/kateika5/shokudouraku-haru/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
