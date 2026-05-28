@@ -30,6 +30,7 @@ keywords:
   - 額田王
   - 奈良時代
   - 古代日本
+cover_image: /illustrations/chugakurekishi1/manyoshu-shiika/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
