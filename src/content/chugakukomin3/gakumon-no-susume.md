@@ -32,6 +32,7 @@ keywords:
   - 人権
   - 平等
   - 学問
+cover_image: /illustrations/chugakukomin3/gakumon-no-susume/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
