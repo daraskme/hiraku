@@ -30,6 +30,7 @@ keywords:
   - 文明開化
   - 啓蒙思想
   - 大学入試
+cover_image: /illustrations/kotoko3/fukuzawa-bunmeiron-no-gairyaku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
