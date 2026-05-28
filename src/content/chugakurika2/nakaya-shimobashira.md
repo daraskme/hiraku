@@ -25,6 +25,7 @@ keywords:
   - 結晶
   - 観察
   - 物理学
+cover_image: /illustrations/chugakurika2/nakaya-shimobashira/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
