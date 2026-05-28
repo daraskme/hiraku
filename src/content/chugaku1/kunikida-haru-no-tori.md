@@ -23,6 +23,7 @@ keywords:
   - 春の鳥
   - 明治
   - 近代短編
+cover_image: /illustrations/chugaku1/kunikida-haru-no-tori/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
