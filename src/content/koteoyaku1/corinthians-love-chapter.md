@@ -30,6 +30,7 @@ keywords:
   - キリスト教
   - 愛
   - 古代ローマ
+cover_image: /illustrations/koteoyaku1/corinthians-love-chapter/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
