@@ -26,6 +26,7 @@ keywords:
   - 反復
   - 視覚詩
   - 大正
+cover_image: /illustrations/kokugo6/fukei/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
