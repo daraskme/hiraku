@@ -29,6 +29,7 @@ keywords:
   - 公論
   - 開国
   - 近代化
+cover_image: /illustrations/chugakukomin3/gokajo-no-goseimon/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
