@@ -32,6 +32,7 @@ keywords:
   - 昭和
   - 終戦
   - "1946"
+cover_image: /illustrations/kotoko2/sakaguchi-darakuron/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
