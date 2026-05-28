@@ -27,6 +27,7 @@ keywords:
   - 塵劫記
   - 和算
   - 算数
+cover_image: /illustrations/sansu5/heikin-to-bunsu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
