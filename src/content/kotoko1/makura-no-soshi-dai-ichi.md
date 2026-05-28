@@ -33,6 +33,7 @@ keywords:
   - 中宮定子
   - をかし
   - 四季
+cover_image: /illustrations/kotoko1/makura-no-soshi-dai-ichi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
