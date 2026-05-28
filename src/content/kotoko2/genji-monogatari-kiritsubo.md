@@ -33,6 +33,7 @@ keywords:
   - 物語
   - 光源氏
   - あはれ
+cover_image: /illustrations/kotoko2/genji-monogatari-kiritsubo/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
