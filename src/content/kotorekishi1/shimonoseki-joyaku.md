@@ -30,6 +30,7 @@ keywords:
   - 李鴻章
   - 台湾割譲
   - 三国干渉
+cover_image: /illustrations/kotorekishi1/shimonoseki-joyaku/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
