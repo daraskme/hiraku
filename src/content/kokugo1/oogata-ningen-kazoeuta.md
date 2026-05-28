@@ -20,6 +20,7 @@ keywords:
   - 動物
   - リズム
   - 小1
+cover_image: /illustrations/kokugo1/oogata-ningen-kazoeuta/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
