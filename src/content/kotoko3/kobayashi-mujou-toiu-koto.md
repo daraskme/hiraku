@@ -31,6 +31,7 @@ keywords:
   - 比叡山
   - 大学入試
   - 一言芳談抄
+cover_image: /illustrations/kotoko3/kobayashi-mujou-toiu-koto/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
