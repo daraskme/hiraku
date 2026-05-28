@@ -31,6 +31,7 @@ keywords:
   - 家族
   - 明治
   - 季節食材
+cover_image: /illustrations/kateika5/shokudouraku-fuyu/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
