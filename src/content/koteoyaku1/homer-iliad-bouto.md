@@ -26,6 +26,7 @@ keywords:
   - 土井晩翠
   - 叙事詩
   - 翻訳
+cover_image: /illustrations/koteoyaku1/homer-iliad-bouto/scene1.webp
 jlpt: N1
 kanji_level: 10
 vocab_level: 上級
