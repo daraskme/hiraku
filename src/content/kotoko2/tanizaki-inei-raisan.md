@@ -31,6 +31,7 @@ keywords:
   - 昭和
   - 随筆
   - 漆器
+cover_image: /illustrations/kotoko2/tanizaki-inei-raisan/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
