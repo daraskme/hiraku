@@ -26,6 +26,7 @@ keywords:
   - 海陸風
   - 気象
   - 科学随筆
+cover_image: /illustrations/chugakurika2/terada-yunagi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
