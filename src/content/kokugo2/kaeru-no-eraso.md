@@ -24,6 +24,7 @@ keywords:
   - 詩
   - 擬音語
   - 昭和
+cover_image: /illustrations/kokugo2/kaeru-no-eraso/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
