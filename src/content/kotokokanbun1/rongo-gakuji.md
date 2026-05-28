@@ -30,6 +30,7 @@ keywords:
   - 春秋時代
   - 学び
   - 儒教
+cover_image: /illustrations/kotokokanbun1/rongo-gakuji/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
