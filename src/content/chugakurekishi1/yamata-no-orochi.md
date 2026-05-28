@@ -35,6 +35,7 @@ keywords:
   - 三種の神器
   - クシナダヒメ
   - 製鉄
+cover_image: /illustrations/chugakurekishi1/yamata-no-orochi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
