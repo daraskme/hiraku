@@ -25,6 +25,7 @@ keywords:
   - 童話
   - 大正
   - 赤い鳥
+cover_image: /illustrations/kokugo4/ogawa-tsukiyo-to-megane/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
