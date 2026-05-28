@@ -30,6 +30,7 @@ keywords:
   - 大政奉還
   - 西郷隆盛
   - 岩倉具視
+cover_image: /illustrations/kotorekishi1/osei-fukko/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
