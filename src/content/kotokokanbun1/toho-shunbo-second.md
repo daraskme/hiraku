@@ -30,6 +30,7 @@ keywords:
   - 安史の乱
   - 五言律詩
   - 漢文
+cover_image: /illustrations/kotokokanbun1/toho-shunbo-second/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級

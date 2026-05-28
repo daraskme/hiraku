@@ -31,6 +31,7 @@ keywords:
   - 安史の乱
   - 春望
   - 国破れて山河あり
+cover_image: /illustrations/kotokokanbun1/toho-shunbo/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
