@@ -26,6 +26,7 @@ keywords:
   - 種子散布
   - 植物
   - 観察
+cover_image: /illustrations/chugakurika1/terada-fuji-saihen/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
