@@ -34,6 +34,7 @@ keywords:
   - 大宰府
   - 防人
   - 国民文学
+cover_image: /illustrations/chugakurekishi1/manyoshu-sakimori/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
