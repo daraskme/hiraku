@@ -32,6 +32,7 @@ keywords:
   - 句動詞
   - 必須語彙
   - 文法総合
+cover_image: /illustrations/kotokoeigo1/sentence-patterns/scene1.webp
 license_editorial: CC-BY-SA-4.0
 license_original: CC-BY-SA-4.0
 goals:
