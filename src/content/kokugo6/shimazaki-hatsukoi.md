@@ -25,6 +25,7 @@ keywords:
   - 明治
   - 近代詩
   - 林檎
+cover_image: /illustrations/kokugo6/shimazaki-hatsukoi/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
