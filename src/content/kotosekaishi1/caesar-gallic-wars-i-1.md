@@ -32,6 +32,7 @@ keywords:
   - ガリア
   - ラテン語古典
   - 戦記文学
+cover_image: /illustrations/kotosekaishi1/caesar-gallic-wars-i-1/scene1.webp
 license_editorial: CC-BY-SA-4.0
 license_original: PublicDomain
 goals:
