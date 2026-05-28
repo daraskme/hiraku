@@ -25,6 +25,7 @@ keywords:
   - 明治
   - 自然文学
   - 雑木林
+cover_image: /illustrations/kokugo6/kunikida-musashino/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
