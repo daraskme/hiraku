@@ -32,6 +32,7 @@ keywords:
   - 紫式部
   - 西行
   - 平安
+cover_image: /illustrations/kotoko1/hyakunin-isshu-go-shu/scene1.webp
 jlpt: N1
 kanji_level: 9
 vocab_level: 上級
