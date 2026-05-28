@@ -28,6 +28,7 @@ keywords:
   - 政治学
   - "1946"
   - 評論
+cover_image: /illustrations/kotoko3/maruyama-masao-chokokka/scene1.webp
 jlpt: N1
 kanji_level: 10
 vocab_level: 上級
