@@ -41,7 +41,7 @@
 
 | Collection       | 完成数 | 主題                                       |
 | ---------------- | ------ | ------------------------------------------ |
-| `bijutsu1`       | 4 / 4  | 美術（北斎・広重・雪舟・応挙）             |
+| `bijutsu1`       | 5 / 5  | 美術（北斎・広重・雪舟・応挙・写楽）       |
 | `taiiku1`        | 4 / 4  | 体育（嘉納治五郎・相撲・武蔵・古代五輪）   |
 | `doutoku1`       | 4 / 4  | 道徳（武士道・報徳・後世遺物・中江藤樹）   |
 | `jouhou1`        | 4 / 4  | 情報（チューリング・シャノン他）           |
@@ -69,10 +69,9 @@
 
 ### 数値サマリー
 
-- **総 WebP ファイル数**: 207
-- **`cover_image:` 設定済み教材数**: 210 / 211 (99.5%)
-- **残り**: `kagaku1/suzuki-umetaro-vitamin` のみ未設定（DALL-E rate limit のため別途生成予定）
-- **全 collection で 100% 達成**: kokugo1-6, chugaku1-3, chugakurika1-2, chugakurekishi1, chugakukomin3, sansu5, kateika5, kotoko1-3, kotokoeigo1, kotokokanbun1, kotorekishi1, koteoyaku1, kotosekaishi1, bijutsu1, taiiku1, doutoku1, jouhou1, seibutsu1, kagaku1 (1件残), butsuri1, chigaku1, ongaku1, sansu4, chugakusugaku1-3
+- **総 WebP ファイル数**: 209
+- **`cover_image:` 設定済み教材数**: 212 / 212 (100%)
+- **全 collection で 100% 達成**: kokugo1-6, chugaku1-3, chugakurika1-2, chugakurekishi1, chugakukomin3, sansu5, kateika5, kotoko1-3, kotokoeigo1, kotokokanbun1, kotorekishi1, koteoyaku1, kotosekaishi1, bijutsu1, taiiku1, doutoku1, jouhou1, seibutsu1, kagaku1, butsuri1, chigaku1, ongaku1, sansu4, chugakusugaku1-3
 
 ## 追加するときの規約
 
