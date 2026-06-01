@@ -24,6 +24,7 @@ keywords:
   - オリザニン
   - 脚気
   - 明治化学
+cover_image: /illustrations/kagaku1/suzuki-umetaro-vitamin/scene1.webp
 license_editorial: CC-BY-4.0
 license_original: PublicDomain
 goals:
