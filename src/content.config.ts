@@ -260,4 +260,145 @@ const jouhou1 = defineCollection({
   schema: lessonSchema,
 });
 
-export const collections = { kokugo1, kokugo2, kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kotoko3, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, koteoyaku1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1, chugakusugaku1, sansu4, ongaku1, chugakusugaku2, chugakusugaku3, seibutsu1, kagaku1, butsuri1, chigaku1, bijutsu1, taiiku1, doutoku1, jouhou1 };
+const kanjiPracticeSchema = z.object({
+  title: z.string(),
+  school_stage: z.enum(['shogaku', 'chugaku', 'kotoko']).default('shogaku'),
+  grade: z.number().int().min(1).max(9),
+  subject: z.string().default('国語'),
+  unit: z.string(),
+  order: z.number().int().default(0),
+  description: z.string(),
+  tags: z.array(z.string()).default([]),
+  items: z.array(z.object({
+    kanji: z.string(),
+    readings: z.array(z.string()).default([]),
+    onyomi: z.array(z.string()).default([]),
+    kunyomi: z.array(z.string()).default([]),
+    meaning: z.string().optional(),
+    stroke_count: z.number().int().min(1).optional(),
+    examples: z.array(z.object({
+      word: z.string(),
+      reading: z.string(),
+      meaning: z.string().optional(),
+    })).default([]),
+    prompts: z.array(z.string()).default([]),
+  })).default([]),
+});
+
+const mathPracticeSchema = z.object({
+  title: z.string(),
+  school_stage: z.enum(['shogaku', 'chugaku', 'kotoko']).default('shogaku'),
+  grade: z.number().int().min(1).max(9),
+  subject: z.string().default('算数'),
+  unit: z.string(),
+  order: z.number().int().default(0),
+  description: z.string(),
+  tags: z.array(z.string()).default([]),
+  problems: z.array(z.object({
+    prompt: z.string(),
+    answer: z.string(),
+    explanation: z.string(),
+    difficulty: z.enum(['basic', 'standard', 'challenge']).default('basic'),
+    type: z.string().default('short-answer'),
+    hints: z.array(z.string()).default([]),
+  })).default([]),
+});
+
+const knowledgePracticeProblemSchema = z.object({
+  prompt: z.string(),
+  answer: z.string(),
+  explanation: z.string(),
+  difficulty: z.enum(['basic', 'standard', 'challenge']).default('basic'),
+  type: z.string().default('short-answer'),
+  hints: z.array(z.string()).default([]),
+});
+
+const sciencePracticeSchema = z.object({
+  title: z.string(),
+  school_stage: z.enum(['shogaku', 'chugaku', 'kotoko']).default('shogaku'),
+  grade: z.number().int().min(1).max(9),
+  subject: z.string().default('理科'),
+  unit: z.string(),
+  order: z.number().int().default(0),
+  description: z.string(),
+  tags: z.array(z.string()).default([]),
+  problems: z.array(knowledgePracticeProblemSchema).default([]),
+});
+
+const socialPracticeSchema = z.object({
+  title: z.string(),
+  school_stage: z.enum(['shogaku', 'chugaku', 'kotoko']).default('shogaku'),
+  grade: z.number().int().min(1).max(9),
+  subject: z.string().default('社会'),
+  unit: z.string(),
+  order: z.number().int().default(0),
+  description: z.string(),
+  tags: z.array(z.string()).default([]),
+  problems: z.array(knowledgePracticeProblemSchema).default([]),
+});
+
+const englishPracticeSchema = z.object({
+  title: z.string(),
+  school_stage: z.enum(['shogaku', 'chugaku', 'kotoko']).default('chugaku'),
+  grade: z.number().int().min(1).max(9),
+  subject: z.string().default('英語'),
+  unit: z.string(),
+  order: z.number().int().default(0),
+  description: z.string(),
+  tags: z.array(z.string()).default([]),
+  entries: z.array(z.object({
+    term: z.string(),
+    kind: z.enum(['word', 'phrase', 'idiom']).default('word'),
+    meaning_ja: z.string(),
+    part_of_speech: z.string().optional(),
+    pronunciation: z.string().optional(),
+    core_image: z.object({
+      summary: z.string(),
+      src: z.string().optional(),
+      alt: z.string().optional(),
+      caption: z.string().optional(),
+      visual_prompt: z.string().optional(),
+    }).optional(),
+    senses: z.array(z.object({
+      label: z.string(),
+      meaning_ja: z.string(),
+      image_note: z.string().optional(),
+      examples: z.array(z.object({
+        en: z.string(),
+        ja: z.string(),
+      })).default([]),
+    })).default([]),
+    examples: z.array(z.object({
+      en: z.string(),
+      ja: z.string(),
+    })).default([]),
+    quiz: z.array(z.string()).default([]),
+  })).default([]),
+});
+
+const kanjiPractice = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/kanjiPractice' }),
+  schema: kanjiPracticeSchema,
+});
+
+const mathPractice = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/mathPractice' }),
+  schema: mathPracticeSchema,
+});
+
+const sciencePractice = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/sciencePractice' }),
+  schema: sciencePracticeSchema,
+});
+
+const socialPractice = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/socialPractice' }),
+  schema: socialPracticeSchema,
+});
+
+const englishPractice = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/englishPractice' }),
+  schema: englishPracticeSchema,
+});
+
+export const collections = { kokugo1, kokugo2, kokugo3, kokugo4, kokugo6, chugaku1, chugaku2, chugaku3, kotoko1, kotoko2, kotoko3, kateika5, chugakurika1, chugakurika2, chugakurekishi1, kotokoeigo1, koteoyaku1, kotokokanbun1, sansu5, chugakukomin3, kotorekishi1, kotosekaishi1, chugakusugaku1, sansu4, ongaku1, chugakusugaku2, chugakusugaku3, seibutsu1, kagaku1, butsuri1, chigaku1, bijutsu1, taiiku1, doutoku1, jouhou1, kanjiPractice, mathPractice, sciencePractice, socialPractice, englishPractice };

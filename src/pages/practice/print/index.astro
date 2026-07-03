@@ -1,0 +1,83 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const kanjiSets = (await getCollection('kanjiPractice')).sort((a, b) => a.data.grade - b.data.grade || a.data.order - b.data.order);
+const mathSets = (await getCollection('mathPractice')).sort((a, b) => a.data.grade - b.data.grade || a.data.order - b.data.order);
+const scienceSets = (await getCollection('sciencePractice')).sort((a, b) => a.data.grade - b.data.grade || a.data.order - b.data.order);
+const socialSets = (await getCollection('socialPractice')).sort((a, b) => a.data.grade - b.data.grade || a.data.order - b.data.order);
+const englishSets = (await getCollection('englishPractice')).sort((a, b) => a.data.grade - b.data.grade || a.data.order - b.data.order);
+
+const groups = [
+  { label: '漢字', kind: 'kanji', sets: kanjiSets, unit: '字', count: (set: any) => set.data.items.length },
+  { label: '算数・数学', kind: 'math', sets: mathSets, unit: '問', count: (set: any) => set.data.problems.length },
+  { label: '理科', kind: 'science', sets: scienceSets, unit: '問', count: (set: any) => set.data.problems.length },
+  { label: '社会', kind: 'social', sets: socialSets, unit: '問', count: (set: any) => set.data.problems.length },
+  { label: '英語', kind: 'english', sets: englishSets, unit: '項目', count: (set: any) => set.data.entries.length },
+];
+---
+
+<Base title="印刷用練習プリント" description="漢字、算数・数学、英語の印刷用ワークシート。" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>印刷用練習プリント</h1>
+      <span class="section__subtitle">PRINT</span>
+    </div>
+    <p>
+      紙に印刷して書き込むためのA4ワークシートです。
+      各プリントで「問題だけ」と「解答つき」を切り替えられます。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/practice">練習トップ</a> ・
+      <a href="/practice/kanji">漢字</a> ・
+      <a href="/practice/math">算数・数学</a> ・
+      <a href="/practice/science">理科</a> ・
+      <a href="/practice/social">社会</a> ・
+      <a href="/practice/english">英語</a>
+    </p>
+  </section>
+
+  {groups.map((group) => (
+    <section class="section">
+      <div class="section__heading">
+        <h2>{group.label}</h2>
+        <span class="section__subtitle">{group.sets.length} SETS</span>
+      </div>
+      <div class="practice-grid">
+        {group.sets.map((set) => (
+          <article class="practice-card practice-card--link">
+            <a href={`/practice/print/${group.kind}/${set.id}`} class="practice-card__anchor">
+              <p class="practice-card__title">小中{set.data.grade} ・ {set.data.unit}</p>
+              <h3 class="practice-card__main">{set.data.title}</h3>
+              <p>{set.data.description}</p>
+              <p class="practice-card__stats">
+                <span>{group.count(set)} {group.unit}</span>
+                <span>A4印刷</span>
+              </p>
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <style>
+    .practice-card--link { position: relative; }
+    .practice-card__anchor {
+      color: inherit;
+      display: block;
+      text-decoration: none;
+    }
+    .practice-card__anchor::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+    .practice-card--link:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-2px);
+      transition: transform 0.12s, border-color 0.12s;
+    }
+  </style>
+</Base>

@@ -1,0 +1,137 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const kanjiSets = await getCollection('kanjiPractice');
+const mathSets = await getCollection('mathPractice');
+const scienceSets = await getCollection('sciencePractice');
+const socialSets = await getCollection('socialPractice');
+const englishSets = await getCollection('englishPractice');
+
+const categories = [
+  {
+    href: '/practice/kanji',
+    label: '漢字ドリル',
+    meta: `${kanjiSets.length} セット`,
+    count: kanjiSets.reduce((acc, set) => acc + set.data.items.length, 0),
+    unit: '字',
+    desc: '学年ごとの漢字を、読み・熟語・短文づくりで練習します。',
+  },
+  {
+    href: '/practice/math',
+    label: '算数・数学',
+    meta: `${mathSets.length} セット`,
+    count: mathSets.reduce((acc, set) => acc + set.data.problems.length, 0),
+    unit: '問',
+    desc: '基本問題から、式・途中の考え方・単位まで確認します。',
+  },
+  {
+    href: '/practice/science',
+    label: '理科',
+    meta: `${scienceSets.length} セット`,
+    count: scienceSets.reduce((acc, set) => acc + set.data.problems.length, 0),
+    unit: '問',
+    desc: '観察、実験、用語、理由説明を、短い問題で確認します。',
+  },
+  {
+    href: '/practice/social',
+    label: '社会',
+    meta: `${socialSets.length} セット`,
+    count: socialSets.reduce((acc, set) => acc + set.data.problems.length, 0),
+    unit: '問',
+    desc: '地理、歴史、公民の基礎を、地図・年表・用語で練習します。',
+  },
+  {
+    href: '/practice/english',
+    label: '英語',
+    meta: `${englishSets.length} セット`,
+    count: englishSets.reduce((acc, set) => acc + set.data.entries.length, 0),
+    unit: '項目',
+    desc: '単語・熟語・イディオムを、例文と小テストで練習します。',
+  },
+];
+---
+
+<Base title="練習" description="漢字、算数・数学、英語の基礎練習。" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>練習</h1>
+      <span class="section__subtitle">PRACTICE</span>
+    </div>
+    <p>
+      読み物で広げた学びを、手を動かす基礎練習につなげます。
+      漢字、算数・数学、英語に加えて、理科と社会の基礎練習も増やします。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/practice/print">印刷用プリント一覧</a>
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="practice-grid">
+      {categories.map((cat) => (
+        <article class="practice-card practice-card--link">
+          <a href={cat.href} class="practice-card__anchor">
+            <p class="practice-card__title">{cat.meta}</p>
+            <h2 class="practice-card__main">{cat.label}</h2>
+            <p>{cat.desc}</p>
+            <p class="practice-card__stats">
+              <span>{cat.count} {cat.unit}</span>
+              <span>基礎から</span>
+              <span>印刷対応</span>
+            </p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>増やし方の方針</h2>
+      <span class="section__subtitle">ROADMAP</span>
+    </div>
+    <div class="practice-grid">
+      <article class="practice-card">
+        <h3 class="practice-card__title">漢字</h3>
+        <p>小1から小6まで、読み・熟語・例文・書き取り用の短文を学年別に増やします。</p>
+      </article>
+      <article class="practice-card">
+        <h3 class="practice-card__title">算数・数学</h3>
+        <p>単元ごとに「基本」「標準」「挑戦」を分け、答えだけでなく考え方を残します。</p>
+      </article>
+      <article class="practice-card">
+        <h3 class="practice-card__title">理科</h3>
+        <p>観察結果、実験の理由、用語の意味を、短答と説明問題で積み上げます。</p>
+      </article>
+      <article class="practice-card">
+        <h3 class="practice-card__title">社会</h3>
+        <p>地図、年表、資料読み取りにつながる基礎知識を、学年別に増やします。</p>
+      </article>
+      <article class="practice-card">
+        <h3 class="practice-card__title">英語</h3>
+        <p>単語だけでなく、日常表現、熟語、イディオム、例文の言い換えを増やします。</p>
+      </article>
+    </div>
+  </section>
+
+  <style>
+    .practice-card--link { position: relative; }
+    .practice-card__anchor {
+      color: inherit;
+      display: block;
+      text-decoration: none;
+    }
+    .practice-card__anchor::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+    .practice-card--link:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-2px);
+      transition: transform 0.12s, border-color 0.12s;
+    }
+  </style>
+</Base>

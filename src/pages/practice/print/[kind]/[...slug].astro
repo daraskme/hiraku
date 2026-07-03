@@ -1,0 +1,523 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import '../../../../styles/global.css';
+
+export const getStaticPaths = (async () => {
+  const configs = [
+    { kind: 'kanji', collection: 'kanjiPractice', back: '/practice/kanji', label: '漢字' },
+    { kind: 'math', collection: 'mathPractice', back: '/practice/math', label: '算数・数学' },
+    { kind: 'science', collection: 'sciencePractice', back: '/practice/science', label: '理科' },
+    { kind: 'social', collection: 'socialPractice', back: '/practice/social', label: '社会' },
+    { kind: 'english', collection: 'englishPractice', back: '/practice/english', label: '英語' },
+  ] as const;
+  const paths = [];
+  for (const config of configs) {
+    const sets = await getCollection(config.collection as any);
+    for (const set of sets) {
+      paths.push({
+        params: { kind: config.kind, slug: set.id },
+        props: { set, config },
+      });
+    }
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+const { set, config } = Astro.props;
+const data = set.data as any;
+const stageLabel = data.school_stage === 'chugaku' ? '中' : data.school_stage === 'kotoko' ? '高' : '小';
+const subtitle = `${stageLabel}${data.grade} ・ ${data.subject} ・ ${data.unit}`;
+const kanjiItems = config.kind === 'kanji' ? data.items : [];
+const mathProblems = config.kind === 'math' ? data.problems : [];
+const knowledgeProblems = ['math', 'science', 'social'].includes(config.kind) ? data.problems : [];
+const englishEntries = config.kind === 'english' ? data.entries : [];
+const difficultyLabel: Record<string, string> = {
+  basic: '基本',
+  standard: '標準',
+  challenge: '挑戦',
+};
+---
+
+<!doctype html>
+<html lang="ja" data-practice-print>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{data.title} ・ 印刷用 | ひらく</title>
+    <meta name="description" content={`${data.title} の印刷用練習プリント。`} />
+    <style>
+      :root[data-practice-print] body {
+        margin: 0;
+        background: #d8d3c5;
+        color: #1a1a1a;
+      }
+      .pp-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.7rem 1rem;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+      .pp-toolbar__group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .pp-toolbar a,
+      .pp-toolbar button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 0 0.9rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--bg-elevated);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 0.86rem;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .pp-toolbar button[aria-pressed="true"] {
+        background: var(--logo-bg);
+        border-color: var(--logo-bg);
+        color: var(--logo-fg);
+      }
+      .pp-toolbar__hint {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--text-soft);
+      }
+      .pp-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 1.4rem auto;
+        padding: 15mm 14mm;
+        background: white;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+        font-family: var(--font-sans);
+        font-size: 10.5pt;
+        line-height: 1.55;
+      }
+      .pp-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: end;
+        border-bottom: 2px solid #1a1a1a;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.8rem;
+      }
+      .pp-brand {
+        font-family: var(--font-mono);
+        font-size: 8pt;
+        letter-spacing: 0.12em;
+        color: #666;
+        text-transform: uppercase;
+      }
+      .pp-title {
+        margin: 0.2rem 0 0;
+        font-family: var(--font-serif);
+        font-size: 20pt;
+        line-height: 1.25;
+      }
+      .pp-meta {
+        text-align: right;
+        font-size: 9pt;
+        color: #444;
+      }
+      .pp-namebar {
+        display: grid;
+        grid-template-columns: 1fr 38mm;
+        gap: 1rem;
+        margin: 0.8rem 0 1rem;
+      }
+      .pp-namebar span {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        border-bottom: 1px solid #777;
+        min-height: 1.7em;
+      }
+      .pp-section {
+        margin: 0.9rem 0 0;
+      }
+      .pp-section__title {
+        margin: 0 0 0.55rem;
+        padding: 0.2rem 0.5rem;
+        background: #efe9d8;
+        border-left: 4px solid #1d2a3d;
+        font-size: 11pt;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      .pp-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin: 0 0 0.75rem;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid #ddd;
+      }
+      .pp-card__head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.35rem;
+        font-weight: 700;
+      }
+      .pp-answer-line {
+        min-height: 2.2em;
+        border-bottom: 1px solid #888;
+        margin-top: 0.35rem;
+      }
+      .pp-answer-box {
+        min-height: 5.2em;
+        border: 1px solid #888;
+        border-radius: 4px;
+        background:
+          repeating-linear-gradient(
+            transparent,
+            transparent calc(1.55em - 1px),
+            #d4d4d4 calc(1.55em - 1px),
+            #d4d4d4 1.55em
+          );
+      }
+      .pp-writing-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 2.5mm;
+        margin-top: 0.45rem;
+      }
+      .pp-writing-cell {
+        aspect-ratio: 1;
+        border: 1px solid #888;
+        background:
+          linear-gradient(90deg, transparent calc(50% - 0.5px), #ddd calc(50% - 0.5px), #ddd calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+          linear-gradient(0deg, transparent calc(50% - 0.5px), #ddd calc(50% - 0.5px), #ddd calc(50% + 0.5px), transparent calc(50% + 0.5px));
+      }
+      .pp-kanji-sample {
+        font-family: var(--font-serif);
+        font-size: 30pt;
+        line-height: 1;
+      }
+      .pp-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem 1rem;
+      }
+      .pp-vocab-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .pp-vocab-table th,
+      .pp-vocab-table td {
+        border: 1px solid #999;
+        padding: 0.35rem 0.45rem;
+        vertical-align: top;
+      }
+      .pp-vocab-table th {
+        background: #f3efe5;
+        text-align: left;
+      }
+      .pp-core-image {
+        display: grid;
+        grid-template-columns: 58mm 1fr;
+        gap: 0.7rem;
+        align-items: start;
+        margin: 0.5rem 0;
+      }
+      .pp-core-image img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border: 1px solid #999;
+      }
+      .pp-sense-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.45rem 0.7rem;
+      }
+      .pp-sense {
+        border-left: 3px solid #888;
+        padding-left: 0.45rem;
+      }
+      .answer-key,
+      .pp-answer-inline {
+        display: none;
+      }
+      body.print-answers .answer-key {
+        display: block;
+      }
+      body.print-answers .pp-answer-inline {
+        display: inline;
+      }
+      .answer-key {
+        margin-top: 1rem;
+        padding-top: 0.7rem;
+        border-top: 2px solid #1a1a1a;
+      }
+      .pp-footer {
+        margin-top: 1rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #999;
+        color: #555;
+        font-size: 8pt;
+      }
+      body.compact-print .pp-page {
+        font-size: 9.5pt;
+      }
+      body.compact-print .pp-card {
+        margin-bottom: 0.45rem;
+        padding: 0.45rem 0;
+      }
+      body.compact-print .pp-answer-box {
+        min-height: 3.2em;
+      }
+      body.compact-print .pp-writing-grid {
+        grid-template-columns: repeat(10, 1fr);
+      }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      @media print {
+        html, body {
+          background: white !important;
+          margin: 0;
+        }
+        .pp-toolbar {
+          display: none !important;
+        }
+        .pp-page {
+          width: auto;
+          min-height: 0;
+          margin: 0;
+          padding: 15mm 14mm;
+          box-shadow: none;
+        }
+        .pp-section__title,
+        .pp-vocab-table th {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+      @media (max-width: 760px) {
+        .pp-toolbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .pp-page {
+          width: auto;
+          min-height: 0;
+          margin: 0;
+          padding: 1rem;
+        }
+        .pp-header,
+        .pp-namebar,
+        .pp-two-col,
+        .pp-core-image,
+        .pp-sense-list {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pp-toolbar no-print">
+      <div class="pp-toolbar__group">
+        <a href={config.back}>← 練習ページへ</a>
+        <a href="/practice/print">印刷一覧</a>
+        <span class="pp-toolbar__hint">A4・片面印刷向け</span>
+      </div>
+      <div class="pp-toolbar__group" role="group" aria-label="印刷オプション">
+        <button type="button" data-mode="questions" aria-pressed="true">問題だけ</button>
+        <button type="button" data-mode="answers" aria-pressed="false">解答つき</button>
+        <button type="button" data-compact aria-pressed="false">省スペース</button>
+        <button type="button" onclick="window.print()">印刷 / PDF</button>
+      </div>
+    </div>
+
+    <article class="pp-page">
+      <header class="pp-header">
+        <div>
+          <div class="pp-brand">ひらく ・ PRACTICE WORKSHEET</div>
+          <h1 class="pp-title">{data.title}</h1>
+        </div>
+        <div class="pp-meta">
+          <div>{config.label}</div>
+          <div>{subtitle}</div>
+        </div>
+      </header>
+
+      <div class="pp-namebar" aria-label="名前と日付">
+        <span>名前</span>
+        <span>日付</span>
+      </div>
+
+      {config.kind === 'kanji' && (
+        <section class="pp-section">
+          <h2 class="pp-section__title">書いて、読んで、文にする</h2>
+          {kanjiItems.map((item: any, index: number) => (
+            <div class="pp-card">
+              <div class="pp-card__head">
+                <span>問 {index + 1}</span>
+                <span class="pp-answer-inline">読み: {item.readings.join(' / ')}</span>
+              </div>
+              <div class="pp-two-col">
+                <div>
+                  <div class="pp-kanji-sample">{item.kanji}</div>
+                  <p>この漢字をていねいに書きましょう。</p>
+                  <div class="pp-writing-grid" aria-hidden="true">
+                    {Array.from({ length: 8 }).map(() => <div class="pp-writing-cell"></div>)}
+                  </div>
+                </div>
+                <div>
+                  <p>読みを書きましょう。</p>
+                  <div class="pp-answer-line"></div>
+                  <p>この漢字を使って短い文を書きましょう。</p>
+                  <div class="pp-answer-box"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <section class="answer-key">
+            <h2 class="pp-section__title">解答・確認</h2>
+            <ol>
+              {kanjiItems.map((item: any) => (
+                <li>
+                  <strong>{item.kanji}</strong> 読み: {item.readings.join(' / ')}
+                  {item.examples.length > 0 && <> / 熟語: {item.examples.map((ex: any) => `${ex.word}（${ex.reading}）`).join('、')}</>}
+                </li>
+              ))}
+            </ol>
+          </section>
+        </section>
+      )}
+
+      {['math', 'science', 'social'].includes(config.kind) && (
+        <section class="pp-section">
+          <h2 class="pp-section__title">問題</h2>
+          {knowledgeProblems.map((problem: any, index: number) => (
+            <div class="pp-card">
+              <div class="pp-card__head">
+                <span>問 {index + 1}</span>
+                <span>{difficultyLabel[problem.difficulty] ?? problem.difficulty}</span>
+              </div>
+              <p>{problem.prompt}</p>
+              <div class="pp-answer-box"></div>
+              <p class="pp-answer-inline"><strong>答え:</strong> {problem.answer} / {problem.explanation}</p>
+            </div>
+          ))}
+          <section class="answer-key">
+            <h2 class="pp-section__title">解答</h2>
+            <ol>
+              {knowledgeProblems.map((problem: any) => (
+                <li><strong>{problem.answer}</strong> {problem.explanation}</li>
+              ))}
+            </ol>
+          </section>
+        </section>
+      )}
+
+      {config.kind === 'english' && (
+        <section class="pp-section">
+          <h2 class="pp-section__title">単語・表現</h2>
+          <table class="pp-vocab-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">英語</th>
+                <th style="width: 25%;">日本語</th>
+                <th>例文・メモ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {englishEntries.map((entry: any) => (
+                <tr>
+                  <td lang="en"><strong>{entry.term}</strong><br />{entry.part_of_speech ?? ''}</td>
+                  <td><span class="pp-answer-inline">{entry.meaning_ja}</span></td>
+                  <td>
+                    {entry.examples[0] && (
+                      <>
+                        <span lang="en">{entry.examples[0].en}</span><br />
+                        <span class="pp-answer-inline">{entry.examples[0].ja}</span>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {englishEntries.filter((entry: any) => entry.core_image).map((entry: any) => (
+            <div class="pp-card">
+              <div class="pp-card__head">
+                <span lang="en">{entry.term}</span>
+                <span>核イメージ</span>
+              </div>
+              <div class="pp-core-image">
+                {entry.core_image.src && <img src={entry.core_image.src} alt={entry.core_image.alt ?? ''} />}
+                <div>
+                  <p>{entry.core_image.summary}</p>
+                  <p>この絵から、意味の広がりを説明しましょう。</p>
+                  <div class="pp-answer-box"></div>
+                </div>
+              </div>
+              {entry.senses.length > 0 && (
+                <div class="pp-sense-list">
+                  {entry.senses.map((sense: any) => (
+                    <div class="pp-sense">
+                      <strong>{sense.label}</strong>
+                      <p class="pp-answer-inline">{sense.meaning_ja}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <section class="answer-key">
+            <h2 class="pp-section__title">解答・確認</h2>
+            <ol>
+              {englishEntries.map((entry: any) => (
+                <li>
+                  <strong lang="en">{entry.term}</strong>: {entry.meaning_ja}
+                  {entry.core_image && <> / 核イメージ: {entry.core_image.summary}</>}
+                </li>
+              ))}
+            </ol>
+          </section>
+        </section>
+      )}
+
+      <footer class="pp-footer">
+        <p>ひらく / project_procopios ・ {data.title} ・ hiraku-5cb.pages.dev/practice/print/{config.kind}/{set.id}</p>
+      </footer>
+    </article>
+
+    <script>
+      const modeButtons = document.querySelectorAll('[data-mode]');
+      modeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const showAnswers = button.dataset.mode === 'answers';
+          document.body.classList.toggle('print-answers', showAnswers);
+          modeButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        });
+      });
+      const compactButton = document.querySelector('[data-compact]');
+      compactButton?.addEventListener('click', () => {
+        const next = !document.body.classList.contains('compact-print');
+        document.body.classList.toggle('compact-print', next);
+        compactButton.setAttribute('aria-pressed', String(next));
+      });
+    </script>
+  </body>
+</html>

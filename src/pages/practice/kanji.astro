@@ -1,0 +1,91 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const sets = (await getCollection('kanjiPractice')).sort((a, b) => {
+  return a.data.grade - b.data.grade || a.data.order - b.data.order;
+});
+const total = sets.reduce((acc, set) => acc + set.data.items.length, 0);
+---
+
+<Base title="漢字ドリル" description="学年ごとの漢字練習。" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>漢字ドリル</h1>
+      <span class="section__subtitle">KANJI</span>
+    </div>
+    <p>
+      読み、熟語、意味、短文づくりをまとめて練習します。
+      現在 <strong>{sets.length}</strong> セット、<strong>{total}</strong> 字を公開中。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/practice/print">印刷用プリント</a> ・
+      <a href="/practice">練習トップ</a> ・
+      <a href="/practice/math">算数・数学</a> ・
+      <a href="/practice/english">英語</a>
+    </p>
+  </section>
+
+  {sets.map((set) => (
+    <section class="section">
+      <div class="section__heading">
+        <h2>{set.data.title}</h2>
+        <span class="section__subtitle">小{set.data.grade} ・ {set.data.unit}</span>
+      </div>
+      <p class="no-print">
+        <a class="btn btn--ghost" href={`/practice/print/kanji/${set.id}`}>印刷用プリント</a>
+      </p>
+      <p>{set.data.description}</p>
+      <div class="practice-grid">
+        {set.data.items.map((item) => (
+          <article class="practice-card">
+            <p class="practice-card__title">画数 {item.stroke_count ?? '-'} ・ {item.readings.join(' / ')}</p>
+            <div class="kanji-card__glyph">{item.kanji}</div>
+            {item.meaning && <p>{item.meaning}</p>}
+            <details>
+              <summary>読みと熟語</summary>
+              <dl class="practice-detail-list">
+                <dt>音読み</dt>
+                <dd>{item.onyomi.join('、') || '-'}</dd>
+                <dt>訓読み</dt>
+                <dd>{item.kunyomi.join('、') || '-'}</dd>
+              </dl>
+              <ul>
+                {item.examples.map((ex) => (
+                  <li>
+                    <strong>{ex.word}</strong>（{ex.reading}）{ex.meaning ? `: ${ex.meaning}` : ''}
+                  </li>
+                ))}
+              </ul>
+            </details>
+            {item.prompts.length > 0 && (
+              <details>
+                <summary>練習</summary>
+                <ol>
+                  {item.prompts.map((prompt) => <li>{prompt}</li>)}
+                </ol>
+              </details>
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <style>
+    .kanji-card__glyph {
+      font-family: var(--font-serif);
+      font-size: 4rem;
+      line-height: 1.1;
+      margin: 0.2rem 0 0.6rem;
+    }
+    .practice-detail-list {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 0.25rem 0.8rem;
+      margin: 0.8rem 0;
+    }
+    .practice-detail-list dt { color: var(--text-soft); font-weight: 700; }
+    .practice-detail-list dd { margin: 0; }
+  </style>
+</Base>

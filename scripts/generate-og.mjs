@@ -84,6 +84,7 @@ async function loadAllLessons() {
       const slug = f.replace(/\.md$/, '');
       const raw = await readFile(join(dir, f), 'utf-8');
       const { data } = matter(raw);
+      if (!data.author || !data.source) continue;
       lessons.push({ collection, slug, data });
     }
   }

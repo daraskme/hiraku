@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const sets = (await getCollection('sciencePractice')).sort((a, b) => {
+  return a.data.grade - b.data.grade || a.data.order - b.data.order;
+});
+const total = sets.reduce((acc, set) => acc + set.data.problems.length, 0);
+const difficultyLabel: Record<string, string> = {
+  basic: '基本',
+  standard: '標準',
+  challenge: '挑戦',
+};
+const stageLabel = (stage: string) => stage === 'chugaku' ? '中' : stage === 'kotoko' ? '高' : '小';
+---
+
+<Base title="理科の問題" description="理科の基礎問題と解説。" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>理科の問題</h1>
+      <span class="section__subtitle">SCIENCE</span>
+    </div>
+    <p>
+      観察、実験、用語、理由説明を短い問題で確認します。
+      現在 <strong>{sets.length}</strong> セット、<strong>{total}</strong> 問を公開中。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/practice/print">印刷用プリント</a> ・
+      <a href="/practice">練習トップ</a> ・
+      <a href="/practice/math">算数・数学</a> ・
+      <a href="/practice/social">社会</a> ・
+      <a href="/practice/english">英語</a>
+    </p>
+  </section>
+
+  {sets.map((set) => (
+    <section class="section">
+      <div class="section__heading">
+        <h2>{set.data.title}</h2>
+        <span class="section__subtitle">{stageLabel(set.data.school_stage)}{set.data.grade} ・ {set.data.unit}</span>
+      </div>
+      <p class="no-print">
+        <a class="btn btn--ghost" href={`/practice/print/science/${set.id}`}>印刷用プリント</a>
+      </p>
+      <p>{set.data.description}</p>
+      <div class="practice-grid">
+        {set.data.problems.map((problem, index) => (
+          <article class="practice-card">
+            <p class="practice-card__title">問 {index + 1} ・ {difficultyLabel[problem.difficulty]}</p>
+            <p class="practice-card__main">{problem.prompt}</p>
+            {problem.hints.length > 0 && (
+              <details>
+                <summary>ヒント</summary>
+                <ul>
+                  {problem.hints.map((hint) => <li>{hint}</li>)}
+                </ul>
+              </details>
+            )}
+            <details>
+              <summary>答えと解説</summary>
+              <p><strong>答え:</strong> {problem.answer}</p>
+              <p>{problem.explanation}</p>
+            </details>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+</Base>

@@ -1,0 +1,161 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const sets = (await getCollection('englishPractice')).sort((a, b) => {
+  return a.data.grade - b.data.grade || a.data.order - b.data.order;
+});
+const total = sets.reduce((acc, set) => acc + set.data.entries.length, 0);
+const kindLabel: Record<string, string> = {
+  word: '単語',
+  phrase: '熟語',
+  idiom: 'イディオム',
+};
+---
+
+<Base title="英語の単語・熟語" description="英単語、熟語、イディオムの基礎練習。" wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>英語の単語・熟語</h1>
+      <span class="section__subtitle">ENGLISH</span>
+    </div>
+    <p>
+      意味だけでなく、短い例文と核になるイメージの中で使い方を覚えます。
+      現在 <strong>{sets.length}</strong> セット、<strong>{total}</strong> 項目を公開中。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/practice/print">印刷用プリント</a> ・
+      <a href="/practice">練習トップ</a> ・
+      <a href="/practice/kanji">漢字</a> ・
+      <a href="/practice/math">算数・数学</a>
+    </p>
+  </section>
+
+  {sets.map((set) => (
+    <section class="section">
+      <div class="section__heading">
+        <h2>{set.data.title}</h2>
+        <span class="section__subtitle">中{set.data.grade} ・ {set.data.unit}</span>
+      </div>
+      <p class="no-print">
+        <a class="btn btn--ghost" href={`/practice/print/english/${set.id}`}>印刷用プリント</a>
+      </p>
+      <p>{set.data.description}</p>
+      <div class="practice-grid">
+        {set.data.entries.map((entry) => (
+          <article class={`practice-card ${entry.core_image ? 'english-image-card' : ''}`}>
+            <p class="practice-card__title">
+              {kindLabel[entry.kind]}{entry.part_of_speech ? ` ・ ${entry.part_of_speech}` : ''}
+            </p>
+            <p class="practice-card__main" lang="en">{entry.term}</p>
+            <p>{entry.meaning_ja}{entry.pronunciation ? `（${entry.pronunciation}）` : ''}</p>
+            {entry.core_image && (
+              <figure class="english-core-image">
+                {entry.core_image.src && (
+                  <img src={entry.core_image.src} alt={entry.core_image.alt ?? ''} loading="lazy" />
+                )}
+                <figcaption>
+                  <strong>核イメージ:</strong> {entry.core_image.summary}
+                  {entry.core_image.caption && <span>{entry.core_image.caption}</span>}
+                </figcaption>
+              </figure>
+            )}
+            {entry.senses.length > 0 && (
+              <div class="english-sense-list">
+                {entry.senses.map((sense) => (
+                  <section class="english-sense">
+                    <h3>{sense.label}</h3>
+                    <p>{sense.meaning_ja}</p>
+                    {sense.image_note && <p class="english-sense__note">{sense.image_note}</p>}
+                    {sense.examples.length > 0 && (
+                      <ul>
+                        {sense.examples.map((ex) => (
+                          <li><span lang="en">{ex.en}</span><br />{ex.ja}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                ))}
+              </div>
+            )}
+            <details>
+              <summary>例文</summary>
+              <ul>
+                {entry.examples.map((ex) => (
+                  <li><span lang="en">{ex.en}</span><br />{ex.ja}</li>
+                ))}
+              </ul>
+            </details>
+            {entry.quiz.length > 0 && (
+              <details>
+                <summary>練習</summary>
+                <ol>
+                  {entry.quiz.map((q) => <li>{q}</li>)}
+                </ol>
+              </details>
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+  <style>
+    .english-image-card {
+      grid-column: span 2;
+    }
+    .english-core-image {
+      margin: 0.9rem 0;
+    }
+    .english-core-image img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+    }
+    .english-core-image figcaption {
+      margin-top: 0.55rem;
+      color: var(--text-soft);
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+    .english-core-image figcaption span {
+      display: block;
+      margin-top: 0.2rem;
+    }
+    .english-sense-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .english-sense {
+      border-left: 3px solid var(--accent);
+      padding-left: 0.8rem;
+    }
+    .english-sense h3 {
+      margin: 0 0 0.25rem;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .english-sense p {
+      margin: 0 0 0.35rem;
+    }
+    .english-sense__note {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+    .english-sense ul {
+      margin: 0.45rem 0 0;
+      padding-left: 1.1rem;
+    }
+    @media (max-width: 760px) {
+      .english-image-card {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</Base>
