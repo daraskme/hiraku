@@ -1,0 +1,135 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+const stageLabel: Record<string, string> = {
+  shogaku: '小',
+  chugaku: '中',
+  kotoko: '高',
+};
+
+const categoryConfigs = [
+  { kind: 'kanji', collection: 'kanjiPractice', label: '漢字', href: '/practice/kanji', count: (set: any) => set.data.items.length, unit: '字' },
+  { kind: 'math', collection: 'mathPractice', label: '算数・数学', href: '/practice/math', count: (set: any) => set.data.problems.length, unit: '問' },
+  { kind: 'science', collection: 'sciencePractice', label: '理科', href: '/practice/science', count: (set: any) => set.data.problems.length, unit: '問' },
+  { kind: 'social', collection: 'socialPractice', label: '社会', href: '/practice/social', count: (set: any) => set.data.problems.length, unit: '問' },
+  { kind: 'english', collection: 'englishPractice', label: '英語', href: '/practice/english', count: (set: any) => set.data.entries.length, unit: '項目' },
+] as const;
+
+const toKey = (set: any) => `${set.data.school_stage}-${set.data.grade}`;
+const toGradeLabel = (key: string) => {
+  const [stage, grade] = key.split('-');
+  return `${stageLabel[stage] ?? ''}${grade}`;
+};
+
+export const getStaticPaths = (async () => {
+  const pathCategoryConfigs = [
+    { kind: 'kanji', collection: 'kanjiPractice', label: '漢字', href: '/practice/kanji', count: (set: any) => set.data.items.length, unit: '字' },
+    { kind: 'math', collection: 'mathPractice', label: '算数・数学', href: '/practice/math', count: (set: any) => set.data.problems.length, unit: '問' },
+    { kind: 'science', collection: 'sciencePractice', label: '理科', href: '/practice/science', count: (set: any) => set.data.problems.length, unit: '問' },
+    { kind: 'social', collection: 'socialPractice', label: '社会', href: '/practice/social', count: (set: any) => set.data.problems.length, unit: '問' },
+    { kind: 'english', collection: 'englishPractice', label: '英語', href: '/practice/english', count: (set: any) => set.data.entries.length, unit: '項目' },
+  ] as const;
+  const getKey = (set: any) => `${set.data.school_stage}-${set.data.grade}`;
+  const rows = [];
+  for (const config of pathCategoryConfigs) {
+    const sets = await getCollection(config.collection as any);
+    rows.push(...sets.map((set) => ({ set, config, key: getKey(set) })));
+  }
+
+  const keys = [...new Set(rows.map((row) => row.key))].sort((a, b) => {
+    const [stageA, gradeA] = a.split('-');
+    const [stageB, gradeB] = b.split('-');
+    const stageOrder = { shogaku: 1, chugaku: 2, kotoko: 3 } as Record<string, number>;
+    return (stageOrder[stageA] ?? 9) - (stageOrder[stageB] ?? 9) || Number(gradeA) - Number(gradeB);
+  });
+
+  return keys.map((key) => ({
+    params: { key },
+    props: {
+      key,
+      rows: rows
+        .filter((row) => row.key === key)
+        .sort((a, b) => a.config.label.localeCompare(b.config.label, 'ja') || a.set.data.order - b.set.data.order),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { key, rows } = Astro.props;
+const gradeLabel = toGradeLabel(key);
+const totalSets = rows.length;
+const totalItems = rows.reduce((acc: number, row: any) => acc + row.config.count(row.set), 0);
+
+const grouped = categoryConfigs
+  .map((config) => ({
+    config,
+    rows: rows.filter((row: any) => row.config.kind === config.kind),
+  }))
+  .filter((group) => group.rows.length > 0);
+---
+
+<Base title={`${gradeLabel}の練習プリント`} description={`${gradeLabel}向けの漢字、算数・数学、英語、理科、社会の練習プリント一覧。`} wide>
+  <section class="section">
+    <div class="section__heading">
+      <h1>{gradeLabel}の練習プリント</h1>
+      <span class="section__subtitle">GRADE</span>
+    </div>
+    <p>
+      学年から探せる練習セットです。現在 <strong>{totalSets}</strong> セット、
+      <strong>{totalItems}</strong> 題材を公開中です。印刷用ページへ直接進めます。
+    </p>
+    <p class="cross-links no-print">
+      <a href="/practice">練習トップ</a> ・
+      <a href="/practice/print">印刷用プリント一覧</a>
+    </p>
+  </section>
+
+  {grouped.map((group) => (
+    <section class="section">
+      <div class="section__heading">
+        <h2>{group.config.label}</h2>
+        <span class="section__subtitle">{group.rows.length} SETS</span>
+      </div>
+      <div class="practice-grid">
+        {group.rows.map(({ set, config }: any) => (
+          <article class="practice-card practice-card--link">
+            <a href={`/practice/print/${config.kind}/${set.id}`} class="practice-card__anchor">
+              <p class="practice-card__title">{set.data.unit}</p>
+              <h3 class="practice-card__main">{set.data.title}</h3>
+              <p>{set.data.description}</p>
+              <p class="practice-card__stats">
+                <span>{config.count(set)} {config.unit}</span>
+                <span>A4印刷</span>
+                <span>{config.label}</span>
+              </p>
+            </a>
+          </article>
+        ))}
+      </div>
+      <p class="no-print">
+        <a class="btn btn--ghost" href={group.config.href}>{group.config.label}をすべて見る</a>
+      </p>
+    </section>
+  ))}
+
+  <style>
+    .practice-card--link { position: relative; }
+    .practice-card__anchor {
+      color: inherit;
+      display: block;
+      text-decoration: none;
+    }
+    .practice-card__anchor::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+    .practice-card--link:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-2px);
+      transition: transform 0.12s, border-color 0.12s;
+    }
+  </style>
+</Base>

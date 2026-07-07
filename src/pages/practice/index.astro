@@ -50,6 +50,40 @@ const categories = [
     desc: '単語・熟語・イディオムを、例文と小テストで練習します。',
   },
 ];
+
+const stageLabel: Record<string, string> = {
+  shogaku: '小',
+  chugaku: '中',
+  kotoko: '高',
+};
+const stageOrder: Record<string, number> = {
+  shogaku: 1,
+  chugaku: 2,
+  kotoko: 3,
+};
+const allPracticeSets = [
+  ...kanjiSets.map((set) => ({ set, count: set.data.items.length })),
+  ...mathSets.map((set) => ({ set, count: set.data.problems.length })),
+  ...scienceSets.map((set) => ({ set, count: set.data.problems.length })),
+  ...socialSets.map((set) => ({ set, count: set.data.problems.length })),
+  ...englishSets.map((set) => ({ set, count: set.data.entries.length })),
+];
+const gradeSummaries = Object.values(
+  allPracticeSets.reduce((acc, { set, count }) => {
+    const key = `${set.data.school_stage}-${set.data.grade}`;
+    acc[key] ??= {
+      key,
+      label: `${stageLabel[set.data.school_stage] ?? ''}${set.data.grade}`,
+      stage: set.data.school_stage,
+      grade: set.data.grade,
+      sets: 0,
+      count: 0,
+    };
+    acc[key].sets += 1;
+    acc[key].count += count;
+    return acc;
+  }, {} as Record<string, { key: string; label: string; stage: string; grade: number; sets: number; count: number }>)
+).sort((a, b) => (stageOrder[a.stage] ?? 9) - (stageOrder[b.stage] ?? 9) || a.grade - b.grade);
 ---
 
 <Base title="練習" description="漢字、算数・数学、英語の基礎練習。" wide>
@@ -82,6 +116,21 @@ const categories = [
             </p>
           </a>
         </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__heading">
+      <h2>学年から探す</h2>
+      <span class="section__subtitle">GRADE</span>
+    </div>
+    <div class="grade-link-grid">
+      {gradeSummaries.map((grade) => (
+        <a href={`/practice/grade/${grade.key}`} class="grade-link-card">
+          <strong>{grade.label}</strong>
+          <span>{grade.sets}セット / {grade.count}題材</span>
+        </a>
       ))}
     </div>
   </section>
@@ -132,6 +181,34 @@ const categories = [
       border-color: var(--accent-soft);
       transform: translateY(-2px);
       transition: transform 0.12s, border-color 0.12s;
+    }
+    .grade-link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+    .grade-link-card {
+      display: grid;
+      gap: 0.15rem;
+      min-height: 84px;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      color: inherit;
+      text-decoration: none;
+    }
+    .grade-link-card:hover {
+      border-color: var(--accent-soft);
+    }
+    .grade-link-card strong {
+      font-family: var(--font-serif);
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+    .grade-link-card span {
+      color: var(--text-soft);
+      font-size: 0.85rem;
     }
   </style>
 </Base>
