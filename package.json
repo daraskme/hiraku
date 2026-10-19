@@ -12,7 +12,8 @@
     "astro": "astro",
     "check": "astro check",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:local": "node --test tests/local-data.test.mjs"
   },
   "dependencies": {
     "astro": "^5.14.0"

@@ -624,11 +624,11 @@ const guidelineDoc = d.school_stage === 'kotoko'
       </section>
     )}
 
-    {/* ─── 学習メモ（ログイン中ユーザーのみ表示・クラウド同期）─── */}
-    <section class="no-print lesson-notes" data-lesson-notes hidden>
+    {/* ─── 学習メモ（このブラウザーに保存）─── */}
+    <section class="no-print lesson-notes" data-lesson-notes>
       <h2>学習メモ</h2>
       <p class="lesson-notes__hint">
-        ログイン中のユーザーのみ利用できます。記入は自動でクラウドに保存され、別端末からも参照できます。
+        メモはこのブラウザーに自動保存されます。学習データの画面からバックアップできます。
       </p>
       <textarea
         class="lesson-notes__editor"
@@ -675,7 +675,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
       <div class="lesson-report__buttons">
         <a
           class="btn btn--ghost lesson-report__btn"
-          href={`https://github.com/daraskme/hiraku/issues/new?labels=correction&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 修正提案: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku-5cb.pages.dev/library/${lesson.collection}/${lesson.id}\n\n## 該当箇所\n（引用してください）\n\n## 提案内容\n\n## その他\n`)}`}
+          href={`https://github.com/daraskme/hiraku/issues/new?labels=correction&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 修正提案: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku.darask.me/library/${lesson.collection}/${lesson.id}\n\n## 該当箇所\n（引用してください）\n\n## 提案内容\n\n## その他\n`)}`}
           target="_blank"
           rel="noopener"
         >
@@ -683,7 +683,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
         </a>
         <a
           class="btn btn--ghost lesson-report__btn"
-          href={`https://github.com/daraskme/hiraku/issues/new?labels=lesson-improvement&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 改善提案: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku-5cb.pages.dev/library/${lesson.collection}/${lesson.id}\n\n## 提案内容\n（語注追加 / 発問追加 / 解説改善 など）\n\n## 背景・理由\n`)}`}
+          href={`https://github.com/daraskme/hiraku/issues/new?labels=lesson-improvement&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 改善提案: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku.darask.me/library/${lesson.collection}/${lesson.id}\n\n## 提案内容\n（語注追加 / 発問追加 / 解説改善 など）\n\n## 背景・理由\n`)}`}
           target="_blank"
           rel="noopener"
         >
@@ -691,7 +691,7 @@ const guidelineDoc = d.school_stage === 'kotoko'
         </a>
         <a
           class="btn btn--ghost lesson-report__btn"
-          href={`https://github.com/daraskme/hiraku/issues/new?labels=teacher-feedback&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 現場フィードバック: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku-5cb.pages.dev/library/${lesson.collection}/${lesson.id}\n\n## 使用した場面\n（小5の国語の授業で / 高3の古典補助として / 等）\n\n## 生徒の反応\n\n## 改善のヒント\n`)}`}
+          href={`https://github.com/daraskme/hiraku/issues/new?labels=teacher-feedback&title=${encodeURIComponent(`[${lesson.collection}/${lesson.id}] 現場フィードバック: `)}&body=${encodeURIComponent(`## 該当教材\n- 教材: ${d.title}\n- URL: https://hiraku.darask.me/library/${lesson.collection}/${lesson.id}\n\n## 使用した場面\n（小5の国語の授業で / 高3の古典補助として / 等）\n\n## 生徒の反応\n\n## 改善のヒント\n`)}`}
           target="_blank"
           rel="noopener"
         >
@@ -876,7 +876,6 @@ const guidelineDoc = d.school_stage === 'kotoko'
         const next = toggle.getAttribute('aria-pressed') !== 'true';
         try { localStorage.setItem(STORAGE_KEY, next ? '1' : '0'); } catch (_) {}
         applyState(next);
-        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       });
     })();
   </script>
@@ -1041,7 +1040,6 @@ const guidelineDoc = d.school_stage === 'kotoko'
       }
       function saveHistory(arr) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 40))); } catch (_) {}
-        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       }
       function addToHistory(word) {
         const w = word.toLowerCase();
@@ -1394,7 +1392,6 @@ const guidelineDoc = d.school_stage === 'kotoko'
           }
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         } catch (_) {}
-        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       }
 
       function deleteBookmark() {
@@ -1517,7 +1514,6 @@ const guidelineDoc = d.school_stage === 'kotoko'
       }
       function save(data) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
-        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       }
       function isStarred() { return !!load()[key]; }
       function applyState() {
@@ -1551,100 +1547,5 @@ const guidelineDoc = d.school_stage === 'kotoko'
     })();
   </script>
 
-  <script is:inline>
-    // ─── 教材メモ (ログイン中のみ表示。/api/notes と連動) ───
-    (function () {
-      const section = document.querySelector('[data-lesson-notes]');
-      const editor = document.querySelector('[data-lesson-notes-editor]');
-      const status = document.querySelector('[data-lesson-notes-status]');
-      const counter = document.querySelector('[data-lesson-notes-count]');
-      const article = document.querySelector('article[data-lesson-collection]');
-      if (!section || !editor || !article) return;
-      const collection = article.dataset.lessonCollection;
-      const id = article.dataset.lessonId;
-      const title = article.dataset.lessonTitle;
-      if (!collection || !id) return;
-
-      let saveTimer = null;
-      let initialLoaded = false;
-
-      function applyVisibility() {
-        const u = (window.HirakuAuth && window.HirakuAuth.getUser && window.HirakuAuth.getUser()) || null;
-        section.hidden = !u;
-        if (u && !initialLoaded) loadFromServer();
-      }
-      function updateCounter() {
-        const n = (editor.value || '').length;
-        if (counter) counter.textContent = n + ' / 8000';
-      }
-
-      async function loadFromServer() {
-        try {
-          const url = '/api/notes?collection=' + encodeURIComponent(collection) +
-                      '&id=' + encodeURIComponent(id);
-          const resp = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
-          if (!resp.ok) throw new Error('HTTP ' + resp.status);
-          const data = await resp.json();
-          if (data.note && typeof data.note.text === 'string') {
-            editor.value = data.note.text;
-          }
-          updateCounter();
-          initialLoaded = true;
-        } catch (_) {
-          if (status) status.textContent = '読み込みに失敗 (オフライン?)';
-        }
-      }
-
-      async function saveNow() {
-        if (!window.HirakuAuth || !window.HirakuAuth.isSignedIn()) return;
-        try {
-          if (status) status.textContent = '保存中…';
-          const resp = await fetch('/api/notes', {
-            method: 'PUT',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              collection,
-              id,
-              title,
-              text: editor.value || '',
-            }),
-          });
-          if (!resp.ok) throw new Error('HTTP ' + resp.status);
-          if (status) status.textContent = '保存しました ' + new Date().toLocaleTimeString('ja-JP');
-          // 20 文字以上書いたらバッジ
-          if ((editor.value || '').trim().length >= 20 && window.HirakuBadges) {
-            window.HirakuBadges.award(collection, id, 'notes-written', title);
-          }
-        } catch (_) {
-          if (status) status.textContent = '保存に失敗 (オフライン?) — 後で自動再試行';
-        }
-      }
-
-      function scheduleSave() {
-        updateCounter();
-        if (saveTimer) clearTimeout(saveTimer);
-        if (status) status.textContent = '入力中…';
-        saveTimer = setTimeout(saveNow, 1500);
-      }
-
-      editor.addEventListener('input', scheduleSave);
-      editor.addEventListener('blur', () => {
-        if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-        saveNow();
-      });
-      window.addEventListener('beforeunload', () => {
-        if (saveTimer) { clearTimeout(saveTimer); saveNow(); }
-      });
-
-      window.addEventListener('hiraku:auth', applyVisibility);
-      // 初期化
-      const tryInit = () => {
-        if (window.HirakuAuth) applyVisibility();
-        else setTimeout(tryInit, 100);
-      };
-      tryInit();
-      updateCounter();
-    })();
-  </script>
+  <script src="/lesson-notes.js" is:inline></script>
 </Base>

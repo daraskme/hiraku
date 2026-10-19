@@ -15,7 +15,7 @@ body:
     id: url
     attributes:
       label: 該当URL（あれば）
-      placeholder: https://hiraku-5cb.pages.dev/library/...
+      placeholder: https://hiraku.darask.me/library/...
 
   - type: textarea
     id: expected

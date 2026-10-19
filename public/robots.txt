@@ -3,4 +3,4 @@ Allow: /
 Disallow: /worksheet/
 Disallow: /offline
 
-Sitemap: https://hiraku-5cb.pages.dev/sitemap-index.xml
+Sitemap: https://hiraku.darask.me/sitemap-index.xml

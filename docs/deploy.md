@@ -1,53 +1,29 @@
-# Cloudflare Pages へのデプロイ手順
+# Cloudflare Pages への公開
 
-## 前提
+公開先は `https://hiraku.darask.me`、Cloudflare Pagesプロジェクトは既存の `hiraku` です。
+既存URL `https://hiraku-5cb.pages.dev` も利用できます。Custom domainsとDNSは登録済みです。
 
-- GitHub にこのリポジトリをプッシュ済みであること
-- Cloudflare アカウントを持っていること（無料プランで可）
+## GitHubからの更新
 
-## 初回セットアップ
+`daraskme/hiraku` の `main` へのプッシュで、GitHub Actionsが検証・ビルドを実行し、同じPagesプロジェクトへ公開します。Actions画面から手動実行もできます。
+このプロジェクトはDirect Uploadを使っているため、Pagesの標準Git連携への切り替えは不要です。
 
-1. Cloudflare ダッシュボード → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
-2. GitHub 連携を承認し、`project_procopios` リポジトリを選択
-3. ビルド設定を以下のとおり指定：
-   - **Framework preset**: `Astro`
-   - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
-   - **Root directory**: `/`（リポジトリのルート）
-   - **環境変数**: `NODE_VERSION=20`（または `22`）
-4. **Save and Deploy** をクリック
+- Node.js: 24
+- ビルド: `npm ci` → `npm run build`
+- 検証: `npm run test:local`
+- 出力: `dist`
+- Functions: リポジトリの `functions/` からWranglerがビルド
 
-初回ビルドが成功すると、`https://project-procopios.pages.dev` のような URL が
-払い出されます。
+GitHub Actions Secretsには `CLOUDFLARE_API_TOKEN`（対象アカウントのPages編集権限）と `CLOUDFLARE_ACCOUNT_ID` を設定します。トークンをコードに書かないでください。
+`HIRAKU_KV` は既存プロジェクトのProduction / Previewのバインディングを引き継ぎます。Google OAuthやログインの設定は不要です。
 
-## 自動デプロイ
+## ローカルでの確認
 
-以降、`main` ブランチへのプッシュで自動的に本番ビルド・デプロイされます。
-プルリクエストごとにプレビュー URL も自動生成されます。
-
-## カスタムドメインを使う場合
-
-1. Pages プロジェクト → **Custom domains** → **Set up a custom domain**
-2. ドメイン（例: `procopios.example.org`）を入力
-3. Cloudflare DNS にネームサーバを向けている場合、自動で CNAME が設定される
-4. 外部 DNS の場合、表示される CNAME を手動で追加
-
-## ローカルでのプレビュー
-
-デプロイ前に本番ビルドを手元で確認できます：
-
-```bash
-npm run build      # dist/ を生成
-npm run preview    # http://localhost:4321
+```sh
+npm ci
+npm run test:local
+npm run build
+npm run preview
 ```
 
-## トラブルシューティング
-
-### ビルドが Node.js のバージョン不一致で失敗する
-
-Cloudflare Pages のビルド環境変数に `NODE_VERSION=20` を設定してください。
-
-### 404 が出る
-
-`astro.config.mjs` の `site` フィールドが実際のドメインと一致しているか確認。
-sitemap や絶対URLの生成に影響します。
+学習データのバックアップとドメイン移行は [SETUP.md](../SETUP.md) を参照してください。

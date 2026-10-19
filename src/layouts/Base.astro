@@ -16,7 +16,6 @@ interface Props {
 const { title, description, wide = false, ogImage, lang = 'ja', hrefAlt } = Astro.props;
 const siteName = lang === 'en' ? 'Hiraku' : 'ひらく';
 const fullTitle = title === siteName ? siteName : `${title} | ${siteName}`;
-const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
 const containerClass = wide ? 'container container--wide' : 'container';
 
 // 教材ページの URL パターンを検知して OG 画像を自動選択
@@ -27,7 +26,7 @@ const computedOgImage = ogImage
   || (lessonMatch ? `/og/${lessonMatch[1]}/${lessonMatch[2]}.webp` : '/og/default.webp');
 const computedOgImagePng = ogImage
   || (lessonMatch ? `/og/${lessonMatch[1]}/${lessonMatch[2]}.png` : '/og/default.png');
-const siteUrl = Astro.site || new URL('https://hiraku-5cb.pages.dev/');
+const siteUrl = Astro.site || new URL('https://hiraku.darask.me/');
 const ogImageUrl = new URL(computedOgImage, siteUrl).toString();
 const ogImagePngUrl = new URL(computedOgImagePng, siteUrl).toString();
 const ogImageType = ogImage ? (ogImage.endsWith('.png') ? 'image/png' : ogImage.endsWith('.jpg') || ogImage.endsWith('.jpeg') ? 'image/jpeg' : 'image/webp') : 'image/webp';
@@ -48,6 +47,7 @@ const ogLocaleAlt = lang === 'en' ? 'ja_JP' : 'en_US';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="/local-data.js" is:inline></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
@@ -123,15 +123,10 @@ const ogLocaleAlt = lang === 'en' ? 'ja_JP' : 'en_US';
     </main>
     <BottomNav />
     <Footer />
-    <script src="/auth.js" is:inline></script>
     <script src="/badges.js" is:inline></script>
     <script src="/progress.js" is:inline></script>
     <script src="/error-reporter.js" is:inline></script>
-    <script src="/cookie-banner.js" is:inline></script>
     <script src="/onboarding.js" is:inline></script>
-    {googleClientId && (
-      <script src="https://accounts.google.com/gsi/client" async defer is:inline></script>
-    )}
     <script is:inline>
       // Service Worker 登録（PWA / オフライン対応）
       if ('serviceWorker' in navigator && location.protocol === 'https:') {

@@ -15,7 +15,7 @@
  * Cloudflare Pages の Settings → Functions → Bindings で "AI" を
  * Workers AI に結ぶ必要がある (SETUP.md 参照)。
  */
-import { jsonResponse } from '../_lib/session';
+import { jsonResponse } from '../_lib/http';
 
 interface Env {
   AI?: {

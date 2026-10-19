@@ -15,11 +15,11 @@ import Base from '../layouts/Base.astro';
     <p>
       これまでの学習を時系列で見返せる、あなた自身の日誌です。
       読了・バッジ獲得・お気に入り追加・学習メモが一つのタイムラインに並びます。
-      <strong>すべてあなたの端末・あなたのクラウドにのみ保存されます。</strong>
+      <strong>すべてこのブラウザー内に保存されます。</strong>
     </p>
     <p class="cross-links no-print">
       <a href="/progress">進捗ダッシュボード</a> ・
-      <a href="/profile">プロフィール</a>
+      <a href="/profile">学習データ</a>
     </p>
   </section>
 
@@ -105,24 +105,15 @@ import Base from '../layouts/Base.astro';
           });
         });
 
-        // メモは個別の API 取得 (ログイン中のみ)。インデックスは /api/notes (GET) から
         return events;
       }
 
-      async function loadNotes() {
-        try {
-          const resp = await fetch('/api/notes', { credentials: 'same-origin', cache: 'no-store' });
-          if (!resp.ok) return [];
-          const data = await resp.json();
-          if (!Array.isArray(data.items)) return [];
-          return data.items.map((n) => ({
-            type: 'note',
-            ts: n.updatedAt || 0,
-            collection: n.collection, id: n.id,
-            title: n.title || n.id,
-            extra: n.preview ? '「' + n.preview + '」' : 'メモを書いた',
-          }));
-        } catch (_) { return []; }
+      function loadNotes() {
+        return window.HirakuLocal.listNotes().map(n => ({
+          type: 'note', ts: n.updatedAt || 0,
+          collection: n.collection, id: n.id, title: n.title || n.id,
+          extra: n.preview ? '「' + n.preview + '」' : 'メモを書いた',
+        }));
       }
 
       const ICON = { read: '◐', badge: '✦', star: '★', note: '✎' };
@@ -186,8 +177,8 @@ import Base from '../layouts/Base.astro';
       });
 
       render();
-      // ジャーナルは sync 完了でも更新したい
-      window.addEventListener('hiraku:sync', render);
+      window.addEventListener('hiraku:local-data', render);
+      window.addEventListener('storage', render);
     })();
   </script>
 

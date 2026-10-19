@@ -8,7 +8,7 @@
  *
  * バージョン番号を上げるとキャッシュが切り替わる。
  */
-const VERSION = 'v1.2026-05-25';
+const VERSION = 'v2.2026-10-20-local';
 const APP_CACHE = `hiraku-app-${VERSION}`;
 const PAGE_CACHE = `hiraku-pages-${VERSION}`;
 const ASSET_CACHE = `hiraku-assets-${VERSION}`;

@@ -8,7 +8,7 @@
  * KV キー: subs:<emailLower> → { email, name, joinedAt, confirmed }
  *          subsCount → 数値 (UI 表示用)
  */
-import { jsonResponse, type Env } from '../_lib/session';
+import { jsonResponse, type Env } from '../_lib/http';
 
 interface Body {
   email?: string;
