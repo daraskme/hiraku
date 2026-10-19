@@ -9,7 +9,7 @@
  *
  * セッション不要 (誰でも投稿可) だが、payload サイズ・rate を制限する。
  */
-import { jsonResponse, type Env } from '../_lib/session';
+import { jsonResponse, type Env } from '../_lib/http';
 
 const MAX_BODY = 4 * 1024; // 4 KB
 const TTL_SECONDS = 30 * 24 * 60 * 60;

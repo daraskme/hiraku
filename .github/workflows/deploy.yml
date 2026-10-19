@@ -5,20 +5,25 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: hiraku-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -40,14 +45,9 @@ jobs:
           echo "- Duration: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
           echo "- Pages: ${PAGE_COUNT}" >> $GITHUB_STEP_SUMMARY
           echo "- dist size: ${DIST_SIZE_KB} KB" >> $GITHUB_STEP_SUMMARY
-        env:
-          # Google ログインボタンをクライアント JS に焼き込むためのビルド時変数。
-          # GitHub: Settings → Secrets and variables → Actions → Variables タブで
-          # PUBLIC_GOOGLE_CLIENT_ID という名前のリポジトリ変数を追加してください。
-          # 値が公開値 (Google OAuth Client ID) なので「シークレット」ではなく
-          # 「Variable」が適切です。未設定でもビルドは通り、ログイン機能だけが
-          # 無効化されます (オフラインファースト設計)。
-          PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.PUBLIC_GOOGLE_CLIENT_ID }}
+
+      - name: Verify local learning data and retired account APIs
+        run: npm run test:local
 
       - name: Compute single-line commit subject (ASCII-safe)
         id: subject
@@ -61,8 +61,9 @@ jobs:
           echo "value=$SAFE" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.151.2'
           command: pages deploy dist --project-name=hiraku --branch=main --commit-message="${{ steps.subject.outputs.value }}" --commit-hash="${{ github.sha }}"

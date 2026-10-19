@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://hiraku-5cb.pages.dev',
+  site: 'https://hiraku.darask.me',
   trailingSlash: 'never',
   build: {
     format: 'directory',

@@ -31,7 +31,6 @@
   }
   function save(data) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
-    if (window.HirakuAuth && window.HirakuAuth.scheduleSync) window.HirakuAuth.scheduleSync();
   }
 
   /** バッジ付与。既に同種を持っているなら何もしない (false を返す) */

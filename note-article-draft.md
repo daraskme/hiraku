@@ -18,7 +18,7 @@
 そう決めて、Claude Code (Anthropic の AI コーディングエージェント) に「教材サイト作って。子どもにも大人にも届くやつ」と頼み続けた結果がこちらです。
 
 **🌸 ひらく — 子どもも大人も学べる、日本の教材オープンソース・プラットフォーム**
-👉 https://hiraku-5cb.pages.dev/
+👉 https://hiraku.darask.me/
 
 ---
 
@@ -116,7 +116,7 @@ GitHub: https://github.com/daraskme/hiraku
 
 ## 使ってみてください
 
-🌸 https://hiraku-5cb.pages.dev/
+🌸 https://hiraku.darask.me/
 
 スマホでも、タブレットでも、PCでも。
 教室でも、家でも、電車の中でも。

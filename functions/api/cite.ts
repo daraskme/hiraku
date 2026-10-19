@@ -7,7 +7,7 @@
  * Cloudflare Pages Functions の Edge で実行され、CDN にキャッシュされる
  * (Cache-Control: 1 day) ので、同じ引用は再生成されない。
  */
-import { jsonResponse } from '../_lib/session';
+import { jsonResponse } from '../_lib/http';
 
 interface Params {
   text: string;
@@ -70,7 +70,7 @@ function buildSvg(p: Params): string {
   <text x="600" y="${startY}" font-family="'Noto Serif JP', serif" font-size="44" fill="#1f1f1f" text-anchor="middle" font-weight="500">${tspans}</text>
   <text x="600" y="540" font-family="'Noto Sans JP', sans-serif" font-size="22" fill="#5a3030" text-anchor="middle" font-weight="500">${escapeXml(title)}</text>
   <text x="600" y="572" font-family="'Noto Sans JP', sans-serif" font-size="18" fill="#777" text-anchor="middle">${escapeXml(author)}</text>
-  <text x="600" y="612" font-family="'Noto Sans JP', sans-serif" font-size="14" fill="#999" text-anchor="middle">— ひらく / hiraku-5cb.pages.dev</text>
+  <text x="600" y="612" font-family="'Noto Sans JP', sans-serif" font-size="14" fill="#999" text-anchor="middle">— ひらく / hiraku.darask.me</text>
 </svg>`;
 }
 

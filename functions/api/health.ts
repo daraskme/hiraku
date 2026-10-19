@@ -8,7 +8,7 @@
  * HTTP 200 で healthy、5xx で何か壊れている。
  * 個人情報や KV 内容は返さない (操作確認のための ping のみ)。
  */
-import type { Env } from '../_lib/session';
+import type { Env } from '../_lib/http';
 
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   const startedAt = Date.now();

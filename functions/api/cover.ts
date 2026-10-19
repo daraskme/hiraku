@@ -82,7 +82,7 @@ export const onRequestGet: PagesFunction = ({ request }) => {
   <text x="600" y="${startY}" font-family="'Noto Serif JP', serif" font-size="64" font-weight="700" fill="${palette.fg}" text-anchor="middle">${titleTspans}</text>
   <text x="600" y="500" font-family="'Noto Serif JP', serif" font-size="28" fill="${palette.fg}" text-anchor="middle" opacity="0.75">${escapeXml(author)}</text>
   ${era ? `<text x="600" y="540" font-family="'Noto Sans JP', sans-serif" font-size="20" fill="${palette.fg}" text-anchor="middle" opacity="0.55">${escapeXml(era)}</text>` : ''}
-  <text x="600" y="600" font-family="'Noto Sans JP', sans-serif" font-size="16" fill="${palette.fg}" text-anchor="middle" opacity="0.5">ひらく — hiraku-5cb.pages.dev</text>
+  <text x="600" y="600" font-family="'Noto Sans JP', sans-serif" font-size="16" fill="${palette.fg}" text-anchor="middle" opacity="0.5">ひらく — hiraku.darask.me</text>
 </svg>`;
 
   return new Response(svg, {

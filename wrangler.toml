@@ -5,17 +5,9 @@
 # wrangler CLI から直接デプロイしたい場合、または Functions の KV バインディングを
 # 明示的に管理したい場合に利用してください。
 
-name = "project-procopios"
+name = "hiraku"
 pages_build_output_dir = "dist"
 compatibility_date = "2025-01-01"
-
-# ─── Functions の環境変数 (公開可) ───
-# GOOGLE_CLIENT_ID は公開値 (クライアント JS でも使うため)。
-# 本番値は Cloudflare ダッシュボード「Settings → Environment variables」で
-# Production / Preview 別に設定する想定。ここはローカル wrangler dev 用のダミー。
-[vars]
-GOOGLE_CLIENT_ID = "525872082477-6chggap23l8giuako66qcufs13qtlmqk.apps.googleusercontent.com"
-SESSION_TTL_DAYS = "30"
 
 # ─── KV バインディング ───
 # Cloudflare ダッシュボードで HIRAKU_KV という namespace を作成し、

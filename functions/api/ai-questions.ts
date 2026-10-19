@@ -6,7 +6,7 @@
  * POST { lessonContext, existingQuestions? }
  * → { questions: string[] }
  */
-import { jsonResponse } from '../_lib/session';
+import { jsonResponse } from '../_lib/http';
 
 interface Env {
   AI?: {

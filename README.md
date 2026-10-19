@@ -17,8 +17,8 @@
 
 - [Astro](https://astro.build/) — 静的サイトジェネレータ
 - [Cloudflare Pages](https://pages.cloudflare.com/) — 無料ホスティング
-- [Cloudflare Pages Functions](https://developers.cloudflare.com/pages/functions/) + KV — 認証 API と進捗の永続化（任意機能）
-- [Google Identity Services](https://developers.google.com/identity/gsi/web) — Google ログイン（任意機能）
+- [Cloudflare Pages Functions](https://developers.cloudflare.com/pages/functions/) + KV — 障害報告・更新通知などの補助API
+- localStorage — 学習記録・メモの端末内保存とバックアップ
 - Markdown + HTML5 ruby — 教材本文（フリガナを含む）
 
 ## ローカル開発
@@ -30,11 +30,11 @@ npm run build   # dist/ を生成
 npm run preview # dist/ をローカルでプレビュー
 ```
 
-## クラウド同期（Google ログイン）
+## 学習データ
 
-任意機能として、Google でログインすると進捗・ブックマーク・英単語履歴・
-表示設定がすべての端末で同期されます。ログインしなくても、すべての機能は
-端末内でそのまま使えます。
+アカウント登録は不要です。進捗・ブックマーク・英単語履歴・表示設定・メモを
+このブラウザーに保存します。`/profile` の学習データ画面でバックアップ・復元でき、
+別端末や新ドメインへの移行にも利用できます。旧クラウドAPIは410を返します。
 
 セットアップ手順は [SETUP.md](./SETUP.md) を参照してください。
 

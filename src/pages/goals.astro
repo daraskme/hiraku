@@ -18,7 +18,7 @@ import Base from '../layouts/Base.astro';
     <p class="cross-links no-print">
       <a href="/journal">ジャーナル</a> ・
       <a href="/progress">進捗ダッシュボード</a> ・
-      <a href="/profile">プロフィール</a>
+      <a href="/profile">学習データ</a>
     </p>
   </section>
 
@@ -74,7 +74,6 @@ import Base from '../layouts/Base.astro';
       }
       function save(arr) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch (_) {}
-        if (window.HirakuAuth) window.HirakuAuth.scheduleSync();
       }
 
       function escapeHtml(s) {
